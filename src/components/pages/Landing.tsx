@@ -227,6 +227,161 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* About Section */}
+<section className="py-20 bg-background">
+  <div className="container mx-auto px-6">
+    <h2 className="text-3xl font-bold text-center mb-4">
+      About Resume Builder Pro
+    </h2>
+    <p className="text-lg text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
+      Empowering professionals to create outstanding resumes since 2020
+    </p>
+
+    {/* Mission & Vision */}
+    <div className="grid md:grid-cols-2 gap-8 mb-16">
+      <Card className="p-8 shadow-soft hover:shadow-medium transition-all">
+        <h3 className="text-2xl font-semibold mb-4">Our Mission</h3>
+        <p className="text-muted-foreground leading-relaxed">
+          We believe everyone deserves a professional resume that showcases their unique talents.
+          Our mission is to make resume creation accessible, intuitive, and effective for job
+          seekers at every stage of their career journey.
+        </p>
+      </Card>
+
+      <Card className="p-8 shadow-soft hover:shadow-medium transition-all">
+        <h3 className="text-2xl font-semibold mb-4">Our Vision</h3>
+        <p className="text-muted-foreground leading-relaxed">
+          To become the world's most trusted resume building platform, helping millions of
+          professionals land their dream jobs through quality-controlled, ATS-optimized resumes
+          that stand out to employers.
+        </p>
+      </Card>
+    </div>
+
+    {/* Why We're Different */}
+    <div className="bg-muted/30 p-10 rounded-xl shadow-soft">
+      <h3 className="text-2xl font-semibold mb-8 text-center">Why We're Different</h3>
+
+      <div className="grid md:grid-cols-3 gap-10">
+        {/* Quality */}
+        <div className="text-center space-y-4">
+          <div className="w-14 h-14 bg-success/10 rounded-full flex items-center justify-center mx-auto">
+            <CheckCircle className="h-8 w-8 text-success" />
+          </div>
+          <h4 className="text-xl font-semibold">Quality First</h4>
+          <p className="text-muted-foreground">
+            Every resume goes through admin review to ensure the highest quality standards.
+          </p>
+        </div>
+
+        {/* Expert Support */}
+        <div className="text-center space-y-4">
+          <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+            <Users className="h-8 w-8 text-primary" />
+          </div>
+          <h4 className="text-xl font-semibold">Expert Support</h4>
+          <p className="text-muted-foreground">
+            Our team of resume experts is always ready to help you succeed.
+          </p>
+        </div>
+
+        {/* ATS Optimized */}
+        <div className="text-center space-y-4">
+          <div className="w-14 h-14 bg-secondary/10 rounded-full flex items-center justify-center mx-auto">
+            <FileText className="h-8 w-8 text-secondary" />
+          </div>
+          <h4 className="text-xl font-semibold">ATS Optimized</h4>
+          <p className="text-muted-foreground">
+            Built with applicant tracking systems in mind for maximum visibility.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{/* Testimonials Section */}
+<section className="py-20 bg-muted/20">
+  <div className="container mx-auto px-6">
+    <h2 className="text-3xl font-bold text-center mb-4">
+      What Our Users Say
+    </h2>
+    <p className="text-lg text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
+      Join thousands of satisfied professionals who landed their dream jobs
+    </p>
+
+    <div className="grid md:grid-cols-3 gap-8">
+      {/* Testimonial 1 */}
+      <Card className="p-8 shadow-soft hover:shadow-medium transition-all">
+        <div className="text-yellow-500 text-xl mb-3">★★★★★</div>
+        <div className="text-4xl text-muted-foreground mb-4">❝❞</div>
+        <p className="text-muted-foreground mb-4 leading-relaxed">
+          "Resume Builder Pro helped me land my dream job at a Fortune 500 company.
+          The approval process ensured my resume was perfect before I sent it out!"
+        </p>
+        <hr className="my-4 border-muted" />
+        <p className="font-semibold">Sarah Johnson</p>
+        <p className="text-muted-foreground text-sm">Software Engineer</p>
+      </Card>
+
+      {/* Testimonial 2 */}
+      <Card className="p-8 shadow-soft hover:shadow-medium transition-all">
+        <div className="text-yellow-500 text-xl mb-3">★★★★★</div>
+        <div className="text-4xl text-muted-foreground mb-4">❝❞</div>
+        <p className="text-muted-foreground mb-4 leading-relaxed">
+          "The intuitive builder and real-time preview made resume creation effortless.
+          I got my resume approved within 24 hours and received 3 interview calls!"
+        </p>
+        <hr className="my-4 border-muted" />
+        <p className="font-semibold">Michael Chen</p>
+        <p className="text-muted-foreground text-sm">Marketing Manager</p>
+      </Card>
+
+      {/* Testimonial 3 */}
+      <Card className="p-8 shadow-soft hover:shadow-medium transition-all">
+        <div className="text-yellow-500 text-xl mb-3">★★★★★</div>
+        <div className="text-4xl text-green-400 mb-4">❝❞</div>
+        <p className="text-muted-foreground mb-4 leading-relaxed">
+          "As a recent graduate, I was lost on how to create a professional resume.
+          This platform guided me through every step and the admin feedback was invaluable!"
+        </p>
+        <hr className="my-4 border-muted" />
+        <p className="font-semibold">Emily Rodriguez</p>
+        <p className="text-muted-foreground text-sm">Recent Graduate</p>
+      </Card>
+    </div>
+
+    {/* Row 2 */}
+    <div className="grid md:grid-cols-2 gap-8 mt-10">
+      {/* Testimonial 4 */}
+      <Card className="p-8 shadow-soft hover:shadow-medium transition-all">
+        <div className="text-yellow-500 text-xl mb-3">★★★★★</div>
+        <div className="text-4xl text-muted-foreground mb-4">❝❞</div>
+        <p className="text-muted-foreground mb-4 leading-relaxed">
+          "The ATS-optimized format helped my resume get past automated filters.
+          I went from 0 responses to 5 interviews in just two weeks!"
+        </p>
+        <hr className="my-4 border-muted" />
+        <p className="font-semibold">David Thompson</p>
+        <p className="text-muted-foreground text-sm">Data Analyst</p>
+      </Card>
+
+      {/* Testimonial 5 */}
+      <Card className="p-8 shadow-soft hover:shadow-medium transition-all">
+        <div className="text-yellow-500 text-xl mb-3">★★★★★</div>
+        <div className="text-4xl text-muted-foreground mb-4">❝❞</div>
+        <p className="text-muted-foreground mb-4 leading-relaxed">
+          "Professional, easy to use, and the quality control is outstanding.
+          This is the only resume builder you'll ever need!"
+        </p>
+        <hr className="my-4 border-muted" />
+        <p className="font-semibold">Jessica Martinez</p>
+        <p className="text-muted-foreground text-sm">Project Manager</p>
+      </Card>
+    </div>
+  </div>
+</section>
+
+
       {/* Footer */}
       <footer className="border-t py-8 bg-card">
         <div className="container mx-auto px-6 text-center text-muted-foreground">
