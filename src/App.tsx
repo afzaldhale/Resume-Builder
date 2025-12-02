@@ -15,6 +15,9 @@ import AdminDashboard from "./components/pages/admin/AdminDashboard";
 import AdminRequests from "./components/pages/admin/AdminRequests";
 // import AdminUsers from "../src/components/pages/admin/AdminUsers";
 import NotFound from "../src/components/pages/NotFound";
+import PrivacyPolicyPage from "./components/pages/PrivacyPolicy";
+import TermsOfService from "./components/pages/TermsOfService";
+import ContactUsPage from "./components/pages/ContactUs";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +38,9 @@ const App = () => (
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/requests" element={<AdminRequests />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/contact" element={<ContactUsPage />} />
           {/* <Route path="/admin/users" element={<AdminUsers />} /> */}
           <Route path="*" element={<NotFound />} />
         </Routes>
