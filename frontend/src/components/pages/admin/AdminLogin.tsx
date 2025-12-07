@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Button } from "../../ui/button";
-import { Card } from "../../ui/card";
-import { Input } from "../../ui/input";
-import { Label } from "../../ui/label";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -12,36 +12,14 @@ const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // ✅ Correct Admin Login (Uses /api/auth/login)
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-
-    try {
-      const response = await fetch("http://localhost:5000/api/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error(data.message || "Invalid admin credentials");
-        return;
-      }
-
-      // 🔥 Save Admin Token
-      localStorage.setItem("adminToken", data.token);
-
+    // Mock admin login
+    if (email && password) {
       toast.success("Admin login successful!");
       navigate("/admin/dashboard");
-
-    } catch (error) {
-      toast.error("Cannot connect to backend");
-      console.error("Login Error:", error);
+    } else {
+      toast.error("Please fill in all fields");
     }
   };
 
@@ -55,9 +33,7 @@ const AdminLogin = () => {
             </div>
           </div>
           <h1 className="text-2xl font-bold">Admin Control Panel</h1>
-          <p className="text-muted-foreground">
-            Resume Requests & Users Management
-          </p>
+          <p className="text-muted-foreground">Resume Requests & Users Management</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">

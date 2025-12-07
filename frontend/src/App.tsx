@@ -1,6 +1,6 @@
-import { Toaster } from "../src/components/ui/toaster";
-import { Toaster as Sonner } from "../src/components/ui/sonner";
-import { TooltipProvider } from "../src/components/ui/tooltip";
+import { Toaster } from "./components/ui/toaster";
+import { Toaster as Sonner } from "./components/ui/sonner";
+import { TooltipProvider } from "./components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./components/pages/Landing";
@@ -14,7 +14,7 @@ import AdminLogin from "./components/pages/admin/AdminLogin";
 import AdminDashboard from "./components/pages/admin/AdminDashboard";
 import AdminRequests from "./components/pages/admin/AdminRequests";
 // import AdminUsers from "../src/components/pages/admin/AdminUsers";
-import NotFound from "../src/components/pages/NotFound";
+import NotFound from "./components/pages/NotFound";
 import PrivacyPolicyPage from "./components/pages/PrivacyPolicy";
 import TermsOfService from "./components/pages/TermsOfService";
 import ContactUsPage from "./components/pages/ContactUs";

@@ -6,21 +6,47 @@ import { Label } from "@/components/ui/label";
 import { FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import axios from "@/api/axios"; // Import your axios instance
 
-const Signup = () => {
+const Login = () => {
   const navigate = useNavigate();
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock signup - will be replaced with actual auth
-    if (name && email && password) {
-      toast.success("Account created successfully!");
-      navigate("/dashboard");
-    } else {
+
+    if (!email || !password) {
       toast.error("Please fill in all fields");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await axios.post("/auth/login", { email, password });
+
+      if (res.data?.message) {
+        toast.success(res.data.message);
+
+        // Optional: store user info in localStorage for session management
+        if (res.data.user) {
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+        }
+
+        navigate("/dashboard");
+      } else {
+        toast.error("Login failed. Please try again.");
+      }
+    } catch (err: any) {
+      if (err.response?.data?.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Server error. Please try again later.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -33,23 +59,11 @@ const Signup = () => {
               <FileText className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold">Create Your Account</h1>
-          <p className="text-muted-foreground">Start building your professional resume</p>
+          <h1 className="text-2xl font-bold">Welcome Back</h1>
+          <p className="text-muted-foreground">Sign in to access your resumes</p>
         </div>
 
-        <form onSubmit={handleSignup} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="John Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-
+        <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -74,18 +88,18 @@ const Signup = () => {
             />
           </div>
 
-          <Button type="submit" className="w-full">
-            Create Account
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Signing in..." : "Sign In"}
           </Button>
         </form>
 
         <div className="text-center text-sm">
-          <span className="text-muted-foreground">Already have an account? </span>
+          <span className="text-muted-foreground">Don't have an account? </span>
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/signup")}
             className="text-primary hover:underline font-medium"
           >
-            Sign in
+            Sign up
           </button>
         </div>
 
@@ -102,4 +116,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default Login;

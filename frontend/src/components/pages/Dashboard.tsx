@@ -3,9 +3,20 @@ import { Card } from "@/components/ui/card";
 import { FileText, Clock, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [userName, setUserName] = useState("User"); // default fallback
+
+  // Get user info from localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUserName(parsedUser.name || "User");
+    }
+  }, []);
 
   const stats = [
     { title: "Total Resumes", value: "3", icon: FileText, color: "text-primary" },
@@ -17,11 +28,11 @@ const Dashboard = () => {
   return (
     <div className="flex min-h-screen bg-background">
       <UserSidebar />
-      
+
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto space-y-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Welcome back, John! 👋</h1>
+            <h1 className="text-3xl font-bold mb-2">Welcome back, {userName}! 👋</h1>
             <p className="text-muted-foreground">Here's your resume building overview</p>
           </div>
 
