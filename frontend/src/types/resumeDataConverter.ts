@@ -75,6 +75,7 @@ export const convertToTemplateData = (
     socialLinks: socialLinks,
     strengths: strengthsArray.length > 0 ? strengthsArray : undefined,
     hobbies: hobbiesArray.length > 0 ? hobbiesArray : undefined,
+    candidateType,
   };
 
   // Add summary or careerObjective based on candidate type
@@ -101,9 +102,10 @@ export const convertFromTemplateData = (
   candidateType: CandidateType;
 } => {
   const candidateType: CandidateType =
-    resumeData.careerObjective || resumeData.strengths?.length || resumeData.hobbies?.length
+    resumeData.candidateType ||
+    (resumeData.careerObjective || resumeData.strengths?.length || resumeData.hobbies?.length
       ? "fresher"
-      : "experienced";
+      : "experienced");
 
   const formData: FormData = {
     fullName: resumeData.fullName || "",

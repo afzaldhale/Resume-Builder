@@ -11,6 +11,12 @@ interface Template3Props {
 }
 
 const Template3: React.FC<Template3Props> = ({ data }) => {
+  const isFresher = data.candidateType === "fresher";
+  const summaryText = isFresher
+    ? data.careerObjective || data.summary
+    : data.summary || data.careerObjective;
+  const summaryTitle = isFresher ? "Career Objective" : "Professional Summary";
+
   // Icon mapping for social platforms
   const getSocialIcon = (platform: string) => {
     const icons: Record<string, React.ReactNode> = {
@@ -76,16 +82,16 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
 
       {/* Main Content */}
       <div className="px-12 py-8">
-        {/* Professional Summary */}
-        {data.summary && (
+        {/* Summary / Career Objective */}
+        {summaryText && (
           <section className="mb-10">
             <div className="flex items-center mb-4">
               <Briefcase size={20} className="text-blue-600 mr-3" />
-              <h2 className="text-2xl font-bold text-gray-800">PROFILE</h2>
+              <h2 className="text-2xl font-bold text-gray-800">{summaryTitle}</h2>
             </div>
             <div className="pl-8">
               <p className="text-gray-700 leading-relaxed text-sm">
-                {data.summary}
+                {summaryText}
               </p>
             </div>
           </section>

@@ -11,7 +11,7 @@ interface Template6Props {
 
 const Template6: React.FC<Template6Props> = ({ data }) => {
   // Check if this is a fresher resume
-  const isFresher = !data.experience || data.experience.length === 0;
+  const isFresher = data.candidateType === "fresher" || !data.experience || data.experience.length === 0;
 
   return (
     <div className="bg-gradient-to-br from-blue-50 to-gray-50 text-gray-800 w-[794px] min-h-[1123px] mx-auto relative overflow-hidden font-sans">

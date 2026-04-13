@@ -11,6 +11,12 @@ interface Template5Props {
 }
 
 const Template5: React.FC<Template5Props> = ({ data }) => {
+  const isFresher = data.candidateType === "fresher";
+  const summaryText = isFresher
+    ? data.careerObjective || data.summary
+    : data.summary || data.careerObjective;
+  const summaryTitle = isFresher ? "Career Objective" : "PROFESSIONAL SUMMARY";
+
   // Icon mapping for social platforms
   const getSocialIcon = (platform: string) => {
     const icons: Record<string, React.ReactNode> = {
@@ -100,15 +106,15 @@ const Template5: React.FC<Template5Props> = ({ data }) => {
 
         {/* Timeline Sections */}
         <div className="space-y-12">
-          {/* Professional Summary */}
-          {data.summary && (
+          {/* Summary / Career Objective */}
+          {summaryText && (
             <TimelineSection 
-              title="PROFESSIONAL SUMMARY" 
+              title={summaryTitle} 
               section="summary"
               content={
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
                   <p className="text-gray-700 leading-relaxed text-sm">
-                    {data.summary}
+                    {summaryText}
                   </p>
                 </div>
               }

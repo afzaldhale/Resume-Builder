@@ -147,6 +147,9 @@ export const fitResumeData = (resumeData = {}) => {
       resumeData.careerObjective || resumeData.summary,
       MAX_LENGTH.summary
     ),
+    candidateType:
+      resumeData.candidateType ||
+      ((resumeData.experience || []).length === 0 ? "fresher" : "experienced"),
     education: nextEducation,
     experience,
     projects,

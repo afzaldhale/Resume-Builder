@@ -59,7 +59,9 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173", // ✅ Vite default
-      "http://localhost:8080", // optional (keep if needed)
+      "http://localhost:8080", // Frontend port
+      "http://localhost:8081", // Alternative frontend port
+      "http://localhost:3000", // Common dev port
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],

@@ -47,6 +47,11 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
     }
   };
 
+  const summaryText = data.candidateType === "fresher"
+    ? data.careerObjective || data.summary
+    : data.summary || data.careerObjective;
+  const summaryTitle = data.candidateType === "fresher" ? "Career Objective" : "Profile Summary";
+
   return (
     <div className="bg-white text-gray-800 w-[794px] min-h-[1123px] shadow-2xl mx-auto relative overflow-hidden font-sans">
       {/* Modern Two-Column Layout */}
@@ -200,16 +205,16 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
 
         {/* Right Content - Light Theme */}
         <div className="w-3/5 p-8">
-          {/* Professional Summary */}
-          {data.summary && (
+          {/* Summary / Career Objective */}
+          {summaryText && (
             <section className="mb-10">
               <div className="flex items-center mb-4">
                 <div className="w-10 h-1 bg-blue-600 rounded"></div>
-                <h2 className="text-2xl font-bold text-gray-800 ml-3">PROFILE SUMMARY</h2>
+                <h2 className="text-2xl font-bold text-gray-800 ml-3">{summaryTitle}</h2>
               </div>
               <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
                 <p className="text-gray-700 leading-relaxed text-sm">
-                  {data.summary}
+                  {summaryText}
                 </p>
               </div>
             </section>

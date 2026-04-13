@@ -7,7 +7,6 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 import Landing from "./components/pages/Landing";
 import Login from "./components/pages/Login";
-import Signup from "./components/pages/Signup";
 import Dashboard from "./components/pages/Dashboard";
 import ResumeBuilder from "./components/pages/ResumeBuilder";
 import Requests from "./components/pages/Requests";
@@ -17,6 +16,7 @@ import ResumePDF from "./components/pages/ResumePDF"; // ✅ NEW
 
 import AdminLogin from "./components/pages/admin/AdminLogin";
 import AdminDashboard from "./components/pages/admin/AdminDashboard";
+import AdminUsers from "./components/pages/admin/AdminUsers";
 import AdminRequests from "./components/pages/admin/AdminRequests";
 
 import NotFound from "./components/pages/NotFound";
@@ -36,7 +36,6 @@ const App = () => (
           {/* ================= PUBLIC ROUTES ================= */}
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
 
           {/* ================= USER ROUTES ================= */}
           <Route
@@ -98,6 +97,14 @@ const App = () => (
             element={
               <ProtectedRoute requireAdmin>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute requireAdmin>
+                <AdminUsers />
               </ProtectedRoute>
             }
           />

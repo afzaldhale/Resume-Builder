@@ -16,10 +16,11 @@ export function template9HTML(data) {
     languages: Array.isArray(data.languages) ? data.languages.slice(0, 3) : [],
     strengths: Array.isArray(data.strengths) ? data.strengths.slice(0, 4) : [],
     hobbies: Array.isArray(data.hobbies) ? data.hobbies.slice(0, 3) : [],
-    socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks.slice(0, 2) : []
+    socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks.slice(0, 2) : [],
+    candidateType: data.candidateType || "experienced"
   };
 
-  const isFresher = safeData.experience.length === 0;
+  const isFresher = data.candidateType === "fresher" || safeData.experience.length === 0;
 
   return `
 <!DOCTYPE html>

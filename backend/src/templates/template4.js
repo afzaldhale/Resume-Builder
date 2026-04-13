@@ -9,6 +9,12 @@ export function template4HTML(data) {
     return colors[index % colors.length];
   };
 
+  const isFresher = data.candidateType === "fresher";
+  const summaryText = isFresher
+    ? data.careerObjective || data.summary
+    : data.summary || data.careerObjective;
+  const summaryTitle = isFresher ? "Career Objective" : "Profile Summary";
+
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -344,14 +350,14 @@ export function template4HTML(data) {
 
   <div class="content">
     <!-- Professional Summary -->
-    ${data.summary ? `
+    ${summaryText ? `
     <section>
       <div style="display: flex; align-items: center; margin-bottom: 8px;">
         <div class="section-divider"></div>
-        <h2>PROFILE SUMMARY</h2>
+        <h2>${summaryTitle}</h2>
       </div>
       <div class="summary-box">
-        <p>${data.summary}</p>
+        <p>${summaryText}</p>
       </div>
     </section>
     ` : ""}

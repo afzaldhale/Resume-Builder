@@ -1,5 +1,10 @@
 export function template2HTML(data) {
   const skillPercent = (i) => Math.min(95, 65 + i * 10);
+  const isFresher = data.candidateType === "fresher";
+  const summaryText = isFresher
+    ? data.careerObjective || data.summary
+    : data.summary || data.careerObjective;
+  const summaryTitle = isFresher ? "Career Objective" : "Profile Summary";
 
   return `
 <!DOCTYPE html>
@@ -173,9 +178,9 @@ export function template2HTML(data) {
   <!-- RIGHT -->
   <div class="content">
 
-    ${data.summary ? `
-    <h2>PROFILE SUMMARY</h2>
-    <div class="box">${data.summary}</div>
+    ${summaryText ? `
+    <h2>${summaryTitle}</h2>
+    <div class="box">${summaryText}</div>
     ` : ""}
 
     ${data.experience?.length ? `

@@ -2,6 +2,7 @@ import { LayoutDashboard, ClipboardList, Users, LogOut, Shield, Menu } from "luc
 import { NavLink, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
+import { useEffect, useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import { useIsMobile } from "./hooks/use-mobile";
 import {
@@ -11,15 +12,33 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./ui/sheet";
+import api from "@/api/axios";
 
 const navItems = [
   { title: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
+  { title: "Users", path: "/admin/users", icon: Users },
   { title: "Manage Requests", path: "/admin/requests", icon: ClipboardList },
 ];
 
 const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => {
   const navigate = useNavigate();
   const { logout } = useAuthContext();
+  const [userCount, setUserCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const loadUserCount = async () => {
+      try {
+        const res = await api.get("/api/admin/users");
+        if (res.data.success) {
+          setUserCount(res.data.users.length);
+        }
+      } catch {
+        setUserCount(null);
+      }
+    };
+
+    loadUserCount();
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -53,6 +72,11 @@ const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => {
           >
             <item.icon className="h-5 w-5" />
             <span className="font-medium">{item.title}</span>
+            {item.path === "/admin/users" && userCount !== null ? (
+              <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
+                {userCount}
+              </span>
+            ) : null}
           </NavLink>
         ))}
       </nav>

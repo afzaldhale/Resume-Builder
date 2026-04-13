@@ -7,7 +7,7 @@ interface Template14Props {
 }
 
 const Template14: React.FC<Template14Props> = ({ data }) => {
-  const isFresher = data.experience.length === 0;
+  const isFresher = data.candidateType === "fresher" || data.experience.length === 0;
 
   return (
     <div className="w-[794px] min-h-[1123px] mx-auto bg-gray-100 border border-gray-300 font-sans text-gray-900">

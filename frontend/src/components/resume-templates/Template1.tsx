@@ -6,6 +6,11 @@ interface Template1Props {
 }
 
 const Template1: React.FC<Template1Props> = ({ data }) => {
+  const summaryText = data.candidateType === "fresher"
+    ? data.careerObjective || data.summary
+    : data.summary || data.careerObjective;
+  const summaryTitle = data.candidateType === "fresher" ? "Career Objective" : "Professional Summary";
+
   return (
     <div className="bg-white text-gray-800 w-[794px] min-h-[1123px] mx-auto p-8 font-sans">
       {/* Header */}
@@ -31,13 +36,13 @@ const Template1: React.FC<Template1Props> = ({ data }) => {
 
       {/* Main Content */}
       <div className="space-y-6">
-        {/* Professional Summary */}
-        {data.summary && (
+        {/* Summary / Career Objective */}
+        {summaryText && (
           <section>
             <h2 className="text-base font-bold uppercase border-b border-gray-300 pb-1 mb-2">
-              Professional Summary
+              {summaryTitle}
             </h2>
-            <p className="text-sm">{data.summary}</p>
+            <p className="text-sm">{summaryText}</p>
           </section>
         )}
 

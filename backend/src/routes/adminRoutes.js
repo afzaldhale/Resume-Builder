@@ -6,6 +6,9 @@ import {
   approveDownloadRequest,
   rejectDownloadRequest,
   previewResume,
+  downloadRequestPDF,
+  createUser,
+  deleteUser,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -28,9 +31,12 @@ router.get("/dashboard", adminAuth, (req, res) => {
  * =========================
  * USERS
  * GET /api/admin/users
+ * POST /api/admin/users
  * =========================
  */
 router.get("/users", adminAuth, getAllUsers);
+router.post("/users", adminAuth, createUser);
+router.delete("/users/:id", adminAuth, deleteUser);
 
 /**
  * =========================
@@ -57,5 +63,13 @@ router.put("/requests/:id/reject", adminAuth, rejectDownloadRequest);
  * =========================
  */
 router.get("/requests/:id/preview", adminAuth, previewResume);
+
+/**
+ * =========================
+ * DOWNLOAD REQUEST PDF
+ * GET /api/admin/requests/:id/pdf
+ * =========================
+ */
+router.get("/requests/:id/pdf", adminAuth, downloadRequestPDF);
 
 export default router;

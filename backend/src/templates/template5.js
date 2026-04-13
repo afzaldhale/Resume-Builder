@@ -15,6 +15,12 @@ export function template5HTML(data) {
     return colors[section] || "#3b82f6";
   };
 
+  const isFresher = data.candidateType === "fresher";
+  const summaryText = isFresher
+    ? data.careerObjective || data.summary
+    : data.summary || data.careerObjective;
+  const summaryTitle = isFresher ? "Career Objective" : "Professional Summary";
+
   // Helper function to get background color
   const getBackgroundColor = (section) => {
     const colors = {
@@ -436,18 +442,16 @@ export function template5HTML(data) {
   <!-- Timeline Sections -->
   <div class="timeline-container">
     <!-- Professional Summary -->
-    ${data.summary ? `
+    ${summaryText ? `
     <div class="timeline-section">
       <div class="timeline-dot" style="background: ${getTimelineColor('summary')};">
         ${getSectionIcon('summary')}
       </div>
       <div class="timeline-line"></div>
       
-      <h2 class="section-title">PROFESSIONAL SUMMARY</h2>
+      <h2 class="section-title">${summaryTitle}</h2>
       <div class="content-box" style="background: ${getBackgroundColor('summary')}; border-color: ${getBorderColor('summary')};">
-        <p class="text-sm">${data.summary}</p>
-      </div>
-    </div>
+        <p class="text-sm">${summaryText}</p>
     ` : ""}
 
     <!-- Work Experience -->

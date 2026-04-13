@@ -1,5 +1,11 @@
 // template3.js
 export function template3HTML(data) {
+  const isFresher = data.candidateType === "fresher";
+  const summaryText = isFresher
+    ? data.careerObjective || data.summary
+    : data.summary || data.careerObjective;
+  const summaryTitle = isFresher ? "Career Objective" : "Professional Summary";
+
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -158,10 +164,10 @@ export function template3HTML(data) {
     <!-- Left Column -->
     <div>
       <!-- SUMMARY -->
-      ${data.summary ? `
+      ${summaryText ? `
       <section class="section">
-        <h2>Professional Summary</h2>
-        <p>${data.summary}</p>
+        <h2>${summaryTitle}</h2>
+        <p>${summaryText}</p>
       </section>
       ` : ""}
 

@@ -11,10 +11,11 @@ export function template14HTML(data) {
     skills: Array.isArray(data.skills) ? data.skills : [],
     experience: Array.isArray(data.experience) ? data.experience : [],
     education: Array.isArray(data.education) ? data.education : [],
-    projects: Array.isArray(data.projects) ? data.projects : []
+    projects: Array.isArray(data.projects) ? data.projects : [],
+    candidateType: data.candidateType || "experienced"
   };
 
-  const isFresher = safe.experience.length === 0;
+  const isFresher = data.candidateType === "fresher" || safe.experience.length === 0;
 
   return `
 <!DOCTYPE html>

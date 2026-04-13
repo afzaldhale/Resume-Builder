@@ -11,6 +11,12 @@ interface Template4Props {
 }
 
 const Template4: React.FC<Template4Props> = ({ data }) => {
+  const isFresher = data.candidateType === "fresher";
+  const summaryText = isFresher
+    ? data.careerObjective || data.summary
+    : data.summary || data.careerObjective;
+  const summaryTitle = isFresher ? "Career Objective" : "PROFILE SUMMARY";
+
   // Icon mapping for social platforms
   const getSocialIcon = (platform: string) => {
     const icons: Record<string, React.ReactNode> = {
@@ -76,16 +82,16 @@ const Template4: React.FC<Template4Props> = ({ data }) => {
 
       {/* Main Content */}
       <div className="px-12 py-8">
-        {/* Professional Summary */}
-        {data.summary && (
-          <section className="mb-10">
-            <div className="flex items-center mb-4">
-              <div className="w-10 h-1 bg-gray-900 rounded"></div>
-              <h2 className="text-2xl font-bold text-gray-900 ml-3">PROFILE SUMMARY</h2>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-gray-900">
-              <p className="text-gray-700 leading-relaxed text-sm">
-                {data.summary}
+{/* Summary / Career Objective */}
+      {summaryText && (
+        <section className="mb-10">
+          <div className="flex items-center mb-4">
+            <div className="w-10 h-1 bg-gray-900 rounded"></div>
+            <h2 className="text-2xl font-bold text-gray-900 ml-3">{summaryTitle}</h2>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-gray-900">
+            <p className="text-gray-700 leading-relaxed text-sm">
+              {summaryText}
               </p>
             </div>
           </section>

@@ -11,18 +11,9 @@ import {
   TableRow,
 } from "../../ui/table";
 import { Badge } from "../../ui/badge";
-import { CheckCircle, XCircle, Eye } from "lucide-react";
+import { CheckCircle, XCircle, FileText } from "lucide-react";
 import { toast } from "sonner";
 import api from "../../../api/axios";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "../../ui/dialog";
-import { LazyTemplateRenderer } from "../../resume-templates/TemplateRegistry";
-import type { ResumeData } from "../../resume-templates/types";
 
 /* =======================
    TYPES
@@ -36,11 +27,6 @@ interface Request {
   status: "pending" | "approved" | "rejected";
 }
 
-interface PreviewData {
-  title: string;
-  templateId: number;
-  resumeData: ResumeData;
-}
 
 /* =======================
    CONSTANTS
@@ -65,9 +51,6 @@ const AdminRequests = () => {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewLoading, setPreviewLoading] = useState(false);
-  const [previewData, setPreviewData] = useState<PreviewData | null>(null);
 
   /* =======================
      FETCH REQUESTS
@@ -133,18 +116,9 @@ const AdminRequests = () => {
     }
   };
 
-  const handlePreview = async (id: number) => {
-    try {
-      setPreviewLoading(true);
-      setPreviewOpen(true);
-      const res = await api.get(`/api/admin/requests/${id}/preview`);
-      setPreviewData(res.data?.resume ?? null);
-    } catch {
-      toast.error("Failed to load preview");
-      setPreviewOpen(false);
-    } finally {
-      setPreviewLoading(false);
-    }
+  const handleViewPdf = (id: number) => {
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+    window.open(`${apiBaseUrl}/api/admin/requests/${id}/pdf`, "_blank");
   };
 
   /* =======================
@@ -230,9 +204,9 @@ const AdminRequests = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handlePreview(request.id)}
+                          onClick={() => handleViewPdf(request.id)}
                         >
-                          <Eye className="h-4 w-4" />
+                          <FileText className="h-4 w-4" />
                         </Button>
 
                         {request.status === "pending" && (
@@ -289,37 +263,6 @@ const AdminRequests = () => {
         </div>
       </main>
 
-      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-5xl h-[90vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle>{previewData?.title || "Resume Preview"}</DialogTitle>
-            <DialogDescription>
-              Review the submitted resume before approving or rejecting it.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex-1 overflow-auto bg-muted rounded-lg p-4">
-            {previewLoading ? (
-              <div className="h-full flex items-center justify-center text-muted-foreground">
-                Loading preview...
-              </div>
-            ) : previewData ? (
-              <div className="w-full overflow-auto">
-                <div className="mx-auto w-fit scale-[0.6] origin-top">
-                  <LazyTemplateRenderer
-                    templateId={previewData.templateId}
-                    data={previewData.resumeData}
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="h-full flex items-center justify-center text-muted-foreground">
-                No preview available.
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

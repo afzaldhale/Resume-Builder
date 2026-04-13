@@ -1,11 +1,13 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, FormEvent } from "react";
 import AdminSidebar from "../../AdminSidebar";
 import { Card } from "../../ui/card";
-import { Users, FileText, Clock, CheckCircle } from "lucide-react";
+import { Users, FileText, Clock, CheckCircle, Eye, EyeOff } from "lucide-react";
 import api from "../../../api/axios";
 import { AxiosResponse } from "axios";
 import { toast } from "sonner";
 import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
 
 /* =======================
    TYPES
@@ -59,6 +61,13 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
 
+  // Form states for creating user
+  const [newUserName, setNewUserName] = useState("");
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
+  const [creatingUser, setCreatingUser] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   /* =======================
      FETCH DASHBOARD DATA
   ======================= */
@@ -88,6 +97,43 @@ const AdminDashboard = () => {
     const interval = setInterval(fetchDashboardData, 15000);
     return () => clearInterval(interval);
   }, []);
+
+  /* =======================
+     CREATE USER
+  ======================= */
+
+  const handleCreateUser = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!newUserName || !newUserEmail || !newUserPassword) {
+      toast.error("All fields are required");
+      return;
+    }
+    if (newUserPassword.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+
+    setCreatingUser(true);
+    try {
+      const response = await api.post("/api/admin/users", {
+        name: newUserName,
+        email: newUserEmail,
+        password: newUserPassword,
+      });
+
+      if (response.data.success) {
+        toast.success("User created successfully");
+        setUsers(prev => [response.data.user, ...prev]);
+        setNewUserName("");
+        setNewUserEmail("");
+        setNewUserPassword("");
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to create user");
+    } finally {
+      setCreatingUser(false);
+    }
+  };
 
   /* =======================
      USER MAP (FIX UNKNOWN)
@@ -172,6 +218,65 @@ const AdminDashboard = () => {
               Overview of system metrics and recent activity
             </p>
           </div>
+
+          {/* CREATE USER FORM */}
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Create New User</h2>
+            <form onSubmit={handleCreateUser} className="space-y-4">
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    value={newUserName}
+                    onChange={(e) => setNewUserName(e.target.value)}
+                    placeholder="Enter user name"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={newUserEmail}
+                    onChange={(e) => setNewUserEmail(e.target.value)}
+                    placeholder="Enter user email"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={newUserPassword}
+                      onChange={(e) => setNewUserPassword(e.target.value)}
+                      placeholder="Enter password (min 8 chars)"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(prev => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <Button type="submit" disabled={creatingUser}>
+                {creatingUser ? "Creating..." : "Create User"}
+              </Button>
+            </form>
+          </Card>
 
           {/* STATS */}
           <div className="grid md:grid-cols-4 gap-6">

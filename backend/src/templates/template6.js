@@ -17,11 +17,12 @@ export function template6HTML(data) {
     languages: Array.isArray(data.languages) ? data.languages : [],
     socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : [],
     hobbies: Array.isArray(data.hobbies) ? data.hobbies : [],
-    strengths: Array.isArray(data.strengths) ? data.strengths : []
+    strengths: Array.isArray(data.strengths) ? data.strengths : [],
+    candidateType: data.candidateType || "experienced"
   };
 
   // Check if fresher
-  const isFresher = safeData.experience.length === 0;
+  const isFresher = data.candidateType === "fresher" || safeData.experience.length === 0;
 
   return `
 <!DOCTYPE html>

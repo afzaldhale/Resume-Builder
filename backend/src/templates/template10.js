@@ -19,11 +19,12 @@ export function template10HTML(data) {
     hobbies: Array.isArray(data.hobbies) ? data.hobbies.slice(0, 3) : [],
     socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks.slice(0, 2) : [],
     references: Array.isArray(data.references) ? data.references.slice(0, 2) : [],
-    customSections: Array.isArray(data.customSections) ? data.customSections.slice(0, 1) : []
+    customSections: Array.isArray(data.customSections) ? data.customSections.slice(0, 1) : [],
+    candidateType: data.candidateType || "experienced"
   };
 
   // Check if fresher
-  const isFresher = safeData.experience.length === 0;
+  const isFresher = data.candidateType === "fresher" || safeData.experience.length === 0;
 
   return `
 <!DOCTYPE html>
