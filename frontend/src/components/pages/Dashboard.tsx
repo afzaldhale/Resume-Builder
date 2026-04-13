@@ -1,50 +1,150 @@
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import UserSidebar from "@/components/UserSidebar";
 import { Card } from "@/components/ui/card";
-import { FileText, Clock, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useAuthContext } from "@/context/AuthContext";
+import { resumeService } from "@/services/resumeService";
+
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  Plus,
+} from "lucide-react";
+
+type Stats = {
+  totalResumes: number;
+  published: number;
+  drafts: number;
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [userName, setUserName] = useState("User"); // default fallback
+  const { user } = useAuthContext();
 
-  // Get user info from localStorage
+  const [stats, setStats] = useState<Stats>({
+    totalResumes: 0,
+    published: 0,
+    drafts: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUserName(parsedUser.name || "User");
-    }
-  }, []);
+    const fetchDashboard = async () => {
+      if (!user?.uid) {
+        setLoading(false);
+        return;
+      }
 
-  const stats = [
-    { title: "Total Resumes", value: "3", icon: FileText, color: "text-primary" },
-    { title: "Pending Requests", value: "1", icon: Clock, color: "text-warning" },
-    { title: "Approved", value: "2", icon: CheckCircle, color: "text-success" },
-    { title: "Rejected", value: "0", icon: XCircle, color: "text-destructive" },
-  ];
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Get user's resumes from the backend
+        const resumes = await resumeService.getMyResumes(user.uid);
+
+        const totalResumes = resumes.length;
+        const published = resumes.filter((r) => r.isPublished).length;
+        const drafts = totalResumes - published;
+
+        setStats({
+          totalResumes,
+          published,
+          drafts,
+        });
+      } catch (error: unknown) {
+        console.error('Dashboard error:', error);
+        setError("Failed to load dashboard");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+  }, [user?.uid]);
+
+  const statsList = useMemo(
+    () => [
+      {
+        title: "Total Resumes",
+        value: stats.totalResumes,
+        icon: FileText,
+        color: "text-primary",
+      },
+      {
+        title: "Published",
+        value: stats.published,
+        icon: CheckCircle,
+        color: "text-green-600",
+      },
+      {
+        title: "Drafts",
+        value: stats.drafts,
+        icon: Clock,
+        color: "text-yellow-500",
+      },
+      {
+        title: "Templates",
+        value: 15, // Static for now, could be dynamic later
+        icon: FileText,
+        color: "text-blue-500",
+      },
+    ],
+    [stats]
+  );
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-background">
+        <UserSidebar />
+        <main className="flex-1 p-4 md:p-8 pt-20 md:pt-8">
+          <div className="grid md:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i} className="p-6 h-28 animate-pulse" />
+            ))}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen text-red-500">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-background">
       <UserSidebar />
 
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-4 md:p-8 pt-20 md:pt-8">
         <div className="max-w-7xl mx-auto space-y-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Welcome back, {userName}! 👋</h1>
-            <p className="text-muted-foreground">Here's your resume building overview</p>
+            <h1 className="text-3xl font-bold mb-2">
+              Welcome back, {user?.name || "User"}
+            </h1>
+            <p className="text-muted-foreground">
+              Here&apos;s your resume activity overview
+            </p>
           </div>
 
           <div className="grid md:grid-cols-4 gap-6">
-            {stats.map((stat) => (
-              <Card key={stat.title} className="p-6 shadow-soft hover:shadow-medium transition-shadow">
+            {statsList.map((stat) => (
+              <Card key={stat.title} className="p-6 hover:shadow-lg transition">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">{stat.title}</p>
                     <p className="text-3xl font-bold mt-2">{stat.value}</p>
                   </div>
-                  <div className={`w-12 h-12 rounded-full bg-muted flex items-center justify-center ${stat.color}`}>
+                  <div
+                    className={`w-12 h-12 rounded-full bg-muted flex items-center justify-center ${stat.color}`}
+                  >
                     <stat.icon className="h-6 w-6" />
                   </div>
                 </div>
@@ -53,48 +153,34 @@ const Dashboard = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            <Card className="p-8 space-y-4 shadow-soft">
+            <Card className="p-8 space-y-4">
               <h2 className="text-xl font-semibold">Quick Actions</h2>
-              <div className="space-y-3">
-                <Button className="w-full justify-start" onClick={() => navigate("/builder")}>
-                  <FileText className="mr-2 h-4 w-4" />
-                  Create New Resume
-                </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/my-resumes")}>
-                  <FileText className="mr-2 h-4 w-4" />
-                  View My Resumes
-                </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/requests")}>
-                  <Clock className="mr-2 h-4 w-4" />
-                  Check Request Status
-                </Button>
-              </div>
+
+              <Button
+                className="w-full justify-start"
+                onClick={() => navigate("/builder")}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Create New Resume
+              </Button>
+
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => navigate("/my-resumes")}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                View My Resumes
+              </Button>
             </Card>
 
-            <Card className="p-8 space-y-4 shadow-soft">
-              <h2 className="text-xl font-semibold">Recent Activity</h2>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-success rounded-full mt-2" />
-                  <div className="flex-1">
-                    <p className="font-medium">Resume approved</p>
-                    <p className="text-sm text-muted-foreground">Software Engineer Resume - 2 hours ago</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-warning rounded-full mt-2" />
-                  <div className="flex-1">
-                    <p className="font-medium">Request pending</p>
-                    <p className="text-sm text-muted-foreground">Product Manager Resume - 1 day ago</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-success rounded-full mt-2" />
-                  <div className="flex-1">
-                    <p className="font-medium">Resume approved</p>
-                    <p className="text-sm text-muted-foreground">Data Analyst Resume - 3 days ago</p>
-                  </div>
-                </div>
+            <Card className="p-8 space-y-4">
+              <h2 className="text-xl font-semibold">Getting Started</h2>
+              <div className="space-y-3 text-sm text-muted-foreground">
+                <p>1. Click "Create New Resume" to start building</p>
+                <p>2. Choose from 15+ professional templates</p>
+                <p>3. Fill in your details and customize</p>
+                <p>4. Download or share your resume</p>
               </div>
             </Card>
           </div>

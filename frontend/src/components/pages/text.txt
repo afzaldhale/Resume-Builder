@@ -1,0 +1,526 @@
+// components/ResumeBuilder.tsx
+import { useState, useRef } from "react";
+import api from "@/api/axios";
+import UserSidebar from "@/components/UserSidebar";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { FileText, X, Plus, Globe, Linkedin, Github, Send } from "lucide-react";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { TemplateSelector } from "@/components/resume-templates/TemplateSelector";
+import Template1 from "@/components/resume-templates/Template1";
+import Template2 from "@/components/resume-templates/Template2";
+import Template3 from "@/components/resume-templates/Template3";
+import Template4 from "@/components/resume-templates/Template4";
+import Template5 from "@/components/resume-templates/Template5";
+import Template6 from "@/components/resume-templates/Template6";
+import Template7 from "@/components/resume-templates/Template7";
+import EmptyTemplate from "@/components/resume-templates/EmptyTemplate";
+import {
+  LanguageItem,
+  CertificationItem,
+  SocialLink,
+} from "@/components/resume-templates/types";
+import {
+  convertToTemplateData,
+  FormData,
+  CandidateType,
+} from "../../types/resumeDataConverter";
+
+const ResumeBuilder = () => {
+  const navigate = useNavigate();
+  const resumeRef = useRef<HTMLDivElement>(null);
+
+  const [selectedTemplate, setSelectedTemplate] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 🔀 Fresher / Experienced
+  const [candidateType, setCandidateType] =
+    useState<CandidateType>("experienced");
+
+  const [formData, setFormData] = useState<FormData>({
+    fullName: "",
+    email: "",
+    phone: "",
+    role: "",
+    address: "",
+    summary: "",
+    education: "",
+    experience: "",
+    skills: "",
+    projects: "",
+    strengths: "",
+    hobbies: "",
+  });
+
+  const [languages, setLanguages] = useState<LanguageItem[]>([]);
+  const [certifications, setCertifications] = useState<CertificationItem[]>([]);
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+
+  const [newCertification, setNewCertification] = useState<CertificationItem>({
+    name: "",
+    issuer: "",
+    year: "",
+  });
+
+  const handleInputChange = (field: keyof FormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const addCertification = () => {
+    if (!newCertification.name) return;
+    setCertifications((p) => [...p, newCertification]);
+    setNewCertification({ name: "", issuer: "", year: "" });
+  };
+
+  const removeCertification = (index: number) => {
+    setCertifications((p) => p.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.fullName || !formData.email) {
+      toast.error("Name and email are required");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const resumeData = convertToTemplateData(
+        formData,
+        languages,
+        certifications,
+        socialLinks,
+        candidateType
+      );
+
+      await api.post("/api/resumes", {
+        title: `${formData.fullName} Resume`,
+        resumeData,
+        templateId: selectedTemplate,
+      });
+
+      toast.success("Resume submitted for approval!");
+      navigate("/requests");
+    } catch {
+      toast.error("Failed to submit resume");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const renderTemplate = () => {
+    const templates = {
+      1: Template1,
+      2: Template2,
+      3: Template3,
+      4: Template4,
+      5: Template5,
+      6: Template6,
+      7: Template7,
+    };
+
+    const TemplateComponent =
+      templates[selectedTemplate as keyof typeof templates] ?? EmptyTemplate;
+
+    const templateData = convertToTemplateData(
+      formData,
+      languages,
+      certifications,
+      socialLinks,
+      candidateType
+    );
+
+    return <TemplateComponent data={templateData} />;
+  };
+
+  return (
+    <div className="flex min-h-screen bg-background">
+      <UserSidebar />
+
+      <main className="flex-1 p-8">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-8">
+
+          {/* FORM */}
+          <Card className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-2rem)]">
+
+            {/* 🔀 TOGGLE */}
+            <div className="flex gap-4">
+              <Button
+                variant={candidateType === "experienced" ? "default" : "outline"}
+                onClick={() => setCandidateType("experienced")}
+              >
+                Experienced
+              </Button>
+              <Button
+                variant={candidateType === "fresher" ? "default" : "outline"}
+                onClick={() => setCandidateType("fresher")}
+              >
+                Fresher
+              </Button>
+            </div>
+
+            <TemplateSelector
+              selectedTemplate={selectedTemplate}
+              onSelectTemplate={setSelectedTemplate}
+            />
+
+            {/* PERSONAL INFO */}
+            <div className="space-y-3">
+              <Label>Full Name</Label>
+              <Input onChange={(e) => handleInputChange("fullName", e.target.value)} />
+
+              <Label>Email</Label>
+              <Input onChange={(e) => handleInputChange("email", e.target.value)} />
+
+              <Label>Phone</Label>
+              <Input onChange={(e) => handleInputChange("phone", e.target.value)} />
+
+              <Label>Role</Label>
+              <Input onChange={(e) => handleInputChange("role", e.target.value)} />
+
+              <Label>Address</Label>
+              <Input onChange={(e) => handleInputChange("address", e.target.value)} />
+            </div>
+
+            {/* SUMMARY / OBJECTIVE */}
+            <div>
+              <Label>
+                {candidateType === "fresher"
+                  ? "Career Objective"
+                  : "Professional Summary"}
+              </Label>
+              <Textarea
+                rows={3}
+                onChange={(e) => handleInputChange("summary", e.target.value)}
+              />
+            </div>
+
+            {/* EDUCATION */}
+            <div>
+              <Label>Education</Label>
+              <Textarea
+                rows={3}
+                onChange={(e) => handleInputChange("education", e.target.value)}
+              />
+            </div>
+
+            {/* WORK EXPERIENCE (BOTH) */}
+            <div>
+              <Label>
+                {candidateType === "fresher"
+                  ? "Work Experience (Fresher / Internship / Training)"
+                  : "Work Experience"}
+              </Label>
+              <Textarea
+                rows={4}
+                placeholder={
+                  candidateType === "fresher"
+                    ? "Fresher / Internship / Industrial Training"
+                    : "Role at Company | Duration | Description"
+                }
+                onChange={(e) =>
+                  handleInputChange("experience", e.target.value)
+                }
+              />
+            </div>
+
+            {/* SKILLS */}
+            <div>
+              <Label>Skills</Label>
+              <Textarea
+                rows={2}
+                onChange={(e) => handleInputChange("skills", e.target.value)}
+              />
+            </div>
+
+            {/* PROJECTS */}
+            <div>
+              <Label>Projects / Achievements</Label>
+              <Textarea
+                rows={3}
+                onChange={(e) => handleInputChange("projects", e.target.value)}
+              />
+            </div>
+
+            {/* STRENGTHS & HOBBIES (FRESHER ONLY) */}
+            {candidateType === "fresher" && (
+              <>
+                <div>
+                  <Label>Strengths</Label>
+                  <Textarea
+                    rows={2}
+                    placeholder="Hardworking, Quick learner, Team player"
+                    onChange={(e) =>
+                      handleInputChange("strengths", e.target.value)
+                    }
+                  />
+                </div>
+
+                <div>
+                  <Label>Hobbies</Label>
+                  <Textarea
+                    rows={2}
+                    placeholder="Reading, Sports, Coding"
+                    onChange={(e) =>
+                      handleInputChange("hobbies", e.target.value)
+                    }
+                  />
+                </div>
+              </>
+            )}
+
+            {/* CERTIFICATIONS (BOTH) */}
+            <div className="space-y-3">
+              <Label>Certifications</Label>
+              <div className="grid grid-cols-3 gap-3">
+                <Input
+                  placeholder="Name"
+                  value={newCertification.name}
+                  onChange={(e) =>
+                    setNewCertification((p) => ({
+                      ...p,
+                      name: e.target.value,
+                    }))
+                  }
+                />
+                <Input
+                  placeholder="Issuer"
+                  value={newCertification.issuer}
+                  onChange={(e) =>
+                    setNewCertification((p) => ({
+                      ...p,
+                      issuer: e.target.value,
+                    }))
+                  }
+                />
+                <Input
+                  placeholder="Year"
+                  value={newCertification.year}
+                  onChange={(e) =>
+                    setNewCertification((p) => ({
+                      ...p,
+                      year: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+              <Button size="sm" onClick={addCertification}>
+                <Plus size={16} className="mr-2" />
+                Add Certification
+              </Button>
+
+              {certifications.map((c, i) => (
+                <div
+                  key={i}
+                  className="flex justify-between bg-gray-50 p-2 rounded"
+                >
+                  <span>
+                    {c.name} – {c.issuer} ({c.year})
+                  </span>
+                  <button onClick={() => removeCertification(i)}>
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="w-full"
+            >
+              <Send size={16} className="mr-2" />
+              Submit for Approval
+            </Button>
+          </Card>
+
+          {/* PREVIEW */}
+          <Card className="p-6 sticky top-8">
+            {formData.fullName ? (
+              <div ref={resumeRef} className="scale-75 origin-top">
+                {renderTemplate()}
+              </div>
+            ) : (
+              <EmptyTemplate />
+            )}
+          </Card>
+
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default ResumeBuilder; 
+
+
+// src/types/resumeDataConverter.ts
+import {
+  ResumeData,
+  LanguageItem,
+  CertificationItem,
+  SocialLink,
+} from "@/components/resume-templates/types";
+
+export type CandidateType = "fresher" | "experienced";
+
+/* -------------------- FORM DATA -------------------- */
+export interface FormData {
+  fullName: string;
+  email: string;
+  phone: string;
+  role: string;
+  address: string;
+
+  summary: string;
+  education: string;
+  experience: string;
+  skills: string;
+  projects: string;
+
+  // ✅ User inputs (comma separated)
+  strengths: string;
+  hobbies: string;
+}
+
+/* -------------------- MAIN CONVERTER -------------------- */
+export const convertToTemplateData = (
+  formData: FormData,
+  languages: LanguageItem[],
+  certifications: CertificationItem[],
+  socialLinks: SocialLink[],
+  candidateType: CandidateType = "experienced"
+): ResumeData => {
+  const skills = splitToArray(formData.skills);
+  const strengths = splitToArray(formData.strengths);
+  const hobbies = splitToArray(formData.hobbies);
+
+  const education = parseEducation(formData.education);
+
+  const experience =
+    candidateType === "experienced"
+      ? parseExperience(formData.experience)
+      : [
+          {
+            role: "Fresher",
+            company: "",
+            startDate: "",
+            endDate: "",
+            description:
+              "Motivated fresher eager to learn and contribute to the organization.",
+          },
+        ];
+
+  const projects = parseProjects(formData.projects);
+
+  return {
+    fullName: formData.fullName,
+    email: formData.email,
+    phone: formData.phone,
+    role: formData.role,
+    address: formData.address,
+
+    summary: formData.summary,
+
+    education,
+    experience,
+    skills,
+    projects,
+
+    // ✅ NOW ARRAYS (matches ResumeData type)
+    strengths,
+    hobbies,
+
+    languages,
+    certifications,
+    socialLinks,
+  };
+};
+
+/* -------------------- HELPERS -------------------- */
+
+const splitToArray = (value: string): string[] =>
+  value
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+
+/* -------------------- PARSERS -------------------- */
+
+const parseEducation = (educationStr: string) =>
+  educationStr
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => {
+      const p = line.split("|").map((x) => x.trim());
+      return {
+        degree: p[0] || "",
+        school: p[1] || "",
+        startYear: p[2] || "",
+        endYear: p[3] || "",
+        gpa: p[4] || "",
+      };
+    });
+
+const parseExperience = (experienceStr: string) =>
+  experienceStr
+    .split("\n\n")
+    .filter(Boolean)
+    .map((block) => {
+      const lines = block.split("\n").filter(Boolean);
+      return {
+        role: lines[0]?.split("at")[0]?.trim() || "",
+        company: lines[0]?.split("at")[1]?.trim() || "",
+        startDate: lines[1]?.split("-")[0]?.trim() || "",
+        endDate: lines[1]?.split("-")[1]?.trim() || "",
+        description: lines.slice(2).join("\n").trim() || "",
+      };
+    });
+
+const parseProjects = (projectsStr: string) =>
+  projectsStr
+    .split("\n\n")
+    .filter(Boolean)
+    .map((block) => {
+      const lines = block.split("\n").filter(Boolean);
+      return {
+        name: lines[0] || "",
+        description: lines[1] || "",
+        technologies:
+          lines[2]?.split(",").map((t) => t.trim()) || [],
+      };
+    });
+
+/* -------------------- UTILS -------------------- */
+
+export const clearFormData = () => ({
+  formData: {
+    fullName: "",
+    email: "",
+    phone: "",
+    role: "",
+    address: "",
+    summary: "",
+    education: "",
+    experience: "",
+    skills: "",
+    projects: "",
+    strengths: "",
+    hobbies: "",
+  },
+  languages: [],
+  certifications: [],
+  socialLinks: [],
+});
+
+

@@ -1,25 +1,37 @@
-import { FileText, LayoutDashboard, FileStack, ClipboardList, LogOut } from "lucide-react";
+import { FileText, LayoutDashboard, ClipboardList, LogOut, Menu } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
+import { useAuthContext } from "@/context/AuthContext";
+import { useIsMobile } from "./hooks/use-mobile";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
 
-const UserSidebar = () => {
+const navItems = [
+  { title: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { title: "Create Resume", path: "/builder", icon: FileText },
+  { title: "My Resumes", path: "/my-resumes", icon: FileText },
+  { title: "Requests", path: "/requests", icon: ClipboardList },
+];
+
+const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => {
   const navigate = useNavigate();
+  const { logout } = useAuthContext();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logout();
     toast.success("Logged out successfully");
-    navigate("/");
+    navigate("/login");
+    onNavigate?.();
   };
 
-  const navItems = [
-    { title: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-    { title: "Create Resume", path: "/builder", icon: FileText },
-    { title: "My Resumes", path: "/my-resumes", icon: FileStack },
-    { title: "Requests", path: "/requests", icon: ClipboardList },
-  ];
-
   return (
-    <aside className="w-64 bg-sidebar border-r border-sidebar-border h-screen sticky top-0 flex flex-col">
+    <div className="h-full bg-sidebar flex flex-col">
       <div className="p-6 border-b border-sidebar-border">
         <div className="flex items-center gap-2">
           <FileText className="h-6 w-6 text-sidebar-foreground" />
@@ -32,6 +44,7 @@ const UserSidebar = () => {
           <NavLink
             key={item.path}
             to={item.path}
+            onClick={onNavigate}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                 isActive
@@ -56,6 +69,36 @@ const UserSidebar = () => {
           <span>Logout</span>
         </Button>
       </div>
+    </div>
+  );
+};
+
+const UserSidebar = () => {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <div className="fixed top-4 left-4 z-40">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button size="icon" variant="outline" className="shadow-soft bg-background">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0 w-[280px]">
+            <SheetHeader className="sr-only">
+              <SheetTitle>Navigation</SheetTitle>
+            </SheetHeader>
+            <SidebarContent />
+          </SheetContent>
+        </Sheet>
+      </div>
+    );
+  }
+
+  return (
+    <aside className="w-64 bg-sidebar border-r border-sidebar-border h-screen sticky top-0">
+      <SidebarContent />
     </aside>
   );
 };

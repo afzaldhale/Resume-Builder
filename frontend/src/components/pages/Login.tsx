@@ -4,12 +4,17 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileText } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import axios from "@/api/axios"; // Import your axios instance
+import { AxiosError } from "axios";
+import api from "@/api/axios";
+import { useAuthContext } from "@/context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { setUser } = useAuthContext();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,28 +27,43 @@ const Login = () => {
       return;
     }
 
-    setLoading(true);
-
     try {
-      const res = await axios.post("/auth/login", { email, password });
+      setLoading(true);
+      const res = await api.post("/auth/login", { email, password });
 
-      if (res.data?.message) {
-        toast.success(res.data.message);
+      const user = res.data?.user;
+      const token = res.data?.token;
 
-        // Optional: store user info in localStorage for session management
-        if (res.data.user) {
-          localStorage.setItem("user", JSON.stringify(res.data.user));
-        }
-
-        navigate("/dashboard");
-      } else {
+      if (!user || !token) {
         toast.error("Login failed. Please try again.");
+        return;
       }
-    } catch (err: any) {
-      if (err.response?.data?.message) {
-        toast.error(err.response.data.message);
+
+      window.localStorage.setItem("token", token);
+      setUser({
+        uid: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        candidateType: "experienced",
+      });
+
+      toast.success(res.data?.message || "Login successful!");
+
+      const redirectPath =
+        (location.state as { from?: { pathname?: string } } | null)?.from
+          ?.pathname || (user.role === "admin" ? "/admin/dashboard" : "/dashboard");
+
+      navigate(redirectPath);
+    } catch (error: unknown) {
+      console.error("Login error:", error);
+
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error instanceof Error) {
+        toast.error(error.message || "Login failed");
       } else {
-        toast.error("Server error. Please try again later.");
+        toast.error("Login failed");
       }
     } finally {
       setLoading(false);
@@ -81,7 +101,7 @@ const Login = () => {
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder="********"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -94,7 +114,7 @@ const Login = () => {
         </form>
 
         <div className="text-center text-sm">
-          <span className="text-muted-foreground">Don't have an account? </span>
+          <span className="text-muted-foreground">Don&apos;t have an account? </span>
           <button
             onClick={() => navigate("/signup")}
             className="text-primary hover:underline font-medium"
@@ -108,7 +128,7 @@ const Login = () => {
             onClick={() => navigate("/")}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            ← Back to home
+            Back to home
           </button>
         </div>
       </Card>
