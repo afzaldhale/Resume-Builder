@@ -4,7 +4,7 @@ import {
   Mail, Phone, MapPin, Palette, Brush, Code, 
   Camera, Music, BookOpen, Globe, Sparkles,
   Award, Users, Zap, Star, Target, Circle,
-  Briefcase, GraduationCap, ChevronRight
+  Briefcase, GraduationCap, ChevronRight, Heart
 } from "lucide-react";
 
 interface Template7Props {
@@ -202,6 +202,45 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                       </div>
                     </div>
                   ))}
+                </div>
+              </section>
+            )}
+
+            {/* Strengths */}
+            {data.strengths && data.strengths.length > 0 && (
+              <section>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-1 bg-emerald-500 rounded"></div>
+                  <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <Star size={18} className="text-emerald-500" />
+                    STRENGTHS
+                  </h2>
+                </div>
+                
+                <div className="space-y-2">
+                  {data.strengths.map((strength, index) => (
+                    <div key={index} className="flex items-start gap-2">
+                      <span className="text-emerald-500 mt-1">•</span>
+                      <span className="text-sm text-gray-700">{strength}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Hobbies */}
+            {data.hobbies && data.hobbies.length > 0 && (
+              <section>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-1 bg-emerald-500 rounded"></div>
+                  <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <Heart size={18} className="text-emerald-500" />
+                    HOBBIES
+                  </h2>
+                </div>
+                
+                <div className="text-sm text-gray-700">
+                  {data.hobbies.join(", ")}
                 </div>
               </section>
             )}

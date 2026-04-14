@@ -285,6 +285,20 @@ ${safeData.projects.length ? `
     </div>`).join("")}
 </section>` : ""}
 
+${safeData.strengths.length ? `
+<section class="section">
+  <h2 class="section-title">STRENGTHS</h2>
+  <ul class="strengths-list">
+    ${safeData.strengths.map(s => `<li>• ${s}</li>`).join("")}
+  </ul>
+</section>` : ""}
+
+${safeData.hobbies.length ? `
+<section class="section">
+  <h2 class="section-title">HOBBIES</h2>
+  <div class="hobbies-content">${safeData.hobbies.join(", ")}</div>
+</section>` : ""}
+
 <footer class="footer">
   ${safeData.fullName || "Your Name"} • Resume
 </footer>

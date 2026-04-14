@@ -77,6 +77,37 @@ const Template12: React.FC<Template12Props> = ({ data }) => {
               </section>
             )}
 
+            {data.languages && data.languages.length > 0 && (
+              <section>
+                <h2 className="section-title">LANGUAGES</h2>
+                <ul className="text-sm mt-2 space-y-1">
+                  {data.languages.map((lang, i) => (
+                    <li key={i}>• {lang.language} ({lang.level})</li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {data.strengths && data.strengths.length > 0 && (
+              <section>
+                <h2 className="section-title">STRENGTHS</h2>
+                <ul className="text-sm mt-2 space-y-1">
+                  {data.strengths.map((strength, i) => (
+                    <li key={i}>• {strength}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {data.hobbies && data.hobbies.length > 0 && (
+              <section>
+                <h2 className="section-title">HOBBIES</h2>
+                <div className="text-sm mt-2">
+                  {data.hobbies.join(", ")}
+                </div>
+              </section>
+            )}
+
           </aside>
 
           {/* RIGHT COLUMN */}

@@ -657,6 +657,41 @@ export function template6HTML(data) {
         ` : ""}
       </div>
       ` : ""}
+
+      <!-- Strengths -->
+      ${safeData.strengths.length > 0 ? `
+      <section class="section">
+        <div class="section-header">
+          <div class="section-bar" style="background: #f59e0b;"></div>
+          <h2 class="section-title">Strengths</h2>
+        </div>
+        <div class="content-card">
+          <ul style="list-style: none; padding: 0;">
+            ${safeData.strengths.map(strength => `
+              <li style="margin-bottom: 8px; display: flex; align-items: flex-start;">
+                <span style="color: #f59e0b; margin-right: 8px; font-weight: bold;">•</span>
+                <span style="font-size: 14px; color: #374151;">${strength}</span>
+              </li>
+            `).join("")}
+          </ul>
+        </div>
+      </section>
+      ` : ""}
+
+      <!-- Hobbies -->
+      ${safeData.hobbies.length > 0 ? `
+      <section class="section">
+        <div class="section-header">
+          <div class="section-bar" style="background: #ec4899;"></div>
+          <h2 class="section-title">Hobbies</h2>
+        </div>
+        <div class="content-card">
+          <div style="font-size: 14px; color: #374151;">
+            ${safeData.hobbies.join(", ")}
+          </div>
+        </div>
+      </section>
+      ` : ""}
     </main>
 
     <!-- Footer -->

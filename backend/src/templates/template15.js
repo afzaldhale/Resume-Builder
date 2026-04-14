@@ -10,6 +10,7 @@ export function template15HTML(data) {
     careerObjective: data.careerObjective || "",
     skills: Array.isArray(data.skills) ? data.skills : [],
     strengths: Array.isArray(data.strengths) ? data.strengths : [],
+    hobbies: Array.isArray(data.hobbies) ? data.hobbies : [],
     experience: Array.isArray(data.experience) ? data.experience : [],
     education: Array.isArray(data.education) ? data.education : [],
     projects: Array.isArray(data.projects) ? data.projects : [],
@@ -143,6 +144,11 @@ export function template15HTML(data) {
       ${safe.strengths.length > 0 ? `
         <div class="left-title">STRENGTHS</div>
         <ul>${safe.strengths.map(s => `<li>${s}</li>`).join("")}</ul>
+      ` : ""}
+
+      ${safe.hobbies.length > 0 ? `
+        <div class="left-title">HOBBIES</div>
+        <div>${safe.hobbies.join(", ")}</div>
       ` : ""}
     </div>
 

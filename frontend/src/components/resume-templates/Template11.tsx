@@ -56,6 +56,43 @@ const Template11: React.FC<Template11Props> = ({ data }) => {
               </ul>
             </div>
           )}
+
+          {data.languages && data.languages.length > 0 && (
+            <div>
+              <h2 className="text-sm font-semibold tracking-wide border-b border-slate-500 pb-1 mb-2">
+                LANGUAGES
+              </h2>
+              <ul className="text-sm space-y-1">
+                {data.languages.map((lang, i) => (
+                  <li key={i}>• {lang.language} ({lang.level})</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {data.strengths && data.strengths.length > 0 && (
+            <div>
+              <h2 className="text-sm font-semibold tracking-wide border-b border-slate-500 pb-1 mb-2">
+                STRENGTHS
+              </h2>
+              <ul className="text-sm space-y-1">
+                {data.strengths.map((strength, i) => (
+                  <li key={i}>• {strength}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {data.hobbies && data.hobbies.length > 0 && (
+            <div>
+              <h2 className="text-sm font-semibold tracking-wide border-b border-slate-500 pb-1 mb-2">
+                HOBBIES
+              </h2>
+              <div className="text-sm">
+                {data.hobbies.join(", ")}
+              </div>
+            </div>
+          )}
         </aside>
 
         {/* RIGHT CONTENT */}

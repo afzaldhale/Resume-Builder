@@ -306,6 +306,37 @@ const Template5: React.FC<Template5Props> = ({ data }) => {
                   }
                 />
               )}
+
+              {/* Strengths */}
+              {data.strengths && data.strengths.length > 0 && (
+                <TimelineSection 
+                  title="STRENGTHS" 
+                  section="strengths"
+                  content={
+                    <div className="space-y-2">
+                      {data.strengths.map((strength, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <span className="text-indigo-500 mt-1">•</span>
+                          <span className="text-sm text-gray-700">{strength}</span>
+                        </div>
+                      ))}
+                    </div>
+                  }
+                />
+              )}
+
+              {/* Hobbies */}
+              {data.hobbies && data.hobbies.length > 0 && (
+                <TimelineSection 
+                  title="HOBBIES" 
+                  section="hobbies"
+                  content={
+                    <div className="text-sm text-gray-700">
+                      {data.hobbies.join(", ")}
+                    </div>
+                  }
+                />
+              )}
             </div>
           )}
 

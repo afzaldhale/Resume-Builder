@@ -66,6 +66,28 @@ const Template15: React.FC<Template15Props> = ({ data }) => {
               </ul>
             </div>
           )}
+
+          {/* LANGUAGES */}
+          {data.languages && data.languages.length > 0 && (
+            <div className="mt-8">
+              <h2 className="left-title">LANGUAGES</h2>
+              <ul className="mt-2 space-y-1 text-sm">
+                {data.languages.map((lang, i) => (
+                  <li key={i}>• {lang.language} ({lang.level})</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* HOBBIES */}
+          {data.hobbies && data.hobbies.length > 0 && (
+            <div className="mt-8">
+              <h2 className="left-title">HOBBIES</h2>
+              <div className="mt-2 text-sm">
+                {data.hobbies.join(", ")}
+              </div>
+            </div>
+          )}
         </aside>
 
         {/* RIGHT COLUMN */}

@@ -268,6 +268,37 @@ const Template6: React.FC<Template6Props> = ({ data }) => {
                 </div>
               </section>
             )}
+
+            {/* Strengths */}
+            {data.strengths && data.strengths.length > 0 && (
+              <section>
+                <div className="flex items-center mb-3">
+                  <div className="w-6 h-1 bg-indigo-600 rounded"></div>
+                  <h2 className="text-lg font-bold text-gray-900 ml-2">STRENGTHS</h2>
+                </div>
+                <div className="space-y-2">
+                  {data.strengths.map((strength, index) => (
+                    <div key={index} className="flex items-start gap-2">
+                      <span className="text-indigo-500 mt-1">•</span>
+                      <span className="text-sm text-gray-700">{strength}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Hobbies */}
+            {data.hobbies && data.hobbies.length > 0 && (
+              <section>
+                <div className="flex items-center mb-3">
+                  <div className="w-6 h-1 bg-indigo-600 rounded"></div>
+                  <h2 className="text-lg font-bold text-gray-900 ml-2">HOBBIES</h2>
+                </div>
+                <div className="text-sm text-gray-700">
+                  {data.hobbies.join(", ")}
+                </div>
+              </section>
+            )}
           </div>
 
           {/* Footer */}

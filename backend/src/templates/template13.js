@@ -12,6 +12,9 @@ export function template13HTML(data) {
     experience: Array.isArray(data.experience) ? data.experience : [],
     education: Array.isArray(data.education) ? data.education : [],
     projects: Array.isArray(data.projects) ? data.projects : [],
+    languages: Array.isArray(data.languages) ? data.languages : [],
+    hobbies: Array.isArray(data.hobbies) ? data.hobbies : [],
+    strengths: Array.isArray(data.strengths) ? data.strengths : [],
     candidateType: data.candidateType || "experienced"
   };
 
@@ -177,6 +180,35 @@ export function template13HTML(data) {
           <p><strong>${p.name}</strong></p>
           <p>${p.description}</p>
         `).join("")}
+      </div>` : ""}
+
+      <!-- LANGUAGES -->
+      ${safe.languages.length > 0 ? `
+      <div class="section">
+        <div class="section-title">LANGUAGES</div>
+        <ul style="list-style: none; padding: 0;">
+          ${safe.languages.map(lang => `
+            <li style="margin-bottom: 4px;">• ${lang.language} (${lang.level})</li>
+          `).join("")}
+        </ul>
+      </div>` : ""}
+
+      <!-- STRENGTHS -->
+      ${safe.strengths.length > 0 ? `
+      <div class="section">
+        <div class="section-title">STRENGTHS</div>
+        <ul style="list-style: none; padding: 0;">
+          ${safe.strengths.map(strength => `
+            <li style="margin-bottom: 4px;">• ${strength}</li>
+          `).join("")}
+        </ul>
+      </div>` : ""}
+
+      <!-- HOBBIES -->
+      ${safe.hobbies.length > 0 ? `
+      <div class="section">
+        <div class="section-title">HOBBIES</div>
+        <p>${safe.hobbies.join(", ")}</p>
       </div>` : ""}
 
     </div>

@@ -304,6 +304,8 @@ ${(safeData.summary || safeData.careerObjective) ? `
 <div>
   ${safeData.experience.length ? `<section class="section"><h2 class="section-title">EXPERIENCE</h2>${safeData.experience.map(e => `<div class="exp-card"><div class="exp-title">${e.role}</div><div class="exp-company">${e.company}</div><div class="exp-description">${e.description}</div></div>`).join("")}</section>` : ""}
   ${safeData.projects.length ? `<section class="section"><h2 class="section-title">PROJECTS</h2>${safeData.projects.map(p => `<div class="project-card"><div class="project-name">${p.name}</div><div class="project-description">${p.description}</div></div>`).join("")}</section>` : ""}
+  ${safeData.strengths.length ? `<section class="section"><h2 class="section-title">STRENGTHS</h2><div class="strengths-grid">${safeData.strengths.map(s => `<div class="strength-item"><span class="strength-bullet">•</span>${s}</div>`).join("")}</div></section>` : ""}
+  ${safeData.hobbies.length ? `<section class="section"><h2 class="section-title">HOBBIES</h2><div class="hobbies-content">${safeData.hobbies.join(", ")}</div></section>` : ""}
 </div>
 
 </div>

@@ -161,6 +161,20 @@ const Template8: React.FC<Template8Props> = ({ data }) => {
           </section>
         )}
 
+        {/* LANGUAGES */}
+        {data.languages?.length > 0 && (
+          <section>
+            <h2 className="section-title">LANGUAGES</h2>
+            <ul className="list-disc list-inside text-sm mt-2">
+              {data.languages.map((lang, i) => (
+                <li key={i}>
+                  {lang.language} — {lang.level}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {/* STRENGTHS */}
         {data.strengths?.length > 0 && (
           <section>

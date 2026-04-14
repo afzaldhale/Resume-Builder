@@ -284,6 +284,33 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
           </div>
         </div>
 
+        {(data.strengths?.length || data.hobbies?.length) && (
+          <section className="mb-10">
+            <div className="flex items-center mb-4">
+              <div className="w-8 h-1 bg-blue-600 rounded"></div>
+              <h2 className="text-2xl font-bold text-gray-800 ml-3">ADDITIONAL PROFILE</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              {data.strengths?.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Strengths</h3>
+                  <ul className="list-disc list-inside text-sm text-gray-700 space-y-2">
+                    {data.strengths.map((strength, index) => (
+                      <li key={index}>{strength}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {data.hobbies?.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Hobbies</h3>
+                  <p className="text-sm text-gray-700">{data.hobbies.join(", ")}</p>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
         {/* Social Links & Footer */}
         <div className="mt-12 pt-8 border-t border-gray-200">
           {data.socialLinks && data.socialLinks.length > 0 && (

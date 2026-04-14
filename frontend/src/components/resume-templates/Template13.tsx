@@ -135,6 +135,48 @@ const Template13: React.FC<Template13Props> = ({ data }) => {
             </section>
           )}
 
+          {/* LANGUAGES */}
+          {data.languages && data.languages.length > 0 && (
+            <section>
+              <h2 className="section-title">LANGUAGES</h2>
+              <div className="space-y-2 mt-2">
+                {data.languages.map((lang, i) => (
+                  <div key={i} className="flex justify-between items-center">
+                    <span className="text-sm font-medium">{lang.language}</span>
+                    <span className="text-xs text-gray-600 bg-purple-100 px-2 py-1 rounded">
+                      {lang.level}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* STRENGTHS */}
+          {data.strengths && data.strengths.length > 0 && (
+            <section>
+              <h2 className="section-title">STRENGTHS</h2>
+              <ul className="text-sm mt-2 space-y-1">
+                {data.strengths.map((strength, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="text-purple-500 mt-1">•</span>
+                    <span>{strength}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* HOBBIES */}
+          {data.hobbies && data.hobbies.length > 0 && (
+            <section>
+              <h2 className="section-title">HOBBIES</h2>
+              <div className="text-sm mt-2">
+                {data.hobbies.join(", ")}
+              </div>
+            </section>
+          )}
+
         </div>
       </div>
 

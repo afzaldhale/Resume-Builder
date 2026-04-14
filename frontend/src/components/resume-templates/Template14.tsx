@@ -128,6 +128,51 @@ const Template14: React.FC<Template14Props> = ({ data }) => {
             </section>
           )}
 
+          {/* LANGUAGES */}
+          {data.languages && data.languages.length > 0 && (
+            <section className="relative">
+              <TimelineDot />
+              <h2 className="section-title">LANGUAGES</h2>
+              <div className="mt-3 space-y-2">
+                {data.languages.map((lang, i) => (
+                  <div key={i} className="flex justify-between items-center">
+                    <span className="text-sm font-medium">{lang.language}</span>
+                    <span className="text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded">
+                      {lang.level}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* STRENGTHS */}
+          {data.strengths && data.strengths.length > 0 && (
+            <section className="relative">
+              <TimelineDot />
+              <h2 className="section-title">STRENGTHS</h2>
+              <ul className="mt-3 space-y-1 text-sm">
+                {data.strengths.map((strength, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="text-teal-500 mt-1">•</span>
+                    <span>{strength}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* HOBBIES */}
+          {data.hobbies && data.hobbies.length > 0 && (
+            <section className="relative">
+              <TimelineDot />
+              <h2 className="section-title">HOBBIES</h2>
+              <div className="mt-3 text-sm">
+                {data.hobbies.join(", ")}
+              </div>
+            </section>
+          )}
+
         </div>
       </div>
 

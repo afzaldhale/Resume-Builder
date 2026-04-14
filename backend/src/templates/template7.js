@@ -1076,6 +1076,45 @@ export function template7HTML(data) {
             </div>
           </section>
           ` : ""}
+
+          <!-- Strengths -->
+          ${safeData.strengths.length > 0 ? `
+          <section>
+            <div class="section-header">
+              <div class="section-line" style="background: #f59e0b;"></div>
+              <h2 class="section-title">
+                <span class="section-icon">💪</span>
+                STRENGTHS
+              </h2>
+            </div>
+            
+            <ul class="strengths-list">
+              ${safeData.strengths.map(strength => `
+                <li class="strength-item">
+                  <span class="strength-bullet">•</span>
+                  <span class="strength-text">${strength}</span>
+                </li>
+              `).join("")}
+            </ul>
+          </section>
+          ` : ""}
+
+          <!-- Hobbies -->
+          ${safeData.hobbies.length > 0 ? `
+          <section>
+            <div class="section-header">
+              <div class="section-line" style="background: #ec4899;"></div>
+              <h2 class="section-title">
+                <span class="section-icon">🎨</span>
+                HOBBIES
+              </h2>
+            </div>
+            
+            <div class="hobbies-content">
+              ${safeData.hobbies.join(", ")}
+            </div>
+          </section>
+          ` : ""}
         </div>
       </div>
     </div>
