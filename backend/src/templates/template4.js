@@ -501,6 +501,15 @@ export function template4HTML(data) {
       </div>
     </div>
 
+    ${data.hobbies && data.hobbies.length > 0 ? `
+    <section style="margin-top: 30px;">
+      <h2>🎯 HOBBIES</h2>
+      <div class="content-box" style="background: #f9fafb; border-color: #e5e7eb; padding: 16px;">
+        <p>${data.hobbies.join(', ')}</p>
+      </div>
+    </section>
+    ` : ""}
+
     <!-- Social Links -->
     ${data.socialLinks && data.socialLinks.length > 0 ? `
     <section style="margin-top: 30px;">

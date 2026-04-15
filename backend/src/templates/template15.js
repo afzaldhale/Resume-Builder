@@ -14,6 +14,9 @@ export function template15HTML(data) {
     experience: Array.isArray(data.experience) ? data.experience : [],
     education: Array.isArray(data.education) ? data.education : [],
     projects: Array.isArray(data.projects) ? data.projects : [],
+    languages: Array.isArray(data.languages) ? data.languages : [],
+    certifications: Array.isArray(data.certifications) ? data.certifications : [],
+    socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : [],
     candidateType: data.candidateType || "experienced"
   };
 
@@ -134,6 +137,7 @@ export function template15HTML(data) {
         ${safe.email ? `<div>✉ ${safe.email}</div>` : ""}
         ${safe.phone ? `<div>📞 ${safe.phone}</div>` : ""}
         ${safe.address ? `<div>📍 ${safe.address}</div>` : ""}
+        ${safe.socialLinks.length > 0 ? safe.socialLinks.map(link => `<div>🔗 ${link.platform}: ${link.url}</div>`).join("") : ""}
       </div>
 
       ${safe.skills.length > 0 ? `
@@ -186,6 +190,15 @@ export function template15HTML(data) {
         `).join("")}
       </div>` : ""}
 
+      ${safe.certifications.length > 0 ? `
+      <div class="section">
+        <div class="section-title">CERTIFICATIONS</div>
+        ${safe.certifications.map(c => `
+          <p><strong>${c.name}</strong></p>
+          <div class="sub">${c.issuer} | ${c.date}</div>
+        `).join("")}
+      </div>` : ""}
+
       ${safe.projects.length > 0 ? `
       <div class="section">
         <div class="section-title">PROJECTS</div>
@@ -193,6 +206,16 @@ export function template15HTML(data) {
           <p><strong>${p.name}</strong></p>
           <p>${p.description}</p>
         `).join("")}
+      </div>` : ""}
+
+      ${safe.languages.length > 0 ? `
+      <div class="section">
+        <div class="section-title">LANGUAGES</div>
+        <ul style="list-style: none; padding: 0;">
+          ${safe.languages.map(lang => `
+            <li style="margin-bottom: 4px;">• ${lang.language}${lang.level ? ` (${lang.level})` : ""}</li>
+          `).join("")}
+        </ul>
       </div>` : ""}
     </div>
 

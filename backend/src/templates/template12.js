@@ -14,6 +14,8 @@ export function template12HTML(data) {
     projects: Array.isArray(data.projects) ? data.projects : [],
     languages: Array.isArray(data.languages) ? data.languages : [],
     hobbies: Array.isArray(data.hobbies) ? data.hobbies : [],
+    certifications: Array.isArray(data.certifications) ? data.certifications : [],
+    socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : [],
     strengths: Array.isArray(data.strengths) ? data.strengths : [],
     candidateType: data.candidateType || "experienced"
   };
@@ -111,6 +113,7 @@ export function template12HTML(data) {
       ${safe.email ? `<span>✉ ${safe.email}</span>` : ""}
       ${safe.phone ? `<span>📞 ${safe.phone}</span>` : ""}
       ${safe.address ? `<span>📍 ${safe.address}</span>` : ""}
+      ${safe.socialLinks.length > 0 ? safe.socialLinks.map(link => `<span>🔗 ${link.platform}: ${link.url}</span>`).join("") : ""}
     </div>
   </div>
 
@@ -133,6 +136,15 @@ export function template12HTML(data) {
         ${safe.education.map(e => `
           <p><strong>${e.degree}</strong><br/>
           <span style="font-size:12px;color:#4b5563">${e.school} | ${e.startYear} - ${e.endYear}</span></p>
+        `).join("")}
+      </div>` : ""}
+
+      ${safe.certifications.length > 0 ? `
+      <div class="section">
+        <div class="section-title">CERTIFICATIONS</div>
+        ${safe.certifications.map(c => `
+          <p><strong>${c.name}</strong><br/>
+          <span style="font-size:12px;color:#4b5563">${c.issuer} | ${c.date}</span></p>
         `).join("")}
       </div>` : ""}
 

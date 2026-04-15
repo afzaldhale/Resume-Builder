@@ -639,6 +639,19 @@ export function template5HTML(data) {
       </div>
     </div>
     ` : ""}
+
+    ${data.hobbies && data.hobbies.length > 0 ? `
+    <div class="timeline-section">
+      <div class="timeline-dot" style="background: ${getTimelineColor('social')};">
+        🎯
+      </div>
+
+      <h2 class="section-title">HOBBIES</h2>
+      <div class="content-box" style="background: ${getBackgroundColor('social')}; border-color: ${getBorderColor('social')};">
+        <p>${data.hobbies.join(', ')}</p>
+      </div>
+    </div>
+    ` : ""}
   </div>
 
   <!-- Footer -->

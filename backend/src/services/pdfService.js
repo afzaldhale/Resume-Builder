@@ -19,91 +19,176 @@ import { fitResumeData } from "../utils/fitResumeData.js";
 const A4_WIDTH_PX = 794;
 const A4_HEIGHT_PX = 1123;
 
-const injectOnePageFit = (html) => {
+/**
+ * =====================================================
+ * ENHANCED A4 PAGE FIT WITH SCALING WRAPPER
+ * Handles BOTH overflow (shrinking) and underflow (expansion)
+ * =====================================================
+ */
+const injectA4FitWithScaling = (html, debugMode = false) => {
   const fitStyles = `
     <style>
-      :root {
-        --resume-font-scale: 1;
-        --resume-line-height: 1.45;
-        --resume-space-scale: 1;
+      /* Page-level A4 enforcement */
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: ${A4_WIDTH_PX}px;
+        height: ${A4_HEIGHT_PX}px;
+        overflow: hidden;
+        background: #ffffff;
       }
 
-      body {
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: hidden !important;
+      /* Scaling wrapper - transforms from top-left without offset */
+      #scale-wrapper {
+        width: 100%;
+        transform-origin: top left;
+        will-change: transform;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
       }
 
+      /* Page container - enforce exact A4 dimensions */
       .page {
         width: ${A4_WIDTH_PX}px !important;
         height: ${A4_HEIGHT_PX}px !important;
         max-height: ${A4_HEIGHT_PX}px !important;
         overflow: hidden !important;
+        box-sizing: border-box;
       }
 
-      h1, h2, h3, p, li, span, div {
-        line-height: var(--resume-line-height) !important;
+      /* Prevent unwanted margins/padding that steal vertical space */
+      * {
+        box-sizing: border-box;
       }
 
-      h1 { letter-spacing: -0.02em; }
-      h2, h3 { margin-top: calc(14px * var(--resume-space-scale)) !important; }
-      p, li { margin-bottom: calc(4px * var(--resume-space-scale)) !important; }
-      ul { margin-top: calc(4px * var(--resume-space-scale)) !important; }
-      .section, .box, .job, .skill { margin-bottom: calc(10px * var(--resume-space-scale)) !important; }
+      body * {
+        margin-collapse: collapse;
+      }
+
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      /* CSS print media */
+      @media print {
+        html, body, .page {
+          width: 100%;
+          height: 100%;
+          margin: 0;
+          padding: 0;
+        }
+      }
     </style>
   `;
 
   const fitScript = `
     <script>
-      window.__fitResume = () => {
-        const page = document.querySelector('.page');
-        if (!page) return false;
-
-        const maxHeight = ${A4_HEIGHT_PX};
-        const minFontScale = 0.82;
-        const minLineHeight = 1.2;
-        const minSpaceScale = 0.72;
-        let fontScale = 1;
-        let lineHeight = 1.45;
-        let spaceScale = 1;
-
-        const apply = () => {
-          document.documentElement.style.setProperty('--resume-font-scale', String(fontScale));
-          document.documentElement.style.setProperty('--resume-line-height', String(lineHeight));
-          document.documentElement.style.setProperty('--resume-space-scale', String(spaceScale));
-          page.style.zoom = "1";
-        };
-
-        const measure = () => Math.max(page.scrollHeight, page.offsetHeight);
-
-        apply();
-
-        for (let index = 0; index < 12; index += 1) {
-          if (measure() <= maxHeight) {
-            return true;
-          }
-
-          if (spaceScale > minSpaceScale) {
-            spaceScale = Math.max(minSpaceScale, +(spaceScale - 0.05).toFixed(2));
-          } else if (lineHeight > minLineHeight) {
-            lineHeight = Math.max(minLineHeight, +(lineHeight - 0.05).toFixed(2));
-          } else if (fontScale > minFontScale) {
-            fontScale = Math.max(minFontScale, +(fontScale - 0.04).toFixed(2));
-          }
-
-          apply();
-        }
-
-        const finalHeight = measure();
-
-        if (finalHeight > maxHeight) {
-          const zoom = Math.max(0.78, Math.min(1, maxHeight / finalHeight));
-          page.style.zoom = String(zoom);
-        }
-
-        return true;
+      window.__resumeFitConfig = {
+        A4_HEIGHT: ${A4_HEIGHT_PX},
+        A4_WIDTH: ${A4_WIDTH_PX},
+        DEBUG: ${debugMode},
+        MAX_SCALE: 1.15,        // Max scale up (prevent extreme expansion)
+        MIN_SCALE: 0.75,        // Min scale down (prevent extreme shrinking)
+        MIN_FONT_SCALE: 0.82,
+        MIN_LINE_HEIGHT: 1.2,
+        MIN_SPACE_SCALE: 0.72
       };
 
+      window.__fitResume = async function() {
+        const cfg = window.__resumeFitConfig;
+        const page = document.querySelector('.page');
+        
+        if (!page) {
+          console.warn('❌ .page element not found');
+          return false;
+        }
+
+        try {
+          // Wait for fonts to load
+          if (document.fonts && document.fonts.ready) {
+            await document.fonts.ready;
+          }
+
+          // Wait for images
+          const images = document.querySelectorAll('img');
+          const imagePromises = Array.from(images).map(img => {
+            return new Promise(resolve => {
+              if (img.complete) {
+                resolve();
+              } else {
+                img.onload = img.onerror = resolve;
+              }
+            });
+          });
+          await Promise.all(imagePromises);
+
+          // Small delay for final layout calculations
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          // Measure actual content height
+          const contentHeight = Math.max(
+            page.scrollHeight,
+            page.offsetHeight,
+            page.getBoundingClientRect().height
+          );
+
+          if (cfg.DEBUG) {
+            console.log('📏 Content Analysis:');
+            console.log('   Content Height:', contentHeight);
+            console.log('   A4 Height:', cfg.A4_HEIGHT);
+            console.log('   Ratio:', (contentHeight / cfg.A4_HEIGHT).toFixed(3));
+          }
+
+          // Get or create scale wrapper
+          let wrapper = document.getElementById('scale-wrapper');
+          if (!wrapper) {
+            wrapper = document.createElement('div');
+            wrapper.id = 'scale-wrapper';
+            const body = document.body;
+            while (body.firstChild) {
+              wrapper.appendChild(body.firstChild);
+            }
+            body.appendChild(wrapper);
+          }
+
+          // Calculate scale factor
+          let scale = 1;
+          
+          if (contentHeight > cfg.A4_HEIGHT) {
+            // OVERFLOW: Shrink content
+            scale = Math.max(cfg.MIN_SCALE, cfg.A4_HEIGHT / contentHeight);
+            if (cfg.DEBUG) console.log('📉 Shrinking to fit:', scale.toFixed(3));
+          } else if (contentHeight < cfg.A4_HEIGHT) {
+            // UNDERFLOW: Expand slightly to fill page (but cap it)
+            const expansionRatio = cfg.A4_HEIGHT / contentHeight;
+            scale = Math.min(cfg.MAX_SCALE, expansionRatio);
+            if (cfg.DEBUG) console.log('📈 Expanding to fill:', scale.toFixed(3));
+          }
+
+          // Apply transform
+          wrapper.style.transform = 'scale(' + scale.toFixed(4) + ')';
+          
+          if (cfg.DEBUG) {
+            console.log('✅ Final scale applied:', scale.toFixed(4));
+          }
+
+          return true;
+        } catch (error) {
+          console.error('❌ Fit Resume Error:', error);
+          return false;
+        }
+      };
+
+      // Execute on load
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => window.__fitResume());
+      } else {
+        window.__fitResume();
+      }
+
+      // Also execute on image load completion
       window.addEventListener('load', () => window.__fitResume());
     </script>
   `;
@@ -115,19 +200,20 @@ const injectOnePageFit = (html) => {
 
 /**
  * =====================================
- * GENERATE RESUME PDF
+ * GENERATE RESUME PDF (ENHANCED)
  * =====================================
  */
-export const generateResumePDF = async (resumeData, templateId) => {
+export const generateResumePDF = async (resumeData, templateId, options = {}) => {
   let browser;
+  const { debugMode = false } = options;
 
   try {
-    console.log(`📤 PDF Service Called:`);
-    console.log(`   Template ID received: ${templateId}`);
-    console.log(`   Template ID type: ${typeof templateId}`);
+    console.log(`\n🚀 PDF Generation Started`);
+    console.log(`   Template ID: ${templateId}`);
+    console.log(`   Debug Mode: ${debugMode}`);
 
     if (templateId === undefined || templateId === null) {
-      console.warn(`⚠️ Template ID is undefined/null, using Template 1`);
+      console.warn(`⚠️  Template ID is undefined/null, using Template 1`);
       templateId = 1;
     }
 
@@ -137,26 +223,40 @@ export const generateResumePDF = async (resumeData, templateId) => {
       throw new Error(`Invalid template ID: ${templateId}`);
     }
 
+    // Launch browser with optimized settings
     browser = await puppeteer.launch({
       headless: "new",
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--font-render-hinting=medium",
         "--disable-dev-shm-usage",
         "--disable-gpu",
         "--disable-software-rasterizer",
+        // Font rendering optimizations
+        "--font-render-hinting=medium",
+        // Memory and performance
+        "--disable-background-networking",
+        "--disable-breakpad",
+        "--disable-client-side-phishing-detection",
+        "--disable-component-extensions-with-background-pages",
+        "--disable-default-apps",
+        "--disable-extensions",
       ],
       defaultViewport: null,
     });
 
     const page = await browser.newPage();
 
+    // Set viewport to A4 dimensions
     await page.setViewport({
-      width: 794,
-      height: 1123,
+      width: A4_WIDTH_PX,
+      height: A4_HEIGHT_PX,
       deviceScaleFactor: 1,
     });
+
+    // Emulate high-quality screen
+    await page.emulateMediaType("screen");
+    await page.evaluateHandle("document.fonts.ready");
 
     const templates = {
       1: { name: "Simple Classic", func: template1HTML },
@@ -182,32 +282,73 @@ export const generateResumePDF = async (resumeData, templateId) => {
       throw new Error(`Template ${templateNumber} not available`);
     }
 
-    const fittedData = fitResumeData(resumeData);
-    const html = injectOnePageFit(template.func(fittedData));
+    console.log(`   Template Name: ${template.name}`);
 
+    // Fit resume data and inject A4-optimized styles
+    const fittedData = fitResumeData(resumeData);
+    const html = injectA4FitWithScaling(template.func(fittedData), debugMode);
+
+    console.log(`   Setting page content...`);
+
+    // Set page content with proper wait conditions
     await page.setContent(html, {
       waitUntil: ["domcontentloaded", "networkidle0"],
       timeout: 30000,
     });
 
-    await page.emulateMediaType("screen");
-    await page.evaluate(() => window.__fitResume && window.__fitResume());
+    console.log(`   Waiting for network idle...`);
+    await page.waitForNetworkIdle({ timeout: 5000 }).catch(() => {
+      console.warn(`⚠️  Network idle timeout (continuing anyway)`);
+    });
 
+    console.log(`   Executing fit-to-page logic...`);
+
+    // Execute scaling logic
+    const fitResult = await page.evaluate(() => {
+      return new Promise((resolve) => {
+        if (window.__fitResume) {
+          Promise.resolve(window.__fitResume()).then(resolve);
+        } else {
+          resolve(false);
+        }
+      });
+    });
+
+    if (debugMode) {
+      console.log(`   Fit result: ${fitResult}`);
+    }
+
+    // Small delay for final rendering
+    await page.evaluate(() => {
+      return new Promise(resolve => setTimeout(resolve, 200));
+    });
+
+    console.log(`   Generating PDF (A4, no margins)...`);
+
+    // Generate PDF with strict A4 settings
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,
       preferCSSPageSize: true,
       margin: {
-        top: "10mm",
-        bottom: "10mm",
-        left: "10mm",
-        right: "10mm",
+        top: "0px",
+        bottom: "0px",
+        left: "0px",
+        right: "0px",
       },
+      scale: 1,
     });
 
+    console.log(`✅ PDF generated successfully (${pdfBuffer.length} bytes)\n`);
+
     return pdfBuffer;
+  } catch (error) {
+    console.error(`\n❌ PDF Generation Error:`, error.message);
+    throw error;
   } finally {
-    if (browser) await browser.close();
+    if (browser) {
+      await browser.close();
+    }
   }
 };
 

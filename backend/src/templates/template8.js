@@ -261,6 +261,16 @@ ${safeData.education.length ? `
     </div>`).join("")}
 </section>` : ""}
 
+${safeData.languages.length ? `
+<section class="section">
+  <h2 class="section-title">LANGUAGES</h2>
+  <ul style="list-style: none; padding: 0;">
+    ${safeData.languages.map(lang => `
+      <li style="margin-bottom: 6px;">• ${lang.language}${lang.level ? ` (${lang.level})` : ""}</li>
+    `).join("")}
+  </ul>
+</section>` : ""}
+
 ${safeData.experience.length ? `
 <section class="section">
   <h2 class="section-title">WORK EXPERIENCE</h2>

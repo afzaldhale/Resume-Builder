@@ -157,6 +157,7 @@ export function template2HTML(data) {
       ${data.email ? `<p>Email: ${data.email}</p>` : ""}
       ${data.phone ? `<p>Phone: ${data.phone}</p>` : ""}
       ${data.address ? `<p>Location: ${data.address}</p>` : ""}
+      ${data.socialLinks?.length ? `<p>${data.socialLinks.map(link => `${link.platform}: ${link.url}`).join(' | ')}</p>` : ""}
     </div>
 
     ${data.skills?.length ? `
@@ -203,6 +204,41 @@ export function template2HTML(data) {
         ${p.technologies?.map(t => `<span class="pill">${t}</span>`).join("")}
       </div>
     `).join("")}
+    ` : ""}
+
+    ${data.education?.length ? `
+    <h2>EDUCATION</h2>
+    ${data.education.map(edu => `
+      <div class="box">
+        <strong>${edu.degree || edu.school || ""}</strong>
+        <div class="muted">${edu.school || ""}${edu.startDate || edu.endDate ? ` • ${edu.startDate || ""}${edu.startDate && edu.endDate ? " – " : ""}${edu.endDate || ""}` : ""}</div>
+      </div>
+    `).join("")}
+    ` : ""}
+
+    ${data.certifications?.length ? `
+    <h2>CERTIFICATIONS</h2>
+    ${data.certifications.map(cert => `
+      <div class="box">
+        <strong>${typeof cert === "string" ? cert : cert.name || ""}</strong>
+        ${typeof cert === "object" && cert.issuer ? `<div class="muted">${cert.issuer}</div>` : ""}
+      </div>
+    `).join("")}
+    ` : ""}
+
+    ${data.languages?.length ? `
+    <h2>LANGUAGES</h2>
+    <div class="box">
+      ${data.languages.map(lang => {
+        const value = typeof lang === "string" ? lang : `${lang.language || ""}${lang.level ? ` (${lang.level})` : ""}`;
+        return `<span class="pill">${value}</span>`;
+      }).join("")}
+    </div>
+    ` : ""}
+
+    ${data.hobbies?.length ? `
+    <h2>HOBBIES</h2>
+    <div class="box">${data.hobbies.join(", ")}</div>
     ` : ""}
 
   </div>

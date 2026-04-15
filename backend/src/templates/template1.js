@@ -192,6 +192,13 @@ export function template1HTML(data) {
   </section>
   ` : ""}
 
+  ${data.hobbies?.length ? `
+  <section class="section">
+    <h2>Hobbies</h2>
+    <p>${data.hobbies.join(", ")}</p>
+  </section>
+  ` : ""}
+
 </div>
 </body>
 </html>
