@@ -1,4 +1,4 @@
-import { Suspense, lazy, type ComponentType, type ReactNode } from "react";
+import { Suspense, lazy, useEffect, type ComponentType, type ReactNode } from "react";
 import type { ResumeData } from "./types";
 import EmptyTemplate from "./EmptyTemplate";
 
@@ -36,16 +36,26 @@ export const LazyTemplateRenderer = ({
   templateId,
   data,
   fallback,
+  onReady,
 }: {
   templateId: number;
   data: ResumeData;
   fallback?: ReactNode;
+  onReady?: () => void;
 }) => {
   const TemplateComponent = loadTemplateComponent(templateId);
 
   return (
     <Suspense fallback={fallback || <div className="p-6 text-sm text-muted-foreground">Loading template...</div>}>
       <TemplateComponent data={data} />
+      {onReady ? <TemplateReadySignal onReady={onReady} /> : null}
     </Suspense>
   );
+};
+
+const TemplateReadySignal = ({ onReady }: { onReady: () => void }) => {
+  useEffect(() => {
+    onReady();
+  }, [onReady]);
+  return null;
 };

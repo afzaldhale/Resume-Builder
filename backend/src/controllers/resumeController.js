@@ -1,6 +1,38 @@
 import { db } from "../database.js";
 import { generateResumePDF } from "../services/pdfService.js";
 import { validateResumePayload } from "../utils/resumeValidation.js";
+import { createPdfRenderToken, verifyPdfRenderToken } from "../utils/pdfRenderToken.js";
+
+const loadResumeRecord = async ({ resumeId, userId = null }) => {
+  const query = userId
+    ? `
+      SELECT id, title, template_id, resume_data, created_at
+      FROM resumes
+      WHERE id = ? AND user_id = ?
+      `
+    : `
+      SELECT id, title, template_id, resume_data, created_at
+      FROM resumes
+      WHERE id = ?
+      `;
+
+  const params = userId ? [resumeId, userId] : [resumeId];
+  const [rows] = await db.query(query, params);
+
+  if (rows.length === 0) {
+    return null;
+  }
+
+  const resume = rows[0];
+
+  return {
+    ...resume,
+    resume_data:
+      typeof resume.resume_data === "string"
+        ? JSON.parse(resume.resume_data)
+        : resume.resume_data,
+  };
+};
 
 /**
  * =====================================
@@ -182,39 +214,107 @@ export const getResumeById = async (req, res) => {
     const userId = req.user?.id;
     const resumeId = req.params.id;
 
-    const [rows] = await db.query(
-      `
-      SELECT id, title, template_id, resume_data, created_at
-      FROM resumes
-      WHERE id = ? AND user_id = ?
-      `,
-      [resumeId, userId]
-    );
+    const resume = await loadResumeRecord({ resumeId, userId });
 
-    if (rows.length === 0) {
+    if (!resume) {
       return res.status(404).json({
         success: false,
         message: "Resume not found",
       });
     }
 
-    const resume = rows[0];
-
     return res.status(200).json({
       success: true,
-      resume: {
-        ...resume,
-        resume_data:
-          typeof resume.resume_data === "string"
-            ? JSON.parse(resume.resume_data)
-            : resume.resume_data,
-      },
+      resume,
     });
   } catch (error) {
     console.error("Get Resume Error:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to load resume",
+    });
+  }
+};
+
+export const getResumeRenderData = async (req, res) => {
+  try {
+    const resumeId = Number(req.params.id);
+    const renderToken =
+      req.get("X-Resume-Render-Token") || req.query.pdfToken || null;
+
+    console.log("[getResumeRenderData] Request:", {
+      resumeId,
+      hasPdfToken: !!renderToken,
+      hasUser: !!req.user,
+      userId: req.user?.id,
+    });
+
+    if (renderToken) {
+      try {
+        const tokenPayload = verifyPdfRenderToken(renderToken);
+
+        console.log("[getResumeRenderData] Token valid:", tokenPayload);
+
+        if (Number(tokenPayload.resumeId) !== resumeId) {
+          console.error("[getResumeRenderData] Token resumeId mismatch:", {
+            tokenResumeId: tokenPayload.resumeId,
+            requestResumeId: resumeId,
+          });
+          return res.status(403).json({
+            success: false,
+            message: "Render token does not match resume",
+          });
+        }
+
+        const resume = await loadResumeRecord({ resumeId });
+
+        if (!resume) {
+          console.error("[getResumeRenderData] Resume not found:", resumeId);
+          return res.status(404).json({
+            success: false,
+            message: "Resume not found",
+          });
+        }
+
+        console.log("[getResumeRenderData] Resume loaded successfully:", {
+          id: resume.id,
+          hasResumeData: !!resume.resume_data,
+          templateId: resume.template_id,
+        });
+
+        return res.status(200).json({
+          success: true,
+          resume,
+        });
+      } catch (error) {
+        console.error("[getResumeRenderData] Token verification failed:", JSON.stringify(error, null, 2));
+        return res.status(401).json({
+          success: false,
+          message: "Invalid render token",
+        });
+      }
+    }
+
+    const userId = req.user?.id;
+    const resume = await loadResumeRecord({ resumeId, userId });
+
+    if (!resume) {
+      console.error("[getResumeRenderData] Resume not found (user auth):", { resumeId, userId });
+      return res.status(404).json({
+        success: false,
+        message: "Resume not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      resume,
+    });
+  } catch (error) {
+    console.error("Get Resume Render Data Error:", JSON.stringify(error, null, 2));
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load resume render data",
     });
   }
 };
@@ -444,16 +544,16 @@ export const downloadResumePDF = async (req, res) => {
       return res.status(404).json({ message: "Resume not found" });
     }
 
-    // 🔥 FIX: SAFE JSON HANDLING
-    const resumeData =
-      typeof resumes[0].resume_data === "string"
-        ? JSON.parse(resumes[0].resume_data)
-        : resumes[0].resume_data;
+    const renderToken = createPdfRenderToken({
+      resumeId,
+      userId,
+      role: "user",
+    });
 
-    const pdfBuffer = await generateResumePDF(
-      resumeData,
-      resumes[0].template_id
-    );
+    const pdfBuffer = await generateResumePDF({
+      resumeId,
+      renderToken,
+    });
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(

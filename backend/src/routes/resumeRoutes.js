@@ -7,6 +7,7 @@ import {
   createDownloadRequest,
   getMyResumes,
   getResumeById,
+  getResumeRenderData,
   duplicateResume,
   deleteResume,
   updateResume,
@@ -40,6 +41,7 @@ router.post("/:id/request", authenticate, createDownloadRequest);
 router.get("/my-requests", authenticate, getMyDownloadRequests);
 
 router.put("/:id", authenticate, updateResume);
+router.get("/:id/render-data", getResumeRenderData);
 router.get("/:id", authenticate, getResumeById);
 router.post("/:id/duplicate", authenticate, duplicateResume);
 router.delete("/:id", authenticate, deleteResume);

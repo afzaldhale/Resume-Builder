@@ -21,11 +21,12 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error("API Error:", {
+    console.error("API Error:", JSON.stringify({
       url: error.config?.url,
       status: error.response?.status,
       data: error.response?.data,
-    });
+      message: error.message,
+    }, null, 2));
     return Promise.reject(error);
   }
 );

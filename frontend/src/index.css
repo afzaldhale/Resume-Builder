@@ -128,3 +128,195 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .resume-renderer {
+    width: fit-content;
+    margin-inline: auto;
+  }
+
+  .resume-pdf-root {
+    min-height: 100vh;
+    margin: 0;
+    padding: 24px 0;
+    background: #f3f4f6;
+  }
+
+  .resume-pdf-page {
+    width: 210mm;
+    height: 297mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: #ffffff;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #resume-ready {
+    width: 794px;
+    height: 1123px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #resume-container {
+    width: 794px;
+    height: 1123px;
+    overflow: hidden;
+    position: relative;
+    margin: 0 auto;
+    background: #ffffff;
+  }
+
+  .resume-pdf-content {
+    width: 794px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: top left;
+    will-change: transform;
+    /* DEBUG: Uncomment to verify content bounds */
+    /* border: 1px solid blue; */
+  }
+
+  .resume-pdf-content--compact {
+    line-height: 0.9 !important;
+  }
+
+  .resume-pdf-content .resume-renderer > * {
+    min-height: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .resume-pdf-content .resume-renderer,
+  .resume-pdf-content .resume-renderer * {
+    box-sizing: border-box;
+  }
+
+  /* STEP 7: REMOVE AGGRESSIVE COMPACT MODE - Keep readable fonts */
+  .resume-pdf-content--compact {
+    line-height: 1.1;
+  }
+
+  .resume-pdf-content--compact section,
+  .resume-pdf-content--compact header,
+  .resume-pdf-content--compact footer,
+  .resume-pdf-content--compact aside,
+  .resume-pdf-content--compact main,
+  .resume-pdf-content--compact [class*="space-y-"],
+  .resume-pdf-content--compact [class*="gap-"] {
+    margin-bottom: max(0px, 0.5em) !important;
+  }
+
+  /* STEP 8: EXPAND MODE - Fill white space when content is small */
+  .resume-pdf-content--expanded {
+    /* Let content stretch to fill available height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .resume-pdf-content--expanded .resume-renderer {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .resume-pdf-content--expanded .resume-renderer > div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Prevent layout collapse - min-height for sections */
+  .resume-pdf-content section {
+    min-height: 20px;
+  }
+
+  .resume-pdf-content section:empty {
+    display: none;
+  }
+
+  .resume-pdf-status {
+    min-height: 1123px;
+    display: grid;
+    place-items: center;
+    background: #ffffff;
+    color: #475569;
+    font-size: 14px;
+  }
+}
+
+@media print {
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body.resume-pdf-body {
+    width: 210mm;
+    height: 297mm;
+    min-height: 297mm;
+    overflow: hidden;
+  }
+
+  .resume-pdf-root {
+    min-height: auto;
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .resume-pdf-page,
+  .page {
+    width: 210mm;
+    height: 297mm;
+    min-height: 297mm;
+    margin: 0;
+    overflow: hidden;
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  #resume-container {
+    margin: 0;
+  }
+
+  #resume-ready,
+  .resume-pdf-content {
+    overflow: hidden;
+  }
+
+  .resume-pdf-content .resume-renderer > * {
+    overflow: visible !important;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer base {
+  .resume-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+
+  .resume-page {
+    width: 100%;
+    max-width: 794px;
+    min-height: 1123px;
+    margin: 0 auto;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+}

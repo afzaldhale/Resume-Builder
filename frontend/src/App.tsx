@@ -81,14 +81,7 @@ const App = () => (
 
           {/* ================= PDF ROUTE ================= */}
           {/* This page triggers backend Puppeteer PDF */}
-          <Route
-            path="/resume/:resumeId/pdf"
-            element={
-              <ProtectedRoute>
-                <ResumePDF />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/resume/:resumeId/pdf" element={<ResumePDF />} />
 
           {/* ================= ADMIN ROUTES ================= */}
           <Route path="/admin/login" element={<AdminLogin />} />

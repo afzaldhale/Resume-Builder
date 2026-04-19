@@ -1,368 +1,252 @@
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { ResumeData } from "./types";
-import { 
-  Mail, Phone, MapPin, Linkedin, Github, Globe, 
-  Briefcase, GraduationCap, Award, Languages, Star,
-  Calendar, ChevronRight
-} from "lucide-react";
 
 interface Template2Props {
   data: ResumeData;
 }
 
+type LayoutMode = 'expand' | 'normal' | 'compact';
+
+const Section: React.FC<{ title: string; children: React.ReactNode; sidebar?: boolean; layoutMode?: LayoutMode }> = ({ title, children, sidebar, layoutMode }) => {
+  const titleSize = layoutMode === 'expand' ? (sidebar ? 'text-[13px]' : 'text-[14px]') : (sidebar ? 'text-[11px]' : 'text-[12px]');
+  const mbSize = layoutMode === 'compact' ? (sidebar ? 'mb-2' : 'mb-2') : (sidebar ? 'mb-3' : 'mb-4');
+  
+  return (
+    <section className={`${mbSize} page-break-inside-avoid`}>
+      <h2 className={`font-semibold uppercase tracking-wide text-blue-600 ${titleSize} border-b border-gray-200 pb-1 mb-2`}>
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+};
+
 const Template2: React.FC<Template2Props> = ({ data }) => {
-  // Icon mapping for social platforms
-  const getSocialIcon = (platform: string) => {
-    const icons: Record<string, React.ReactNode> = {
-      LinkedIn: <Linkedin size={16} />,
-      GitHub: <Github size={16} />,
-      Portfolio: <Globe size={16} />,
-      Twitter: <div className="text-sm">𝕏</div>,
-      Facebook: <div className="text-sm">f</div>,
-      Instagram: <div className="text-sm">📷</div>,
-      Website: <Globe size={16} />,
-    };
-    return icons[platform] || <Globe size={16} />;
-  };
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>('normal');
+  
+  const isFresher = data.candidateType === "fresher";
 
-  // Proficiency level to percentage
-  const getLanguagePercentage = (level: string): number => {
-    switch(level) {
-      case "Native": return 100;
-      case "Fluent": return 90;
-      case "Intermediate": return 70;
-      case "Beginner": return 40;
-      default: return 60;
-    }
-  };
-
-  // Get color based on language level
-  const getLanguageColor = (level: string): string => {
-    switch(level) {
-      case "Native": return "bg-emerald-500";
-      case "Fluent": return "bg-green-500";
-      case "Intermediate": return "bg-yellow-500";
-      case "Beginner": return "bg-orange-400";
-      default: return "bg-blue-400";
-    }
-  };
-
-  const summaryText = data.candidateType === "fresher"
+  const summaryText = isFresher
     ? data.careerObjective || data.summary
     : data.summary || data.careerObjective;
-  const summaryTitle = data.candidateType === "fresher" ? "Career Objective" : "Profile Summary";
+
+  const summaryTitle = isFresher ? "Career Objective" : "Professional Summary";
+
+  // Dynamic font sizes based on layout mode
+  const nameSize = layoutMode === 'expand' ? 'text-3xl' : layoutMode === 'compact' ? 'text-lg' : 'text-xl';
+  const roleSize = layoutMode === 'expand' ? 'text-base' : layoutMode === 'compact' ? 'text-xs' : 'text-sm';
+  const bodySize = layoutMode === 'expand' ? 'text-[12px]' : layoutMode === 'compact' ? 'text-[9px]' : 'text-[10px]';
+  const sidebarTextSize = layoutMode === 'expand' ? 'text-[11px]' : layoutMode === 'compact' ? 'text-[9px]' : 'text-[10px]';
+  const smallTextSize = layoutMode === 'expand' ? 'text-[10px]' : layoutMode === 'compact' ? 'text-[8px]' : 'text-[9px]';
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const height = containerRef.current.scrollHeight;
+
+    if (height < 900) {
+      setLayoutMode('expand');
+    } else if (height > 1123) {
+      setLayoutMode('compact');
+    } else {
+      setLayoutMode('normal');
+    }
+  }, [data]);
 
   return (
-    <div className="bg-white text-gray-800 w-[794px] min-h-[1123px] shadow-2xl mx-auto relative overflow-hidden font-sans">
-      {/* Modern Two-Column Layout */}
-      <div className="flex min-h-[1123px]">
-        {/* Left Sidebar - Dark Theme */}
-        <div className="w-2/5 bg-gradient-to-b from-gray-900 to-gray-800 text-white p-8">
-          {/* Profile Header */}
-          <div className="mb-10">
-            <h1 className="text-3xl font-bold mb-2 tracking-tight">
-              {data.fullName || "Your Name"}
-            </h1>
-            {data.role && (
-              <div className="text-lg text-gray-300 mb-6">
-                {data.role}
-              </div>
-            )}
-            
-            {/* Contact Info */}
-            <div className="space-y-4 mb-8">
-              {data.email && (
-                <div className="flex items-center gap-3">
-                  <Mail size={18} className="text-gray-400" />
-                  <span className="text-sm">{data.email}</span>
-                </div>
-              )}
-              
-              {data.phone && (
-                <div className="flex items-center gap-3">
-                  <Phone size={18} className="text-gray-400" />
-                  <span className="text-sm">{data.phone}</span>
-                </div>
-              )}
-              
-              {data.address && (
-                <div className="flex items-center gap-3">
-                  <MapPin size={18} className="text-gray-400" />
-                  <span className="text-sm">{data.address}</span>
-                </div>
-              )}
-            </div>
+    <div ref={containerRef} className="w-[794px] min-h-[1123px] mx-auto bg-white flex flex-col">
+
+      {/* LAYOUT: Sidebar (30%) + Main Content (70%) */}
+      <div className="flex flex-row">
+
+        {/* LEFT SIDEBAR - 30% */}
+        <aside className="w-[30%] bg-gray-100 p-4 flex-shrink-0 border-r border-gray-200">
+          
+          {/* Name & Role */}
+          <div className={layoutMode === 'expand' ? 'mb-5' : 'mb-4'}>
+            <h1 className={`${nameSize} font-bold text-gray-800`}>{data.fullName || "Your Name"}</h1>
+            {data.role && <p className={`${roleSize} text-gray-600`}>{data.role}</p>}
           </div>
 
-          {/* Skills Section */}
-          {data.skills.length > 0 && (
-            <section className="mb-8">
-              <div className="flex items-center mb-4">
-                <Star size={18} className="mr-3 text-blue-400" />
-                <h2 className="text-xl font-bold">SKILLS</h2>
-              </div>
-              <div className="space-y-3">
-                {data.skills.map((skill, index) => (
-                  <div key={index} className="group">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm font-medium text-gray-300">{skill}</span>
-                      <span className="text-xs text-gray-400">
-                        {Math.min(95, 65 + (index * 10))}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-700 h-1.5 rounded-full overflow-hidden">
-                      <div 
-                        className="bg-gradient-to-r from-blue-500 to-cyan-400 h-full rounded-full transition-all duration-700 group-hover:from-blue-400 group-hover:to-cyan-300"
-                        style={{ width: `${Math.min(95, 65 + (index * 10))}%` }}
-                      ></div>
-                    </div>
-                  </div>
+          {/* Contact Info */}
+          <Section title="Contact" sidebar layoutMode={layoutMode}>
+            <div className={`${sidebarTextSize} text-gray-700 space-y-1`}>
+              {data.email && <p className="break-all">{data.email}</p>}
+              {data.phone && <p>{data.phone}</p>}
+              {data.address && <p className="break-words">{data.address}</p>}
+            </div>
+          </Section>
+
+          {/* Skills */}
+          {data.skills && data.skills.length > 0 && (
+            <Section title="Skills" sidebar layoutMode={layoutMode}>
+              <div className={`flex flex-wrap gap-1 ${layoutMode === 'expand' ? 'gap-2' : 'gap-1'}`}>
+                {data.skills.map((skill, i) => (
+                  <span key={i} className={`${smallTextSize} bg-white text-gray-700 px-1.5 py-0.5 rounded border border-gray-300`}>
+                    {skill}
+                  </span>
                 ))}
               </div>
-            </section>
+            </Section>
           )}
 
-          {/* Education Section */}
-          {data.education.length > 0 && (
-            <section className="mb-8">
-              <div className="flex items-center mb-4">
-                <GraduationCap size={18} className="mr-3 text-green-400" />
-                <h2 className="text-xl font-bold">EDUCATION</h2>
-              </div>
-              <div className="space-y-5">
-                {data.education.map((edu, index) => (
-                  <div key={index} className="relative pl-6">
-                    <div className="absolute left-0 top-1 w-2 h-2 bg-green-500 rounded-full"></div>
-                    <div>
-                      <h3 className="font-semibold text-gray-200 text-sm">{edu.degree}</h3>
-                      <p className="text-sm text-gray-400 mt-1">{edu.school}</p>
-                      <div className="flex justify-between items-center mt-2">
-                        <span className="text-xs text-gray-500">
-                          {edu.startYear} - {edu.endYear}
-                        </span>
-                        {edu.gpa && (
-                          <span className="text-xs bg-green-900/30 text-green-300 px-2 py-1 rounded">
-                            GPA: {edu.gpa}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Languages Section */}
+          {/* Languages */}
           {data.languages && data.languages.length > 0 && (
-            <section className="mb-8">
-              <div className="flex items-center mb-4">
-                <Languages size={18} className="mr-3 text-purple-400" />
-                <h2 className="text-xl font-bold">LANGUAGES</h2>
-              </div>
-              <div className="space-y-3">
-                {data.languages.map((lang, index) => (
-                  <div key={index} className="group">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm font-medium text-gray-300">{lang.language}</span>
-                      <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
-                        {lang.level}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-700 h-1.5 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full rounded-full ${getLanguageColor(lang.level)}`}
-                        style={{ width: `${getLanguagePercentage(lang.level)}%` }}
-                      ></div>
-                    </div>
-                  </div>
+            <Section title="Languages" sidebar layoutMode={layoutMode}>
+              <ul className={`${sidebarTextSize} text-gray-700 space-y-0.5`}>
+                {data.languages.map((lang, i) => (
+                  <li key={i}>{lang.language} - {lang.level}</li>
                 ))}
-              </div>
-            </section>
-          )}
-
-          {/* Social Links */}
-          {data.socialLinks && data.socialLinks.length > 0 && (
-            <section>
-              <div className="flex items-center mb-4">
-                <Globe size={18} className="mr-3 text-amber-400" />
-                <h2 className="text-xl font-bold">CONNECT</h2>
-              </div>
-              <div className="space-y-2">
-                {data.socialLinks.map((link, index) => (
-                  <div 
-                    key={index}
-                    className="flex items-center gap-3 p-2 rounded hover:bg-gray-700/50 transition-colors"
-                  >
-                    {getSocialIcon(link.platform)}
-                    <span className="text-sm text-gray-300 truncate">{link.url}</span>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-
-        {/* Right Content - Light Theme */}
-        <div className="w-3/5 p-8">
-          {/* Summary / Career Objective */}
-          {summaryText && (
-            <section className="mb-10">
-              <div className="flex items-center mb-4">
-                <div className="w-10 h-1 bg-blue-600 rounded"></div>
-                <h2 className="text-2xl font-bold text-gray-800 ml-3">{summaryTitle}</h2>
-              </div>
-              <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                <p className="text-gray-700 leading-relaxed text-sm">
-                  {summaryText}
-                </p>
-              </div>
-            </section>
-          )}
-
-          {/* Work Experience */}
-          {data.experience.length > 0 && (
-            <section className="mb-10">
-              <div className="flex items-center mb-6">
-                <Briefcase size={20} className="text-blue-600 mr-3" />
-                <h2 className="text-2xl font-bold text-gray-800">WORK EXPERIENCE</h2>
-              </div>
-              <div className="space-y-8">
-                {data.experience.map((exp, index) => (
-                  <div key={index} className="relative pl-10">
-                    {/* Timeline Dot */}
-                    <div className="absolute left-0 top-0">
-                      <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-                        <ChevronRight size={12} className="text-white" />
-                      </div>
-                      {index < data.experience.length - 1 && (
-                        <div className="absolute left-3 top-6 w-0.5 h-full bg-gradient-to-b from-blue-600 to-transparent"></div>
-                      )}
-                    </div>
-                    
-                    <div className="p-5 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="font-bold text-xl text-gray-800">{exp.role}</h3>
-                          <div className="flex items-center gap-3 mt-2">
-                            <span className="text-sm font-medium text-blue-600">{exp.company}</span>
-                            <div className="flex items-center gap-1 text-sm text-gray-500">
-                              <Calendar size={14} />
-                              <span>{exp.startDate} - {exp.endDate}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <span className="text-xs bg-blue-100 text-blue-800 font-semibold px-3 py-1.5 rounded-full">
-                          Full-time
-                        </span>
-                      </div>
-                      <p className="text-gray-700 text-sm leading-relaxed pl-4 border-l-2 border-blue-200">
-                        {exp.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Projects & Achievements */}
-          {data.projects.length > 0 && (
-            <section className="mb-10">
-              <div className="flex items-center mb-6">
-                <Award size={20} className="text-green-600 mr-3" />
-                <h2 className="text-2xl font-bold text-gray-800">PROJECTS & ACHIEVEMENTS</h2>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                {data.projects.map((project, index) => (
-                  <div 
-                    key={index}
-                    className="group relative overflow-hidden bg-gradient-to-br from-white to-gray-50 rounded-xl border border-gray-200 p-5 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                  >
-                    <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-100 rounded-full opacity-20"></div>
-                    
-                    <h3 className="font-bold text-gray-800 text-lg mb-2 relative z-10">
-                      {project.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-4 leading-relaxed relative z-10">
-                      {project.description}
-                    </p>
-                    
-                    {project.technologies.length > 0 && (
-                      <div className="flex flex-wrap gap-2 relative z-10">
-                        {project.technologies.map((tech, techIndex) => (
-                          <span 
-                            key={techIndex}
-                            className="text-xs bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 font-medium px-3 py-1.5 rounded-full border border-green-200"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
+              </ul>
+            </Section>
           )}
 
           {/* Certifications */}
           {data.certifications && data.certifications.length > 0 && (
-            <section className="mb-8">
-              <div className="flex items-center mb-4">
-                <div className="w-10 h-1 bg-purple-600 rounded"></div>
-                <h2 className="text-2xl font-bold text-gray-800 ml-3">CERTIFICATIONS</h2>
+            <Section title="Certifications" sidebar layoutMode={layoutMode}>
+              {data.certifications.map((cert, i) => (
+                <div key={i} className={layoutMode === 'compact' ? 'mb-1' : 'mb-1.5'}>
+                  <p className={`${sidebarTextSize} font-semibold text-gray-800`}>{cert.name}</p>
+                  <p className={`${smallTextSize} text-gray-600`}>{cert.issuer}</p>
+                  {cert.year && <p className={`${smallTextSize} text-gray-500`}>{cert.year}</p>}
+                </div>
+              ))}
+            </Section>
+          )}
+
+          {/* Social Links */}
+          {data.socialLinks && data.socialLinks.length > 0 && (
+            <Section title="Links" sidebar layoutMode={layoutMode}>
+              <div className="space-y-1">
+                {data.socialLinks.map((link, i) => (
+                  <p key={i} className={`${smallTextSize} text-blue-600 break-words`}>
+                    {link.platform}: {link.url}
+                  </p>
+                ))}
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                {data.certifications.map((cert, index) => (
-                  <div 
-                    key={index}
-                    className="p-3 bg-gradient-to-br from-purple-50 to-violet-50 rounded-lg border border-purple-200 hover:shadow-md transition-shadow"
-                  >
-                    <div className="text-xs text-purple-600 font-semibold mb-1 truncate">{cert.issuer}</div>
-                    <div className="text-sm font-medium text-gray-800 mb-1 truncate">{cert.name}</div>
-                    <div className="text-xs text-gray-500">Issued {cert.year}</div>
+            </Section>
+          )}
+
+          {/* Fresher Only - Strengths */}
+          {isFresher && data.strengths && data.strengths.length > 0 && (
+            <Section title="Strengths" sidebar layoutMode={layoutMode}>
+              <ul className={`${sidebarTextSize} text-gray-700 list-disc ml-3 space-y-1`}>
+                {data.strengths.map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ul>
+            </Section>
+          )}
+
+          {/* Fresher Only - Hobbies */}
+          {isFresher && data.hobbies && data.hobbies.length > 0 && (
+            <Section title="Hobbies" sidebar layoutMode={layoutMode}>
+              <ul className={`${sidebarTextSize} text-gray-700 list-disc ml-3 space-y-1`}>
+                {data.hobbies.map((h, i) => (
+                  <li key={i}>{h}</li>
+                ))}
+              </ul>
+            </Section>
+          )}
+
+        </aside>
+
+        {/* RIGHT MAIN CONTENT - 70% */}
+        <main className="w-[70%] p-4 flex-grow">
+
+          {/* Summary / Career Objective */}
+          {summaryText && (
+            <Section title={summaryTitle} layoutMode={layoutMode}>
+              <p className={`${bodySize} leading-relaxed text-gray-700`}>{summaryText}</p>
+            </Section>
+          )}
+
+          {/* Experience */}
+          {data.experience && data.experience.length > 0 && (
+            <Section title="Experience" layoutMode={layoutMode}>
+              {data.experience.map((exp, i) => (
+                <div key={i} className={layoutMode === 'compact' ? 'mb-2' : 'mb-3'}>
+                  <div className="flex justify-between items-start">
+                    <h3 className={`${bodySize} font-bold text-gray-800`}>{exp.role}</h3>
+                    <span className={`${smallTextSize} text-gray-500 whitespace-nowrap ml-2`}>
+                      {exp.startDate} - {exp.endDate}
+                    </span>
                   </div>
-                ))}
-              </div>
-            </section>
+                  <p className={`${smallTextSize} text-gray-600`}>{exp.company}</p>
+                  <p className={`${bodySize} leading-snug text-gray-700 mt-1`}>{exp.description}</p>
+                </div>
+              ))}
+            </Section>
           )}
 
-          {/* Hobbies or Additional Info */}
-          {data.hobbies && data.hobbies.length > 0 && (
-            <section>
-              <div className="flex items-center mb-4">
-                <div className="w-10 h-1 bg-amber-600 rounded"></div>
-                <h2 className="text-2xl font-bold text-gray-800 ml-3">HOBBIES & INTERESTS</h2>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {data.hobbies.map((hobby, index) => (
-                  <span 
-                    key={index}
-                    className="text-xs bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 font-medium px-3 py-1.5 rounded-full border border-amber-200"
-                  >
-                    {hobby}
-                  </span>
-                ))}
-              </div>
-            </section>
+          {/* Projects */}
+          {data.projects && data.projects.length > 0 && (
+            <Section title="Projects" layoutMode={layoutMode}>
+              {data.projects.map((proj, i) => (
+                <div key={i} className={layoutMode === 'compact' ? 'mb-1.5' : 'mb-2'}>
+                  <h3 className={`${bodySize} font-bold text-gray-800`}>{proj.name}</h3>
+                  <p className={`${bodySize} leading-snug text-gray-700`}>{proj.description}</p>
+                  {proj.technologies && proj.technologies.length > 0 && (
+                    <p className={`${smallTextSize} text-gray-500 mt-0.5`}>
+                      Tech: {proj.technologies.join(", ")}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </Section>
           )}
-        </div>
-      </div>
 
-      {/* Modern Footer */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-gray-900 to-gray-800 text-white p-3">
-        <div className="flex justify-between items-center text-xs">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span>Available for opportunities</span>
-            </div>
-          </div>
-          <div className="text-gray-300">
-            Resume Template 2 • {new Date().getFullYear()}
-          </div>
-        </div>
+          {/* Education */}
+          {data.education && data.education.length > 0 && (
+            <Section title="Education" layoutMode={layoutMode}>
+              {data.education.map((edu, i) => (
+                <div key={i} className={layoutMode === 'compact' ? 'mb-1.5' : 'mb-2'}>
+                  <h3 className={`${bodySize} font-bold text-gray-800`}>{edu.degree}</h3>
+                  <p className={`${smallTextSize} text-gray-600`}>{edu.school}</p>
+                  <p className={`${smallTextSize} text-gray-500`}>
+                    {edu.startYear} - {edu.endYear}
+                  </p>
+                </div>
+              ))}
+            </Section>
+          )}
+
+          {/* References */}
+          {data.references && data.references.length > 0 && (
+            <Section title="References" layoutMode={layoutMode}>
+              <ul className={`${bodySize} text-gray-700 space-y-1`}>
+                {data.references.map((ref, i) => (
+                  <li key={i} className="break-words">{ref}</li>
+                ))}
+              </ul>
+            </Section>
+          )}
+
+          {/* Custom Sections */}
+          {data.customSections && data.customSections.length > 0 && (
+            <>
+              {data.customSections.map((section, i) => (
+                <Section key={i} title={section.title} layoutMode={layoutMode}>
+                  {section.description && (
+                    <p className={`${bodySize} leading-snug text-gray-700 mb-2`}>{section.description}</p>
+                  )}
+                  {section.items && section.items.length > 0 && (
+                    <ul className={`${bodySize} text-gray-700 list-disc ml-4 space-y-0.5`}>
+                      {section.items.map((item, j) => (
+                        <li key={j}>{item}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {section.date && (
+                    <p className={`${smallTextSize} text-gray-500 mt-1`}>{section.date}</p>
+                  )}
+                </Section>
+              ))}
+            </>
+          )}
+
+        </main>
       </div>
     </div>
   );

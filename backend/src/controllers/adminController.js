@@ -1,6 +1,7 @@
 import { db } from "../database.js";
 import { generateResumePDF } from "../services/pdfService.js";
 import bcrypt from "bcrypt";
+import { createPdfRenderToken } from "../utils/pdfRenderToken.js";
 
 /**
  * =====================================
@@ -154,7 +155,7 @@ export const previewResume = async (req, res) => {
 
     const [rows] = await db.query(
       `
-      SELECT r.resume_data, r.template_id, r.title
+      SELECT r.id AS resume_id, r.resume_data, r.template_id, r.title
       FROM download_requests dr
       JOIN resumes r ON dr.resume_id = r.id
       WHERE dr.id = ?
@@ -202,7 +203,7 @@ export const downloadRequestPDF = async (req, res) => {
 
     const [rows] = await db.query(
       `
-      SELECT r.resume_data, r.template_id, r.title
+      SELECT r.id AS resume_id, r.resume_data, r.template_id, r.title
       FROM download_requests dr
       JOIN resumes r ON dr.resume_id = r.id
       WHERE dr.id = ?
@@ -217,11 +218,15 @@ export const downloadRequestPDF = async (req, res) => {
       });
     }
 
-    const rawData = rows[0].resume_data;
-    const resumeData =
-      typeof rawData === "string" ? JSON.parse(rawData) : rawData;
+    const renderToken = createPdfRenderToken({
+      resumeId: rows[0].resume_id ?? rows[0].id ?? req.params.id,
+      role: "admin",
+    });
 
-    const pdfBuffer = await generateResumePDF(resumeData, rows[0].template_id);
+    const pdfBuffer = await generateResumePDF({
+      resumeId: rows[0].resume_id ?? rows[0].id ?? req.params.id,
+      renderToken,
+    });
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(

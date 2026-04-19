@@ -1,22 +1,22 @@
 import type { ResumeData } from "@/components/resume-templates/types";
 
 const MAX_ENTRIES = {
-  education: 3,
-  experience: 4,
-  projects: 3,
-  certifications: 3,
-  languages: 4,
-  skills: 12,
+  education: 3, // Increased from 2 to 3
+  experience: 3, // Increased from 2 to 3
+  projects: 3, // Increased from 2 to 3
+  certifications: 3, // Increased from 2 to 3
+  languages: 5, // Increased from 3 to 5
+  skills: 10, // Increased from 8 to 10
 };
 
 const MAX_LENGTH = {
-  summary: 320,
-  role: 60,
-  address: 80,
-  skill: 24,
-  technology: 22,
-  line: 95,
-  projectDescription: 170,
+  summary: 250,
+  role: 50,
+  address: 70,
+  skill: 22,
+  technology: 20,
+  line: 80,
+  projectDescription: 120,
 };
 
 const truncate = (value = "", max = 120) => {
@@ -91,5 +91,9 @@ export const fitResumeData = (resumeData: ResumeData): ResumeData => {
     certifications: resumeData.certifications.slice(0, MAX_ENTRIES.certifications),
     languages: resumeData.languages.slice(0, MAX_ENTRIES.languages),
     socialLinks: resumeData.socialLinks.slice(0, 3),
+    // Preserve fresher-specific fields
+    hobbies: resumeData.hobbies || [],
+    strengths: resumeData.strengths || [],
+    candidateType: resumeData.candidateType || "experienced",
   };
 };

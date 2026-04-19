@@ -33,6 +33,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
+      // Skip auth check on PDF preview routes - they use pdfToken instead
+      if (window.location.pathname.startsWith("/resume/") && window.location.pathname.endsWith("/pdf")) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await api.get("/auth/me");
         const userData = res.data?.user;
