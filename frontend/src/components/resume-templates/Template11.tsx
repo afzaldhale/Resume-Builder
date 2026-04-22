@@ -9,39 +9,39 @@ const Template11: React.FC<Template11Props> = ({ data }) => {
   const isFresher = data.candidateType === 'fresher';
 
   return (
-    <div className="w-[794px] min-h-[1123px] bg-white p-8 font-sans">
+    <div className="w-[794px] h-[1123px] bg-white p-5 font-sans flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="mb-8 page-safe">
-        <div className="flex items-baseline justify-between border-b-2 border-blue-600 pb-4">
+      <header className="mb-4 page-safe flex-shrink-0">
+        <div className="flex items-baseline justify-between border-b-2 border-blue-600 pb-3">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-1 break-words">
+            <h1 className="text-2xl font-bold text-gray-900 mb-0.5 break-words">
               {data.fullName || 'Your Name'}
             </h1>
-            <p className="text-lg text-blue-600 break-words">
+            <p className="text-sm text-blue-600 break-words">
               {data.role || 'Professional Title'}
             </p>
           </div>
           <div className="text-right">
-            {data.email && <p className="text-[11px] text-gray-600 break-words">{data.email}</p>}
-            {data.phone && <p className="text-[11px] text-gray-600 break-words">{data.phone}</p>}
-            {data.address && <p className="text-[11px] text-gray-600 break-words">{data.address}</p>}
+            {data.email && <p className="text-[9px] text-gray-600 break-words">{data.email}</p>}
+            {data.phone && <p className="text-[9px] text-gray-600 break-words">{data.phone}</p>}
+            {data.address && <p className="text-[9px] text-gray-600 break-words">{data.address}</p>}
           </div>
         </div>
       </header>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-3 gap-4 flex-1 overflow-y-auto min-h-0">
         {/* Left Sidebar */}
         <div className="col-span-1">
           {/* Skills */}
           {data.skills && data.skills.length > 0 && (
-            <section className="mb-5 page-safe">
-              <h2 className="text-[13px] font-bold text-gray-800 mb-3">Skills</h2>
-              <div className="space-y-2">
+            <section className="mb-3 page-safe">
+              <h2 className="text-[11px] font-bold text-gray-800 mb-2">Skills</h2>
+              <div className="space-y-1.5">
                 {data.skills.map((skill, idx) => (
                   <div key={idx} className="break-words">
-                    <p className="text-[11px] font-medium text-gray-900">{skill}</p>
-                    <div className="w-full bg-gray-200 h-1 mt-1">
-                      <div className="bg-blue-600 h-1 w-4/5"></div>
+                    <p className="text-[9px] font-medium text-gray-900">{skill}</p>
+                    <div className="w-full bg-gray-200 h-0.5 mt-0.5">
+                      <div className="bg-blue-600 h-0.5 w-4/5"></div>
                     </div>
                   </div>
                 ))}
@@ -51,11 +51,11 @@ const Template11: React.FC<Template11Props> = ({ data }) => {
 
           {/* Strengths (Fresher) */}
           {isFresher && data.strengths && data.strengths.length > 0 && (
-            <section className="mb-5 page-safe">
-              <h2 className="text-[13px] font-bold text-gray-800 mb-3">Strengths</h2>
-              <div className="space-y-1">
+            <section className="mb-3 page-safe">
+              <h2 className="text-[11px] font-bold text-gray-800 mb-2">Strengths</h2>
+              <div className="space-y-0.5">
                 {data.strengths.map((strength, idx) => (
-                  <p key={idx} className="text-[11px] text-gray-700 break-words">• {strength}</p>
+                  <p key={idx} className="text-[9px] text-gray-700 break-words">• {strength}</p>
                 ))}
               </div>
             </section>
@@ -63,13 +63,13 @@ const Template11: React.FC<Template11Props> = ({ data }) => {
 
           {/* Languages */}
           {data.languages && data.languages.length > 0 && (
-            <section className="mb-5 page-safe">
-              <h2 className="text-[13px] font-bold text-gray-800 mb-3">Languages</h2>
-              <div className="space-y-2">
+            <section className="mb-3 page-safe">
+              <h2 className="text-[11px] font-bold text-gray-800 mb-2">Languages</h2>
+              <div className="space-y-1.5">
                 {data.languages.map((lang, idx) => (
                   <div key={idx} className="break-words">
-                    <p className="text-[11px] font-medium text-gray-900">{lang.language}</p>
-                    <p className="text-[10px] text-gray-600">{lang.level}</p>
+                    <p className="text-[9px] font-medium text-gray-900">{lang.language}</p>
+                    <p className="text-[8px] text-gray-600">{lang.level}</p>
                   </div>
                 ))}
               </div>
@@ -78,14 +78,14 @@ const Template11: React.FC<Template11Props> = ({ data }) => {
 
           {/* Social Links */}
           {data.socialLinks && data.socialLinks.length > 0 && (
-            <section className="mb-5 page-safe">
-              <h2 className="text-[13px] font-bold text-gray-800 mb-3">Connect</h2>
-              <div className="space-y-1">
+            <section className="page-safe">
+              <h2 className="text-[11px] font-bold text-gray-800 mb-2">Connect</h2>
+              <div className="space-y-0.5">
                 {data.socialLinks.map((link, idx) => (
                   <a
                     key={idx}
                     href={link.url}
-                    className="block text-[11px] text-blue-600 hover:underline break-words"
+                    className="block text-[9px] text-blue-600 hover:underline break-words"
                   >
                     {link.platform}
                   </a>
@@ -99,8 +99,8 @@ const Template11: React.FC<Template11Props> = ({ data }) => {
         <div className="col-span-2">
           {/* Summary */}
           {(data.summary || data.careerObjective) && (
-            <section className="mb-6 page-safe">
-              <p className="text-[11px] text-gray-700 leading-relaxed break-words">
+            <section className="mb-3 page-safe">
+              <p className="text-[9px] text-gray-700 leading-relaxed break-words">
                 {isFresher ? data.careerObjective : data.summary}
               </p>
             </section>
@@ -108,21 +108,21 @@ const Template11: React.FC<Template11Props> = ({ data }) => {
 
           {/* Timeline Experience */}
           {data.experience && data.experience.length > 0 && (
-            <section className="mb-6 page-safe">
-              <h2 className="text-[13px] font-bold text-gray-800 mb-4">Experience Timeline</h2>
+            <section className="mb-3 page-safe">
+              <h2 className="text-[11px] font-bold text-gray-800 mb-2">Experience Timeline</h2>
               <div className="relative">
-                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-blue-200"></div>
-                <div className="space-y-4">
+                <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-blue-200"></div>
+                <div className="space-y-3">
                   {data.experience.map((exp, idx) => (
-                    <div key={idx} className="relative pl-10 break-words">
-                      <div className="absolute left-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
+                    <div key={idx} className="relative pl-8 break-words">
+                      <div className="absolute left-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                       </div>
                       <div>
-                        <h3 className="text-[12px] font-bold text-gray-900">{exp.role}</h3>
-                        <p className="text-[11px] text-blue-600 mb-1">{exp.company}</p>
-                        <p className="text-[10px] text-gray-500 mb-2">{exp.startDate} - {exp.endDate}</p>
-                        <p className="text-[11px] text-gray-700 leading-relaxed">{exp.description}</p>
+                        <h3 className="text-[10px] font-bold text-gray-900">{exp.role}</h3>
+                        <p className="text-[9px] text-blue-600 mb-0.5">{exp.company}</p>
+                        <p className="text-[8px] text-gray-500 mb-1">{exp.startDate} - {exp.endDate}</p>
+                        <p className="text-[9px] text-gray-700 leading-relaxed">{exp.description}</p>
                       </div>
                     </div>
                   ))}
@@ -133,14 +133,14 @@ const Template11: React.FC<Template11Props> = ({ data }) => {
 
           {/* Education */}
           {data.education && data.education.length > 0 && (
-            <section className="mb-6 page-safe">
-              <h2 className="text-[13px] font-bold text-gray-800 mb-3">Education</h2>
-              <div className="space-y-3">
+            <section className="mb-3 page-safe">
+              <h2 className="text-[11px] font-bold text-gray-800 mb-2">Education</h2>
+              <div className="space-y-2">
                 {data.education.map((edu, idx) => (
-                  <div key={idx} className="border-l-2 border-blue-300 pl-3 break-words">
-                    <h3 className="text-[12px] font-bold text-gray-900">{edu.degree}</h3>
-                    <p className="text-[11px] text-gray-700">{edu.school}</p>
-                    <p className="text-[10px] text-gray-500">
+                  <div key={idx} className="border-l-2 border-blue-300 pl-2 break-words">
+                    <h3 className="text-[10px] font-bold text-gray-900">{edu.degree}</h3>
+                    <p className="text-[9px] text-gray-700">{edu.school}</p>
+                    <p className="text-[8px] text-gray-500">
                       {edu.startYear} - {edu.endYear}
                       {edu.gpa && ` • GPA: ${edu.gpa}`}
                     </p>
@@ -152,24 +152,24 @@ const Template11: React.FC<Template11Props> = ({ data }) => {
 
           {/* Projects */}
           {data.projects && data.projects.length > 0 && (
-            <section className="mb-6 page-safe">
-              <h2 className="text-[13px] font-bold text-gray-800 mb-3">Projects</h2>
-              <div className="space-y-3">
+            <section className="mb-3 page-safe">
+              <h2 className="text-[11px] font-bold text-gray-800 mb-2">Projects</h2>
+              <div className="space-y-2">
                 {data.projects.map((project, idx) => (
                   <div key={idx} className="break-words">
-                    <div className="flex items-baseline gap-2">
-                      <h3 className="text-[12px] font-bold text-gray-900">{project.name}</h3>
+                    <div className="flex items-baseline gap-1.5 flex-wrap">
+                      <h3 className="text-[10px] font-bold text-gray-900">{project.name}</h3>
                       {project.link && (
-                        <a href={project.link} className="text-[10px] text-blue-600 hover:underline">
+                        <a href={project.link} className="text-[8px] text-blue-600 hover:underline">
                           Link
                         </a>
                       )}
                     </div>
-                    <p className="text-[11px] text-gray-700 leading-relaxed">{project.description}</p>
+                    <p className="text-[9px] text-gray-700 leading-relaxed">{project.description}</p>
                     {project.technologies && project.technologies.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1">
+                      <div className="flex flex-wrap gap-1 mt-0.5">
                         {project.technologies.map((tech, i) => (
-                          <span key={i} className="text-[9px] bg-gray-100 px-2 py-0.5 text-gray-600">
+                          <span key={i} className="text-[7px] bg-gray-100 px-1.5 py-0.5 text-gray-600">
                             {tech}
                           </span>
                         ))}
@@ -183,13 +183,16 @@ const Template11: React.FC<Template11Props> = ({ data }) => {
 
           {/* Certifications */}
           {data.certifications && data.certifications.length > 0 && (
-            <section className="mb-6 page-safe">
-              <h2 className="text-[13px] font-bold text-gray-800 mb-3">Certifications</h2>
-              <div className="space-y-2">
+            <section className="mb-3 page-safe">
+              <h2 className="text-[11px] font-bold text-gray-800 mb-2">Certifications</h2>
+              <div className="space-y-1.5">
                 {data.certifications.map((cert, idx) => (
                   <div key={idx} className="break-words">
-                    <h3 className="text-[11px] font-bold text-gray-900">{cert.name}</h3>
-                    <p className="text-[10px] text-gray-600">{cert.issuer} • {cert.year}</p>
+                    <h3 className="text-[9px] font-bold text-gray-900">{cert.name}</h3>
+                    <p className="text-[8px] text-gray-600">{cert.issuer} • {cert.year}</p>
+                    {cert.credentialId && (
+                      <p className="text-[7px] text-gray-400">ID: {cert.credentialId}</p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -198,11 +201,11 @@ const Template11: React.FC<Template11Props> = ({ data }) => {
 
           {/* Hobbies (Fresher) */}
           {isFresher && data.hobbies && data.hobbies.length > 0 && (
-            <section className="mb-6 page-safe">
-              <h2 className="text-[13px] font-bold text-gray-800 mb-3">Interests</h2>
-              <div className="flex flex-wrap gap-2">
+            <section className="mb-3 page-safe">
+              <h2 className="text-[11px] font-bold text-gray-800 mb-2">Interests</h2>
+              <div className="flex flex-wrap gap-1.5">
                 {data.hobbies.map((hobby, idx) => (
-                  <span key={idx} className="text-[11px] text-gray-700 break-words">
+                  <span key={idx} className="text-[9px] text-gray-700 break-words">
                     {hobby}{idx < data.hobbies!.length - 1 ? ' •' : ''}
                   </span>
                 ))}
@@ -212,11 +215,11 @@ const Template11: React.FC<Template11Props> = ({ data }) => {
 
           {/* References */}
           {data.references && data.references.length > 0 && (
-            <section className="mb-6 page-safe">
-              <h2 className="text-[13px] font-bold text-gray-800 mb-3">References</h2>
-              <div className="space-y-1">
+            <section className="mb-3 page-safe">
+              <h2 className="text-[11px] font-bold text-gray-800 mb-2">References</h2>
+              <div className="space-y-0.5">
                 {data.references.map((ref, idx) => (
-                  <p key={idx} className="text-[11px] text-gray-700 break-words">{ref}</p>
+                  <p key={idx} className="text-[9px] text-gray-700 break-words">{ref}</p>
                 ))}
               </div>
             </section>
@@ -226,19 +229,22 @@ const Template11: React.FC<Template11Props> = ({ data }) => {
           {data.customSections && data.customSections.length > 0 && (
             <>
               {data.customSections.map((section, idx) => (
-                <section key={idx} className="mb-6 page-safe">
-                  <h2 className="text-[13px] font-bold text-gray-800 mb-3">{section.title}</h2>
+                <section key={idx} className="mb-3 page-safe">
+                  <h2 className="text-[11px] font-bold text-gray-800 mb-2">{section.title}</h2>
                   {section.description && (
-                    <p className="text-[11px] text-gray-700 leading-relaxed mb-2 break-words">
+                    <p className="text-[9px] text-gray-700 leading-relaxed mb-1 break-words">
                       {section.description}
                     </p>
                   )}
                   {section.items && section.items.length > 0 && (
-                    <ul className="list-disc list-inside space-y-1">
+                    <ul className="list-disc list-inside space-y-0.5">
                       {section.items.map((item, i) => (
-                        <li key={i} className="text-[11px] text-gray-700 break-words">{item}</li>
+                        <li key={i} className="text-[9px] text-gray-700 break-words">{item}</li>
                       ))}
                     </ul>
+                  )}
+                  {section.date && (
+                    <p className="text-[8px] text-gray-500 mt-0.5">{section.date}</p>
                   )}
                 </section>
               ))}

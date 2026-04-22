@@ -12,7 +12,7 @@ const Section: React.FC<{ title: string; children: React.ReactNode; sidebar?: bo
   const mbSize = layoutMode === 'compact' ? (sidebar ? 'mb-2' : 'mb-2') : (sidebar ? 'mb-3' : 'mb-4');
   
   return (
-    <section className={`${mbSize} page-break-inside-avoid`}>
+    <section className={`${mbSize} page-safe`}>
       <h2 className={`font-semibold uppercase tracking-wide text-blue-600 ${titleSize} border-b border-gray-200 pb-1 mb-2`}>
         {title}
       </h2>
@@ -43,37 +43,40 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const height = containerRef.current.scrollHeight;
+    const checkHeight = () => {
+      const height = containerRef.current?.scrollHeight || 0;
 
-    if (height < 900) {
-      setLayoutMode('expand');
-    } else if (height > 1123) {
-      setLayoutMode('compact');
-    } else {
-      setLayoutMode('normal');
-    }
+      if (height < 950) {
+        setLayoutMode('expand');
+      } else if (height > 1123) {
+        setLayoutMode('compact');
+      } else {
+        setLayoutMode('normal');
+      }
+    };
+
+    // Small delay to ensure content is rendered
+    setTimeout(checkHeight, 10);
   }, [data]);
 
   return (
-    <div ref={containerRef} className="w-[794px] min-h-[1123px] mx-auto bg-white flex flex-col">
-
+    <div ref={containerRef} className="w-[794px] h-[1123px] mx-auto bg-white flex flex-col overflow-hidden">
       {/* LAYOUT: Sidebar (30%) + Main Content (70%) */}
-      <div className="flex flex-row">
-
+      <div className="flex flex-row flex-1 min-h-0">
         {/* LEFT SIDEBAR - 30% */}
-        <aside className="w-[30%] bg-gray-100 p-4 flex-shrink-0 border-r border-gray-200">
+        <aside className="w-[30%] bg-gray-100 p-4 flex-shrink-0 border-r border-gray-200 flex flex-col overflow-y-auto">
           
           {/* Name & Role */}
-          <div className={layoutMode === 'expand' ? 'mb-5' : 'mb-4'}>
-            <h1 className={`${nameSize} font-bold text-gray-800`}>{data.fullName || "Your Name"}</h1>
-            {data.role && <p className={`${roleSize} text-gray-600`}>{data.role}</p>}
+          <div className={layoutMode === 'expand' ? 'mb-5' : layoutMode === 'compact' ? 'mb-3' : 'mb-4'}>
+            <h1 className={`${nameSize} font-bold text-gray-800 break-words`}>{data.fullName || "Your Name"}</h1>
+            {data.role && <p className={`${roleSize} text-gray-600 break-words`}>{data.role}</p>}
           </div>
 
           {/* Contact Info */}
           <Section title="Contact" sidebar layoutMode={layoutMode}>
             <div className={`${sidebarTextSize} text-gray-700 space-y-1`}>
-              {data.email && <p className="break-all">{data.email}</p>}
-              {data.phone && <p>{data.phone}</p>}
+              {data.email && <p className="break-words">{data.email}</p>}
+              {data.phone && <p className="break-words">{data.phone}</p>}
               {data.address && <p className="break-words">{data.address}</p>}
             </div>
           </Section>
@@ -81,9 +84,9 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
           {/* Skills */}
           {data.skills && data.skills.length > 0 && (
             <Section title="Skills" sidebar layoutMode={layoutMode}>
-              <div className={`flex flex-wrap gap-1 ${layoutMode === 'expand' ? 'gap-2' : 'gap-1'}`}>
+              <div className={`flex flex-wrap ${layoutMode === 'expand' ? 'gap-2' : 'gap-1'}`}>
                 {data.skills.map((skill, i) => (
-                  <span key={i} className={`${smallTextSize} bg-white text-gray-700 px-1.5 py-0.5 rounded border border-gray-300`}>
+                  <span key={i} className={`${smallTextSize} bg-white text-gray-700 px-1.5 py-0.5 rounded border border-gray-300 break-words`}>
                     {skill}
                   </span>
                 ))}
@@ -96,7 +99,7 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
             <Section title="Languages" sidebar layoutMode={layoutMode}>
               <ul className={`${sidebarTextSize} text-gray-700 space-y-0.5`}>
                 {data.languages.map((lang, i) => (
-                  <li key={i}>{lang.language} - {lang.level}</li>
+                  <li key={i} className="break-words">{lang.language} - {lang.level}</li>
                 ))}
               </ul>
             </Section>
@@ -105,13 +108,18 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
           {/* Certifications */}
           {data.certifications && data.certifications.length > 0 && (
             <Section title="Certifications" sidebar layoutMode={layoutMode}>
-              {data.certifications.map((cert, i) => (
-                <div key={i} className={layoutMode === 'compact' ? 'mb-1' : 'mb-1.5'}>
-                  <p className={`${sidebarTextSize} font-semibold text-gray-800`}>{cert.name}</p>
-                  <p className={`${smallTextSize} text-gray-600`}>{cert.issuer}</p>
-                  {cert.year && <p className={`${smallTextSize} text-gray-500`}>{cert.year}</p>}
-                </div>
-              ))}
+              <div className="space-y-1.5">
+                {data.certifications.map((cert, i) => (
+                  <div key={i}>
+                    <p className={`${sidebarTextSize} font-semibold text-gray-800 break-words`}>{cert.name}</p>
+                    <p className={`${smallTextSize} text-gray-600 break-words`}>{cert.issuer}</p>
+                    {cert.year && <p className={`${smallTextSize} text-gray-500`}>{cert.year}</p>}
+                    {cert.credentialId && (
+                      <p className="text-[8px] text-gray-400 break-words">ID: {cert.credentialId}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
             </Section>
           )}
 
@@ -120,9 +128,13 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
             <Section title="Links" sidebar layoutMode={layoutMode}>
               <div className="space-y-1">
                 {data.socialLinks.map((link, i) => (
-                  <p key={i} className={`${smallTextSize} text-blue-600 break-words`}>
-                    {link.platform}: {link.url}
-                  </p>
+                  <a 
+                    key={i}
+                    href={link.url}
+                    className={`${smallTextSize} text-blue-600 hover:underline block break-words`}
+                  >
+                    {link.platform}
+                  </a>
                 ))}
               </div>
             </Section>
@@ -131,9 +143,9 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
           {/* Fresher Only - Strengths */}
           {isFresher && data.strengths && data.strengths.length > 0 && (
             <Section title="Strengths" sidebar layoutMode={layoutMode}>
-              <ul className={`${sidebarTextSize} text-gray-700 list-disc ml-3 space-y-1`}>
+              <ul className={`${sidebarTextSize} text-gray-700 list-disc ml-3 space-y-0.5`}>
                 {data.strengths.map((s, i) => (
-                  <li key={i}>{s}</li>
+                  <li key={i} className="break-words">{s}</li>
                 ))}
               </ul>
             </Section>
@@ -142,80 +154,18 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
           {/* Fresher Only - Hobbies */}
           {isFresher && data.hobbies && data.hobbies.length > 0 && (
             <Section title="Hobbies" sidebar layoutMode={layoutMode}>
-              <ul className={`${sidebarTextSize} text-gray-700 list-disc ml-3 space-y-1`}>
+              <ul className={`${sidebarTextSize} text-gray-700 list-disc ml-3 space-y-0.5`}>
                 {data.hobbies.map((h, i) => (
-                  <li key={i}>{h}</li>
+                  <li key={i} className="break-words">{h}</li>
                 ))}
               </ul>
             </Section>
           )}
 
-        </aside>
-
-        {/* RIGHT MAIN CONTENT - 70% */}
-        <main className="w-[70%] p-4 flex-grow">
-
-          {/* Summary / Career Objective */}
-          {summaryText && (
-            <Section title={summaryTitle} layoutMode={layoutMode}>
-              <p className={`${bodySize} leading-relaxed text-gray-700`}>{summaryText}</p>
-            </Section>
-          )}
-
-          {/* Experience */}
-          {data.experience && data.experience.length > 0 && (
-            <Section title="Experience" layoutMode={layoutMode}>
-              {data.experience.map((exp, i) => (
-                <div key={i} className={layoutMode === 'compact' ? 'mb-2' : 'mb-3'}>
-                  <div className="flex justify-between items-start">
-                    <h3 className={`${bodySize} font-bold text-gray-800`}>{exp.role}</h3>
-                    <span className={`${smallTextSize} text-gray-500 whitespace-nowrap ml-2`}>
-                      {exp.startDate} - {exp.endDate}
-                    </span>
-                  </div>
-                  <p className={`${smallTextSize} text-gray-600`}>{exp.company}</p>
-                  <p className={`${bodySize} leading-snug text-gray-700 mt-1`}>{exp.description}</p>
-                </div>
-              ))}
-            </Section>
-          )}
-
-          {/* Projects */}
-          {data.projects && data.projects.length > 0 && (
-            <Section title="Projects" layoutMode={layoutMode}>
-              {data.projects.map((proj, i) => (
-                <div key={i} className={layoutMode === 'compact' ? 'mb-1.5' : 'mb-2'}>
-                  <h3 className={`${bodySize} font-bold text-gray-800`}>{proj.name}</h3>
-                  <p className={`${bodySize} leading-snug text-gray-700`}>{proj.description}</p>
-                  {proj.technologies && proj.technologies.length > 0 && (
-                    <p className={`${smallTextSize} text-gray-500 mt-0.5`}>
-                      Tech: {proj.technologies.join(", ")}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </Section>
-          )}
-
-          {/* Education */}
-          {data.education && data.education.length > 0 && (
-            <Section title="Education" layoutMode={layoutMode}>
-              {data.education.map((edu, i) => (
-                <div key={i} className={layoutMode === 'compact' ? 'mb-1.5' : 'mb-2'}>
-                  <h3 className={`${bodySize} font-bold text-gray-800`}>{edu.degree}</h3>
-                  <p className={`${smallTextSize} text-gray-600`}>{edu.school}</p>
-                  <p className={`${smallTextSize} text-gray-500`}>
-                    {edu.startYear} - {edu.endYear}
-                  </p>
-                </div>
-              ))}
-            </Section>
-          )}
-
           {/* References */}
           {data.references && data.references.length > 0 && (
-            <Section title="References" layoutMode={layoutMode}>
-              <ul className={`${bodySize} text-gray-700 space-y-1`}>
+            <Section title="References" sidebar layoutMode={layoutMode}>
+              <ul className={`${sidebarTextSize} text-gray-700 space-y-0.5`}>
                 {data.references.map((ref, i) => (
                   <li key={i} className="break-words">{ref}</li>
                 ))}
@@ -223,29 +173,106 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
             </Section>
           )}
 
-          {/* Custom Sections */}
+          {/* Custom Sections in Sidebar */}
           {data.customSections && data.customSections.length > 0 && (
             <>
               {data.customSections.map((section, i) => (
-                <Section key={i} title={section.title} layoutMode={layoutMode}>
+                <Section key={i} title={section.title} sidebar layoutMode={layoutMode}>
                   {section.description && (
-                    <p className={`${bodySize} leading-snug text-gray-700 mb-2`}>{section.description}</p>
+                    <p className={`${sidebarTextSize} leading-snug text-gray-700 mb-1 break-words`}>{section.description}</p>
                   )}
                   {section.items && section.items.length > 0 && (
-                    <ul className={`${bodySize} text-gray-700 list-disc ml-4 space-y-0.5`}>
+                    <ul className={`${sidebarTextSize} text-gray-700 list-disc ml-3 space-y-0.5`}>
                       {section.items.map((item, j) => (
-                        <li key={j}>{item}</li>
+                        <li key={j} className="break-words">{item}</li>
                       ))}
                     </ul>
                   )}
                   {section.date && (
-                    <p className={`${smallTextSize} text-gray-500 mt-1`}>{section.date}</p>
+                    <p className={`${smallTextSize} text-gray-500 mt-0.5`}>{section.date}</p>
                   )}
                 </Section>
               ))}
             </>
           )}
+        </aside>
 
+        {/* RIGHT MAIN CONTENT - 70% */}
+        <main className="w-[70%] p-4 flex-grow overflow-y-auto flex flex-col">
+          {/* Summary / Career Objective */}
+          {summaryText && (
+            <Section title={summaryTitle} layoutMode={layoutMode}>
+              <p className={`${bodySize} leading-relaxed text-gray-700 break-words`}>{summaryText}</p>
+            </Section>
+          )}
+
+          {/* Experience */}
+          {data.experience && data.experience.length > 0 && (
+            <Section title="Experience" layoutMode={layoutMode}>
+              <div className={layoutMode === 'compact' ? 'space-y-2' : 'space-y-3'}>
+                {data.experience.map((exp, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between items-start flex-wrap gap-1">
+                      <h3 className={`${bodySize} font-bold text-gray-800 break-words`}>{exp.role}</h3>
+                      <span className={`${smallTextSize} text-gray-500 whitespace-nowrap`}>
+                        {exp.startDate} - {exp.endDate}
+                      </span>
+                    </div>
+                    <p className={`${smallTextSize} text-gray-600 break-words`}>{exp.company}</p>
+                    <p className={`${bodySize} leading-snug text-gray-700 mt-1 break-words`}>{exp.description}</p>
+                  </div>
+                ))}
+              </div>
+            </Section>
+          )}
+
+          {/* Projects */}
+          {data.projects && data.projects.length > 0 && (
+            <Section title="Projects" layoutMode={layoutMode}>
+              <div className={layoutMode === 'compact' ? 'space-y-1.5' : 'space-y-2'}>
+                {data.projects.map((proj, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between items-baseline flex-wrap gap-1">
+                      <h3 className={`${bodySize} font-bold text-gray-800 break-words`}>{proj.name}</h3>
+                      {proj.link && (
+                        <a href={proj.link} className={`${smallTextSize} text-blue-600 hover:underline break-words`}>
+                          Link
+                        </a>
+                      )}
+                    </div>
+                    <p className={`${bodySize} leading-snug text-gray-700 break-words`}>{proj.description}</p>
+                    {proj.technologies && proj.technologies.length > 0 && (
+                      <p className={`${smallTextSize} text-gray-500 mt-0.5 break-words`}>
+                        Tech: {proj.technologies.join(", ")}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Section>
+          )}
+
+          {/* Education */}
+          {data.education && data.education.length > 0 && (
+            <Section title="Education" layoutMode={layoutMode}>
+              <div className={layoutMode === 'compact' ? 'space-y-1.5' : 'space-y-2'}>
+                {data.education.map((edu, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between items-baseline flex-wrap gap-1">
+                      <h3 className={`${bodySize} font-bold text-gray-800 break-words`}>{edu.degree}</h3>
+                      <span className={`${smallTextSize} text-gray-500 whitespace-nowrap`}>
+                        {edu.startYear} - {edu.endYear}
+                      </span>
+                    </div>
+                    <p className={`${smallTextSize} text-gray-600 break-words`}>{edu.school}</p>
+                    {edu.gpa && (
+                      <p className={`${smallTextSize} text-gray-500`}>GPA: {edu.gpa}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Section>
+          )}
         </main>
       </div>
     </div>
