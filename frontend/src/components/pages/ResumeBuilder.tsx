@@ -95,6 +95,9 @@ const ResumeBuilder = () => {
     url: ""
   });
 
+  const longTextareaClass =
+    "min-h-[110px] rounded-2xl border-slate-200 bg-white px-4 py-3 text-sm leading-6 shadow-sm transition-all duration-200 placeholder:text-slate-400 focus-visible:border-slate-400 focus-visible:ring-4 focus-visible:ring-slate-900/5";
+
   useEffect(() => {
     const draft = localStorage.getItem("resume-builder-draft");
 
@@ -471,17 +474,19 @@ const ResumeBuilder = () => {
                     id="summary"
                     value={formData.summary}
                     onChange={(e) => handleInputChange("summary", e.target.value)}
+                    autoResize
+                    className={longTextareaClass}
                     placeholder={
                       candidateType === "experienced"
-                        ? "Brief overview of your professional background and achievements..."
-                        : "Career goals, academic achievements, and what you bring as a fresher..."
+                        ? "Write 3-5 lines about your experience, strongest skills, measurable impact, and the value you bring to teams."
+                        : "Write 3-5 lines about your career goals, academic strengths, practical exposure, and how you add value as a fresher."
                     }
-                    rows={3}
+                    rows={4}
                   />
                   <p className="text-xs text-gray-500">
                     {candidateType === "experienced"
-                      ? "Highlight your experience, skills, and career achievements"
-                      : "Focus on your educational background, skills, and career aspirations"}
+                      ? "Focus on scope, outcomes, domain expertise, leadership, and key wins."
+                      : "Focus on your goals, strengths, training, projects, and readiness to contribute."}
                   </p>
                 </div>
 
@@ -509,6 +514,8 @@ const ResumeBuilder = () => {
                     id="education"
                     value={formData.education}
                     onChange={(e) => handleInputChange("education", e.target.value)}
+                    autoResize
+                    className={longTextareaClass}
                     placeholder={
                       candidateType === "experienced"
                         ? "Bachelor of Computer Science | MIT | 2015 | 2019 | 3.8"
@@ -530,17 +537,19 @@ const ResumeBuilder = () => {
                     id="experience"
                     value={formData.experience}
                     onChange={(e) => handleInputChange("experience", e.target.value)}
+                    autoResize
+                    className={longTextareaClass}
                     placeholder={
                       candidateType === "experienced"
-                        ? "Senior Developer at TechCorp&#10;2021 - Present&#10;Led development of web applications..."
-                        : "Summer Intern at TechCorp&#10;Jun 2023 - Aug 2023&#10;Assisted in frontend development..."
+                        ? "Senior Product Designer at Acme Corp\n2021 - Present\nDescribe responsibilities, achievements, tools used, leadership, process improvements, and measurable impact."
+                        : "Software Intern\nAcme Corp\nJun 2023 - Aug 2023\nDescribe responsibilities, achievements, tools used, learning outcomes, and impact."
                     }
-                    rows={4}
+                    rows={5}
                   />
                   <p className="text-xs text-gray-500">
                     {candidateType === "experienced"
-                      ? "Format: Role at Company<br />Dates: Start - End<br />Description<br />Separate experiences with an empty line"
-                      : "Include internships, industrial training, academic projects with real-world impact"}
+                      ? "Format: Role at Company, next line dates, then 2-4 concise lines on responsibilities, tools, results, and leadership."
+                      : "Format: Role, company, dates, then 2-4 concise lines on responsibilities, achievements, tools used, and outcomes."}
                   </p>
                 </div>
 
@@ -550,18 +559,17 @@ const ResumeBuilder = () => {
                     id="projects"
                     value={formData.projects}
                     onChange={(e) => handleInputChange("projects", e.target.value)}
+                    autoResize
+                    className={longTextareaClass}
                     placeholder={
                       candidateType === "experienced"
-                        ? "E-commerce Platform&#10;Built full-stack platform with React and Node.js&#10;React, Node.js, MongoDB"
-                        : "Student Management System&#10;Developed for final year project&#10;Java, MySQL, Spring Boot"
+                        ? "Customer Analytics Platform\nExplain project purpose, technologies used, your role, technical decisions, and business outcomes.\nReact, TypeScript, Node.js, PostgreSQL"
+                        : "Student Management System\nExplain project purpose, technologies used, your role, and outcomes or learnings.\nJava, MySQL, Spring Boot"
                     }
-                    rows={3}
+                    rows={4}
                   />
                   <p className="text-xs text-gray-500">
-                    Format: Project Name<br />
-                    Description<br />
-                    Technologies (comma-separated)<br />
-                    Separate projects with an empty line
+                    Format: project name, description, then technologies on the next line. Separate projects with an empty line.
                   </p>
                 </div>
 
@@ -574,11 +582,13 @@ const ResumeBuilder = () => {
                         id="strengths"
                         value={formData.strengths}
                         onChange={(e) => handleInputChange("strengths", e.target.value)}
-                        placeholder="Hardworking, Quick learner, Team player, Adaptable, Problem-solving"
-                        rows={2}
+                        autoResize
+                        className={longTextareaClass}
+                        placeholder="Problem-solving, quick learning, ownership, communication, teamwork, adaptability, research, presentation"
+                        rows={3}
                       />
                       <p className="text-xs text-gray-500">
-                        Personal and professional strengths that make you a good candidate
+                        List strengths, achievements, responsibilities you handle well, or qualities that support your target role.
                       </p>
                     </div>
 
@@ -588,11 +598,13 @@ const ResumeBuilder = () => {
                         id="hobbies"
                         value={formData.hobbies}
                         onChange={(e) => handleInputChange("hobbies", e.target.value)}
-                        placeholder="Coding competitions, Reading tech blogs, Open source contributions, Sports"
-                        rows={2}
+                        autoResize
+                        className={longTextareaClass}
+                        placeholder="Open source, hackathons, product writing, mentoring, community work, reading, sports, design exploration"
+                        rows={3}
                       />
                       <p className="text-xs text-gray-500">
-                        Helps show personality and cultural fit
+                        Keep this concise and relevant to your personality, discipline, or collaborative style.
                       </p>
                     </div>
                   </>
