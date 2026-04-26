@@ -35,11 +35,8 @@ type Theme = {
   muted: string;
   strong: string;
   accentText: string;
-  accentSoft: string;
-  accentBorder: string;
   tag: string;
   timeline: string;
-  card: string;
   smallCard: string;
   skillBarTrack: string;
   skillBarFill: string;
@@ -77,11 +74,8 @@ const themes: Record<TemplateVariant, Theme> = {
     muted: "text-[8px] text-slate-500",
     strong: "text-[11px] font-semibold text-slate-900",
     accentText: "text-blue-700",
-    accentSoft: "bg-blue-50",
-    accentBorder: "border-blue-200",
     tag: "bg-blue-50 text-blue-800 border border-blue-100",
     timeline: "border-blue-500",
-    card: "rounded-[20px] border border-slate-200 bg-white",
     smallCard: "rounded-2xl border border-slate-200 bg-white",
     skillBarTrack: "bg-blue-100",
     skillBarFill: "bg-blue-600",
@@ -108,11 +102,8 @@ const themes: Record<TemplateVariant, Theme> = {
     muted: "text-[8px] text-slate-500",
     strong: "text-[11px] font-semibold text-slate-900",
     accentText: "text-cyan-700",
-    accentSoft: "bg-cyan-50",
-    accentBorder: "border-cyan-200",
     tag: "bg-cyan-50 text-cyan-800 border border-cyan-100",
     timeline: "border-cyan-500",
-    card: "rounded-[20px] border border-slate-200 bg-white",
     smallCard: "rounded-2xl border border-white/10 bg-white/5",
     skillBarTrack: "bg-white/10",
     skillBarFill: "bg-cyan-400",
@@ -139,11 +130,8 @@ const themes: Record<TemplateVariant, Theme> = {
     muted: "text-[8px] text-slate-500",
     strong: "text-[11px] font-semibold text-slate-900",
     accentText: "text-slate-700",
-    accentSoft: "bg-slate-100",
-    accentBorder: "border-slate-200",
     tag: "bg-slate-100 text-slate-700 border border-slate-200",
     timeline: "border-slate-400",
-    card: "rounded-none border-0 bg-white",
     smallCard: "rounded-xl border border-slate-200 bg-white",
     skillBarTrack: "bg-slate-200",
     skillBarFill: "bg-slate-600",
@@ -170,11 +158,8 @@ const themes: Record<TemplateVariant, Theme> = {
     muted: "text-[8px] text-stone-500",
     strong: "text-[11px] font-semibold text-stone-900",
     accentText: "text-amber-800",
-    accentSoft: "bg-amber-50",
-    accentBorder: "border-amber-200",
     tag: "bg-white text-amber-900 border border-amber-200",
     timeline: "border-amber-500",
-    card: "rounded-[24px] border border-[#eadcc7] bg-white/90",
     smallCard: "rounded-[18px] border border-[#eadcc7] bg-white/90",
     skillBarTrack: "bg-amber-100",
     skillBarFill: "bg-amber-600",
@@ -201,11 +186,8 @@ const themes: Record<TemplateVariant, Theme> = {
     muted: "text-[8px] text-slate-500",
     strong: "text-[11px] font-semibold text-slate-900",
     accentText: "text-rose-700",
-    accentSoft: "bg-rose-50",
-    accentBorder: "border-rose-200",
     tag: "bg-rose-50 text-rose-800 border border-rose-100",
     timeline: "border-rose-500",
-    card: "rounded-[20px] border border-rose-100 bg-white",
     smallCard: "rounded-2xl border border-rose-100 bg-white",
     skillBarTrack: "bg-rose-100",
     skillBarFill: "bg-rose-600",
@@ -232,11 +214,8 @@ const themes: Record<TemplateVariant, Theme> = {
     muted: "text-[8px] text-slate-500",
     strong: "text-[11px] font-semibold text-slate-900",
     accentText: "text-cyan-700",
-    accentSoft: "bg-cyan-50",
-    accentBorder: "border-cyan-200",
     tag: "bg-cyan-50 text-cyan-900 border border-cyan-100",
     timeline: "border-cyan-500",
-    card: "rounded-[20px] border border-cyan-100 bg-white",
     smallCard: "rounded-2xl border border-white/10 bg-white/5",
     skillBarTrack: "bg-white/10",
     skillBarFill: "bg-cyan-400",
@@ -263,11 +242,8 @@ const themes: Record<TemplateVariant, Theme> = {
     muted: "text-[8px] text-neutral-500",
     strong: "text-[11px] font-semibold text-neutral-900",
     accentText: "text-amber-700",
-    accentSoft: "bg-amber-50",
-    accentBorder: "border-amber-200",
     tag: "bg-white text-amber-900 border border-amber-200",
     timeline: "border-amber-500",
-    card: "rounded-[22px] border border-amber-100 bg-white",
     smallCard: "rounded-2xl border border-amber-100 bg-white",
     skillBarTrack: "bg-amber-100",
     skillBarFill: "bg-amber-500",
@@ -294,11 +270,8 @@ const themes: Record<TemplateVariant, Theme> = {
     muted: "text-[8px] text-slate-500",
     strong: "text-[11px] font-semibold text-slate-900",
     accentText: "text-sky-700",
-    accentSoft: "bg-sky-50",
-    accentBorder: "border-sky-100",
     tag: "bg-white text-sky-800 border border-sky-100",
     timeline: "border-sky-500",
-    card: "rounded-[18px] border border-slate-200 bg-white",
     smallCard: "rounded-2xl border border-slate-200 bg-white",
     skillBarTrack: "bg-sky-100",
     skillBarFill: "bg-sky-600",
@@ -325,11 +298,8 @@ const themes: Record<TemplateVariant, Theme> = {
     muted: "text-[8px] text-slate-500",
     strong: "text-[11px] font-semibold text-slate-900",
     accentText: "text-fuchsia-700",
-    accentSoft: "bg-fuchsia-50",
-    accentBorder: "border-fuchsia-100",
     tag: "bg-white text-fuchsia-800 border border-fuchsia-100",
     timeline: "border-fuchsia-500",
-    card: "rounded-[24px] border border-white/80 bg-white/80 backdrop-blur-sm",
     smallCard: "rounded-[18px] border border-white/80 bg-white/75 backdrop-blur-sm",
     skillBarTrack: "bg-fuchsia-100",
     skillBarFill: "bg-fuchsia-500",
@@ -356,11 +326,8 @@ const themes: Record<TemplateVariant, Theme> = {
     muted: "text-[8px] text-slate-500",
     strong: "text-[11px] font-semibold text-slate-900",
     accentText: "text-slate-700",
-    accentSoft: "bg-slate-100",
-    accentBorder: "border-slate-200",
     tag: "bg-slate-100 text-slate-700 border border-slate-200",
     timeline: "border-slate-500",
-    card: "rounded-none border-0 bg-white",
     smallCard: "rounded-xl border border-slate-200 bg-white",
     skillBarTrack: "bg-slate-200",
     skillBarFill: "bg-slate-600",
@@ -387,11 +354,8 @@ const themes: Record<TemplateVariant, Theme> = {
     muted: "text-[8px] text-slate-500",
     strong: "text-[11px] font-semibold text-slate-900",
     accentText: "text-indigo-700",
-    accentSoft: "bg-indigo-50",
-    accentBorder: "border-indigo-100",
     tag: "bg-indigo-50 text-indigo-800 border border-indigo-100",
     timeline: "border-indigo-500",
-    card: "rounded-[20px] border border-indigo-100 bg-white",
     smallCard: "rounded-2xl border border-indigo-100 bg-white",
     skillBarTrack: "bg-indigo-100",
     skillBarFill: "bg-indigo-600",
@@ -418,11 +382,8 @@ const themes: Record<TemplateVariant, Theme> = {
     muted: "text-[8px] text-slate-500",
     strong: "text-[11px] font-semibold text-slate-900",
     accentText: "text-emerald-700",
-    accentSoft: "bg-emerald-50",
-    accentBorder: "border-emerald-100",
     tag: "bg-emerald-50 text-emerald-800 border border-emerald-100",
     timeline: "border-emerald-500",
-    card: "rounded-[18px] border border-slate-200 bg-white",
     smallCard: "rounded-2xl border border-slate-200 bg-white",
     skillBarTrack: "bg-emerald-100",
     skillBarFill: "bg-emerald-600",
@@ -449,11 +410,8 @@ const themes: Record<TemplateVariant, Theme> = {
     muted: "text-[8px] text-slate-500",
     strong: "text-[11px] font-semibold text-slate-900",
     accentText: "text-cyan-700",
-    accentSoft: "bg-cyan-50",
-    accentBorder: "border-cyan-100",
     tag: "bg-cyan-50 text-cyan-800 border border-cyan-100",
     timeline: "border-cyan-500",
-    card: "rounded-[24px] border border-white/10 bg-white/95",
     smallCard: "rounded-[20px] border border-white/10 bg-white/95",
     skillBarTrack: "bg-cyan-100",
     skillBarFill: "bg-cyan-600",
@@ -480,11 +438,8 @@ const themes: Record<TemplateVariant, Theme> = {
     muted: "text-[8px] text-slate-500",
     strong: "text-[11px] font-semibold text-slate-900",
     accentText: "text-teal-700",
-    accentSoft: "bg-teal-50",
-    accentBorder: "border-teal-100",
     tag: "bg-white text-teal-800 border border-teal-100",
     timeline: "border-teal-500",
-    card: "rounded-[18px] border border-slate-200 bg-white",
     smallCard: "rounded-2xl border border-slate-200 bg-white",
     skillBarTrack: "bg-teal-100",
     skillBarFill: "bg-teal-600",
@@ -511,11 +466,8 @@ const themes: Record<TemplateVariant, Theme> = {
     muted: "text-[8px] text-slate-500",
     strong: "text-[11px] font-semibold text-slate-900",
     accentText: "text-emerald-700",
-    accentSoft: "bg-emerald-50",
-    accentBorder: "border-emerald-100",
     tag: "bg-white text-emerald-800 border border-emerald-100",
     timeline: "border-emerald-500",
-    card: "rounded-[22px] border border-slate-200 bg-white",
     smallCard: "rounded-2xl border border-slate-200 bg-white",
     skillBarTrack: "bg-emerald-100",
     skillBarFill: "bg-emerald-500",
@@ -573,9 +525,7 @@ const bullets = (items: string[] | undefined, theme: Theme) =>
   ) : null;
 
 const description = (value: string | undefined, theme: Theme, className = "") =>
-  value ? (
-    <p className={`${theme.text} whitespace-pre-line break-words ${className}`.trim()}>{value}</p>
-  ) : null;
+  value ? <p className={`${theme.text} whitespace-pre-line break-words ${className}`.trim()}>{value}</p> : null;
 
 const renderSummary = (summary: string | undefined, label: string, theme: Theme) =>
   summary ? (
@@ -585,21 +535,13 @@ const renderSummary = (summary: string | undefined, label: string, theme: Theme)
     </section>
   ) : null;
 
-const renderExperience = (
-  data: ResumeData,
-  theme: Theme,
-  title: string,
-  asTimeline = false,
-) =>
+const renderExperience = (data: ResumeData, theme: Theme, title: string, asTimeline = false) =>
   data.experience && data.experience.length > 0 ? (
     <section className="page-safe">
       {sectionTitleNode(title, theme)}
       <div className="space-y-3">
         {data.experience.map((item, index) => (
-          <article
-            key={`${item.role}-${item.company}-${index}`}
-            className={asTimeline ? "relative pl-4" : ""}
-          >
+          <article key={`${item.role}-${item.company}-${index}`} className={asTimeline ? "relative pl-4" : ""}>
             {asTimeline ? (
               <>
                 <span className={`absolute left-0 top-1 h-full border-l-2 ${theme.timeline}`} />
@@ -609,15 +551,9 @@ const renderExperience = (
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <h3 className={`${theme.strong} break-words`}>{item.role}</h3>
-                {item.company ? (
-                  <p className={`mt-0.5 text-[9px] font-medium ${theme.accentText} break-words`}>
-                    {item.company}
-                  </p>
-                ) : null}
+                {item.company ? <p className={`mt-0.5 text-[9px] font-medium ${theme.accentText} break-words`}>{item.company}</p> : null}
               </div>
-              <p className={`${theme.muted} whitespace-nowrap`}>
-                {[item.startDate, item.endDate].filter(Boolean).join(" - ")}
-              </p>
+              <p className={`${theme.muted} whitespace-nowrap`}>{[item.startDate, item.endDate].filter(Boolean).join(" - ")}</p>
             </div>
             {description(item.description, theme, "mt-1")}
           </article>
@@ -638,9 +574,7 @@ const renderEducation = (data: ResumeData, theme: Theme) =>
                 <h3 className={`${theme.strong} break-words`}>{item.degree}</h3>
                 <p className={`${theme.text} ${theme.accentText} break-words`}>{item.school}</p>
               </div>
-              <p className={`${theme.muted} whitespace-nowrap`}>
-                {[item.startYear, item.endYear].filter(Boolean).join(" - ")}
-              </p>
+              <p className={`${theme.muted} whitespace-nowrap`}>{[item.startYear, item.endYear].filter(Boolean).join(" - ")}</p>
             </div>
             {item.gpa ? <p className={`${theme.muted} mt-0.5`}>GPA: {item.gpa}</p> : null}
           </article>
@@ -655,28 +589,16 @@ const renderProjects = (data: ResumeData, theme: Theme, withCards = false) =>
       {sectionTitleNode("Projects", theme)}
       <div className="space-y-3">
         {data.projects.map((item, index) => (
-          <article
-            key={`${item.name}-${index}`}
-            className={withCards ? `p-3 ${theme.smallCard}` : ""}
-          >
+          <article key={`${item.name}-${index}`} className={withCards ? `p-3 ${theme.smallCard}` : ""}>
             <div className="flex items-start justify-between gap-3">
               <h3 className={`${theme.strong} break-words`}>{item.name}</h3>
-              {item.link ? (
-                <a href={item.link} className={`text-[8px] font-medium ${theme.link}`}>
-                  View
-                </a>
-              ) : null}
+              {item.link ? <a href={item.link} className={`text-[8px] font-medium ${theme.link}`}>View</a> : null}
             </div>
             {description(item.description, theme, "mt-1")}
             {item.technologies && item.technologies.length > 0 ? (
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {item.technologies.map((tech, techIndex) => (
-                  <span
-                    key={`${tech}-${techIndex}`}
-                    className={`rounded-full px-2 py-1 text-[8px] ${theme.tag}`}
-                  >
-                    {tech}
-                  </span>
+                  <span key={`${tech}-${techIndex}`} className={`rounded-full px-2 py-1 text-[8px] ${theme.tag}`}>{tech}</span>
                 ))}
               </div>
             ) : null}
@@ -707,9 +629,7 @@ const renderSkills = (data: ResumeData, theme: Theme, title: string, bars = fals
       ) : (
         <div className="flex flex-wrap gap-1.5">
           {data.skills.map((skill, index) => (
-            <span key={`${skill}-${index}`} className={`rounded-full px-2.5 py-1 text-[8px] ${theme.tag}`}>
-              {skill}
-            </span>
+            <span key={`${skill}-${index}`} className={`rounded-full px-2.5 py-1 text-[8px] ${theme.tag}`}>{skill}</span>
           ))}
         </div>
       )}
@@ -729,10 +649,7 @@ const renderLanguages = (data: ResumeData, theme: Theme, bars = false) =>
             </div>
             {bars ? (
               <div className={`h-1.5 rounded-full ${theme.skillBarTrack}`}>
-                <div
-                  className={`h-1.5 rounded-full ${theme.skillBarFill}`}
-                  style={{ width: levelWidth[item.level] || "60%" }}
-                />
+                <div className={`h-1.5 rounded-full ${theme.skillBarFill}`} style={{ width: levelWidth[item.level] || "60%" }} />
               </div>
             ) : null}
           </div>
@@ -768,9 +685,7 @@ const renderLinks = (data: ResumeData, theme: Theme) =>
         {data.socialLinks.map((item, index) => (
           <div key={`${item.platform}-${index}`}>
             <p className={`${theme.strong} text-[9px]`}>{item.platform}</p>
-            <a href={item.url} className={`text-[9px] break-words ${theme.link}`}>
-              {item.url}
-            </a>
+            <a href={item.url} className={`text-[9px] break-words ${theme.link}`}>{item.url}</a>
           </div>
         ))}
       </div>
@@ -784,9 +699,7 @@ const renderCustomSections = (data: ResumeData, theme: Theme) =>
         <section className="page-safe" key={`${section.title}-${index}`}>
           {sectionTitleNode(section.title, theme)}
           {section.description ? description(section.description, theme) : null}
-          {section.items && section.items.length > 0 ? (
-            <div className={section.description ? "mt-1.5" : ""}>{bullets(section.items, theme)}</div>
-          ) : null}
+          {section.items && section.items.length > 0 ? <div className={section.description ? "mt-1.5" : ""}>{bullets(section.items, theme)}</div> : null}
           {section.date ? <p className={`${theme.muted} mt-1`}>{section.date}</p> : null}
         </section>
       ))}
@@ -818,23 +731,9 @@ const renderFresherPanels = (data: ResumeData, theme: Theme) => (
   </>
 );
 
-const Header = ({
-  data,
-  theme,
-  variant,
-}: {
-  data: ResumeData;
-  theme: Theme;
-  variant: TemplateVariant;
-}) => (
+const Header = ({ data, theme, variant }: { data: ResumeData; theme: Theme; variant: TemplateVariant }) => (
   <header className={`page-safe px-8 py-7 ${theme.header}`}>
-    <div
-      className={
-        variant === 3 || variant === 10
-          ? "flex items-end justify-between gap-6"
-          : "flex items-start justify-between gap-6"
-      }
-    >
+    <div className={variant === 3 || variant === 10 ? "flex items-end justify-between gap-6" : "flex items-start justify-between gap-6"}>
       <div className="min-w-0 flex-1">
         <h1 className={`${theme.headerName} break-words leading-none`}>{data.fullName || "Your Name"}</h1>
         <p className={`mt-2 break-words ${theme.headerRole}`}>{data.role || "Professional Title"}</p>
@@ -850,22 +749,14 @@ const Header = ({
     {data.socialLinks && data.socialLinks.length > 0 ? (
       <div className="mt-4 flex flex-wrap gap-2">
         {data.socialLinks.map((item, index) => (
-          <span key={`${item.platform}-${index}`} className={`rounded-full px-3 py-1 text-[8px] ${theme.headerBadge}`}>
-            {item.platform}
-          </span>
+          <span key={`${item.platform}-${index}`} className={`rounded-full px-3 py-1 text-[8px] ${theme.headerBadge}`}>{item.platform}</span>
         ))}
       </div>
     ) : null}
   </header>
 );
 
-const TopBandLayout = ({
-  data,
-  variant,
-}: {
-  data: ResumeData;
-  variant: TemplateVariant;
-}) => {
+const TopBandLayout = ({ data, variant }: { data: ResumeData; variant: TemplateVariant }) => {
   const theme = themes[variant];
   const meta = variantMeta[variant];
   const summaryTitle = data.candidateType === "fresher" ? "Career Objective" : meta.summaryTitle;
@@ -894,13 +785,7 @@ const TopBandLayout = ({
   );
 };
 
-const LeftSidebarLayout = ({
-  data,
-  variant,
-}: {
-  data: ResumeData;
-  variant: TemplateVariant;
-}) => {
+const LeftSidebarLayout = ({ data, variant }: { data: ResumeData; variant: TemplateVariant }) => {
   const theme = themes[variant];
   const meta = variantMeta[variant];
   const summaryTitle = data.candidateType === "fresher" ? "Career Objective" : meta.summaryTitle;
@@ -914,7 +799,7 @@ const LeftSidebarLayout = ({
           muted: "text-[8px] text-slate-400",
           strong: "text-[11px] font-semibold text-white",
           tag: "bg-white/10 text-white border border-white/10",
-          link: variant === 2 ? "text-cyan-300" : "text-cyan-300",
+          link: "text-cyan-300",
           accentText: "text-cyan-300",
         }
       : theme;
@@ -960,13 +845,7 @@ const LeftSidebarLayout = ({
   );
 };
 
-const SingleColumnLayout = ({
-  data,
-  variant,
-}: {
-  data: ResumeData;
-  variant: TemplateVariant;
-}) => {
+const SingleColumnLayout = ({ data, variant }: { data: ResumeData; variant: TemplateVariant }) => {
   const theme = themes[variant];
   const meta = variantMeta[variant];
   const summaryTitle = data.candidateType === "fresher" ? "Career Objective" : meta.summaryTitle;
@@ -997,13 +876,7 @@ const SingleColumnLayout = ({
   );
 };
 
-const SplitTopLayout = ({
-  data,
-  variant,
-}: {
-  data: ResumeData;
-  variant: TemplateVariant;
-}) => {
+const SplitTopLayout = ({ data, variant }: { data: ResumeData; variant: TemplateVariant }) => {
   const theme = themes[variant];
   const meta = variantMeta[variant];
   const summaryTitle = data.candidateType === "fresher" ? "Career Objective" : meta.summaryTitle;
@@ -1048,13 +921,7 @@ const SplitTopLayout = ({
   );
 };
 
-const TimelineLayout = ({
-  data,
-  variant,
-}: {
-  data: ResumeData;
-  variant: TemplateVariant;
-}) => {
+const TimelineLayout = ({ data, variant }: { data: ResumeData; variant: TemplateVariant }) => {
   const theme = themes[variant];
   const meta = variantMeta[variant];
   const summaryTitle = data.candidateType === "fresher" ? "Career Objective" : meta.summaryTitle;
@@ -1083,13 +950,7 @@ const TimelineLayout = ({
   );
 };
 
-export const TemplateCore = ({
-  data,
-  variant,
-}: {
-  data: ResumeData;
-  variant: TemplateVariant;
-}) => {
+const TemplateCore = ({ data, variant }: { data: ResumeData; variant: TemplateVariant }) => {
   switch (variantMeta[variant].layout) {
     case "left-sidebar":
       return <LeftSidebarLayout data={data} variant={variant} />;
