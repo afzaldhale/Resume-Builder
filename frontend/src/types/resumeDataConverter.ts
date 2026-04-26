@@ -16,6 +16,7 @@ export interface FormData {
   projects: string;
   strengths: string; // For freshers
   hobbies: string;   // For freshers
+  referenceNotes: string;
 }
 
 /**
@@ -43,21 +44,9 @@ export const convertToTemplateData = (
   // Parse projects
   const projectsArray = parseProjects(formData.projects);
 
-  // Parse strengths (for freshers)
-  const strengthsArray = candidateType === "fresher" 
-    ? formData.strengths
-        .split(',')
-        .map(strength => strength.trim())
-        .filter(strength => strength !== '')
-    : [];
-
-  // Parse hobbies (for freshers)
-  const hobbiesArray = candidateType === "fresher"
-    ? formData.hobbies
-        .split(',')
-        .map(hobby => hobby.trim())
-        .filter(hobby => hobby !== '')
-    : [];
+  const strengthsArray = parseListField(formData.strengths);
+  const hobbiesArray = parseListField(formData.hobbies, true);
+  const referencesArray = parseListField(formData.referenceNotes, true);
 
   // Decide summary vs careerObjective based on candidate type
   const resumeData: ResumeData = {
@@ -75,6 +64,7 @@ export const convertToTemplateData = (
     socialLinks: socialLinks,
     strengths: strengthsArray.length > 0 ? strengthsArray : undefined,
     hobbies: hobbiesArray.length > 0 ? hobbiesArray : undefined,
+    references: referencesArray.length > 0 ? referencesArray : undefined,
     candidateType,
   };
 
@@ -137,14 +127,19 @@ export const convertFromTemplateData = (
       .join("\n\n"),
     skills: (resumeData.skills || []).join(", "),
     projects: (resumeData.projects || [])
-      .map((project) =>
-        [project.name, project.description, project.technologies?.join(", ")]
+      .map((project) => {
+        const technologyLine = project.technologies?.length
+          ? `Technologies: ${project.technologies.join(", ")}`
+          : "";
+
+        return [project.name, project.description, technologyLine]
           .filter(Boolean)
-          .join("\n")
-      )
+          .join("\n");
+      })
       .join("\n\n"),
     strengths: (resumeData.strengths || []).join(", "),
-    hobbies: (resumeData.hobbies || []).join(", "),
+    hobbies: (resumeData.hobbies || []).join("\n"),
+    referenceNotes: (resumeData.references || []).join("\n"),
   };
 
   return {
@@ -173,6 +168,20 @@ const parseEducation = (educationStr: string) => {
         gpa: parts[4] || "",
       };
     });
+};
+
+const parseListField = (value?: string, preserveLines = false) => {
+  const safeValue = value ?? "";
+
+  if (!safeValue.trim()) return [];
+
+  const items = safeValue
+    .replace(/\r\n/g, "\n")
+    .split(preserveLines ? /\n|,/ : /,|\n/)
+    .map((item) => item.replace(/^[\s]*[•*-]\s*/, "").trim())
+    .filter(Boolean);
+
+  return preserveLines ? items : Array.from(new Set(items));
 };
 
 /**
@@ -221,10 +230,24 @@ const parseProjects = (projectsStr: string) => {
     .filter(block => block.trim() !== '')
     .map(block => {
       const lines = block.split('\n').filter(line => line.trim() !== '');
+      const technologyLineIndex = lines.findIndex((line) =>
+        /^technologies\s*:/i.test(line.trim())
+      );
+
+      const technologyLine = technologyLineIndex >= 0 ? lines[technologyLineIndex] : "";
+      const descriptionLines =
+        technologyLineIndex >= 0 ? lines.slice(1, technologyLineIndex) : lines.slice(1);
+
       return {
         name: lines[0] || "",
-        description: lines[1] || "",
-        technologies: lines[2]?.split(',').map(tech => tech.trim()) || [],
+        description: descriptionLines.join('\n').trim() || "",
+        technologies: technologyLine
+          ? technologyLine
+              .replace(/^technologies\s*:/i, "")
+              .split(',')
+              .map(tech => tech.trim())
+              .filter(Boolean)
+          : [],
       };
     });
 };
@@ -253,6 +276,7 @@ export const generateSampleData = (candidateType: CandidateType = "experienced")
         projects: "E-commerce Platform\nBuilt a full-stack e-commerce platform with React and Node.js\nTechnologies: React, Node.js, MongoDB, Stripe API\n\nTask Management App\nDeveloped a collaborative task management application\nTechnologies: TypeScript, Next.js, Prisma, PostgreSQL",
         strengths: "",
         hobbies: "",
+        referenceNotes: "References available upon request",
       },
       languages: [
         { language: "English", level: "Native" },
@@ -285,7 +309,8 @@ export const generateSampleData = (candidateType: CandidateType = "experienced")
         skills: "JavaScript, Python, React, Node.js, HTML/CSS, Git, MongoDB, SQL",
         projects: "Student Management System\nDeveloped a comprehensive system for tracking student records\nTechnologies: Java, MySQL, Spring Boot\n\nE-commerce Website\nBuilt a responsive e-commerce site as a college project\nTechnologies: React, Node.js, MongoDB, Express",
         strengths: "Quick learner, Team player, Problem-solving, Adaptable, Attention to detail",
-        hobbies: "Coding competitions, Open source contributions, Reading tech blogs, Playing chess",
+        hobbies: "Hackathon finalist\nOpen source contributor\nChess club coordinator",
+        referenceNotes: "Faculty reference: Prof. Maria Chen, Computer Science Department",
       },
       languages: [
         { language: "English", level: "Native" },
@@ -326,7 +351,8 @@ export const clearFormData = (candidateType: CandidateType = "experienced"): {
       skills: "",
       projects: "",
       strengths: candidateType === "fresher" ? "Quick learner, Team player" : "",
-      hobbies: candidateType === "fresher" ? "Reading, Sports, Coding" : "",
+      hobbies: candidateType === "fresher" ? "Hackathons\nStudent clubs\nVolunteer work" : "",
+      referenceNotes: "",
     },
     languages: candidateType === "experienced" 
       ? [{ language: "English", level: "Native" }]

@@ -38,7 +38,6 @@ INSERT INTO users (name, email, password, role)
 VALUES (
   'Admin',
   'admin@example.com',
-  '$2b$10$wH6X3j8Y0Q2bZ9mJ6XkO5uJc9rMZ1KZPp1yQ2xYk9xYpZzQ1Y0l3m',
-   Admin@123
+  '$2b$10$n2qng4m7X8g5x9Ysl7NNP.qsYQ8EaV7UwvjvntZNHjMzNihRNaywG',
   'admin'
 );

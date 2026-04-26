@@ -1,12 +1,23 @@
-// components/ResumeBuilder.tsx
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
+import {
+  Briefcase,
+  FileText,
+  Github,
+  Globe,
+  GraduationCap,
+  Linkedin,
+  Plus,
+  Send,
+  X,
+} from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
 import { resumeService } from "@/services/resumeService";
 import UserSidebar from "@/components/UserSidebar";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -15,85 +26,81 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, X, Plus, Globe, Linkedin, Github, Send, Briefcase, GraduationCap } from "lucide-react";
-import { toast } from "sonner";
-import { useNavigate, useParams } from "react-router-dom";
-import { TemplateSelector } from "@/components/resume-templates/TemplateSelector";
 import EmptyTemplate from "@/components/resume-templates/EmptyTemplate";
 import ResumeRenderer from "@/components/resume-templates/ResumeRenderer";
-import { LanguageItem, CertificationItem, SocialLink } from "@/components/resume-templates/types";
+import { TemplateSelector } from "@/components/resume-templates/TemplateSelector";
+import { premiumTemplateOptions } from "@/components/resume-templates/premiumShared";
+import type {
+  CertificationItem,
+  LanguageItem,
+  SocialLink,
+} from "@/components/resume-templates/types";
 import {
+  CandidateType,
+  FormData,
+  clearFormData,
   convertFromTemplateData,
   convertToTemplateData,
   generateSampleData,
-  clearFormData,
-  FormData,
-  CandidateType,
 } from "../../types/resumeDataConverter";
+import { SmartTextareaField } from "./resume-builder/SmartTextareaField";
+
+const defaultFormData: FormData = {
+  fullName: "",
+  email: "",
+  phone: "",
+  role: "",
+  address: "",
+  summary: "",
+  education: "",
+  experience: "",
+  skills: "",
+  projects: "",
+  strengths: "",
+  hobbies: "",
+  referenceNotes: "",
+};
 
 const ResumeBuilder = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
   const { user } = useAuthContext();
   const editingResumeId = id;
+
   const [selectedTemplate, setSelectedTemplate] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoadingResume, setIsLoadingResume] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
-  const resumeRef = useRef<HTMLDivElement>(null);
-
-  // Candidate type toggle
   const [candidateType, setCandidateType] = useState<CandidateType>("experienced");
-
-  // Form state
-  const [formData, setFormData] = useState<FormData>({
-    fullName: "",
-    email: "",
-    phone: "",
-    role: "",
-    address: "",
-    summary: "",
-    education: "",
-    experience: "",
-    skills: "",
-    projects: "",
-    strengths: "",
-    hobbies: "",
-  });
-
-  // Dynamic sections state
+  const [formData, setFormData] = useState<FormData>(defaultFormData);
   const [languages, setLanguages] = useState<LanguageItem[]>([
     { language: "English", level: "Native" },
     { language: "Hindi", level: "Fluent" },
   ]);
-
   const [certifications, setCertifications] = useState<CertificationItem[]>([
     { name: "AWS Certified", issuer: "Amazon", year: "2023" },
     { name: "React Expert", issuer: "Meta", year: "2022" },
   ]);
-
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([
     { platform: "LinkedIn", url: "linkedin.com/in/johndoe" },
     { platform: "GitHub", url: "github.com/johndoe" },
     { platform: "Portfolio", url: "johndoeportfolio.com" },
   ]);
-
-  // New item states with proper typing for LanguageItem level
   const [newLanguage, setNewLanguage] = useState<LanguageItem>({
     language: "",
-    level: "Intermediate"
+    level: "Intermediate",
   });
-
   const [newCertification, setNewCertification] = useState<CertificationItem>({
     name: "",
     issuer: "",
-    year: ""
+    year: "",
   });
-
   const [newSocialLink, setNewSocialLink] = useState<SocialLink>({
     platform: "LinkedIn",
-    url: ""
+    url: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingResume, setIsLoadingResume] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [previewScale, setPreviewScale] = useState(0.62);
+  const previewShellRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const draft = localStorage.getItem("resume-builder-draft");
@@ -101,7 +108,12 @@ const ResumeBuilder = () => {
     if (!editingResumeId && draft) {
       try {
         const parsed = JSON.parse(draft);
-        if (parsed.formData) setFormData(parsed.formData);
+        if (parsed.formData) {
+          setFormData({
+            ...defaultFormData,
+            ...parsed.formData,
+          });
+        }
         if (parsed.languages) setLanguages(parsed.languages);
         if (parsed.certifications) setCertifications(parsed.certifications);
         if (parsed.socialLinks) setSocialLinks(parsed.socialLinks);
@@ -126,14 +138,17 @@ const ResumeBuilder = () => {
         }
 
         const parsed = convertFromTemplateData(resume.resumeData);
-        setFormData(parsed.formData);
+        setFormData({
+          ...defaultFormData,
+          ...parsed.formData,
+        });
         setLanguages(parsed.languages);
         setCertifications(parsed.certifications);
         setSocialLinks(parsed.socialLinks);
         setCandidateType(parsed.candidateType);
         setSelectedTemplate(Number(resume.templateId) || 1);
       } catch (error: unknown) {
-        console.error('Load resume error:', error);
+        console.error("Load resume error:", error);
         toast.error("Failed to load resume");
       } finally {
         setIsLoadingResume(false);
@@ -156,17 +171,75 @@ const ResumeBuilder = () => {
           socialLinks,
           candidateType,
           selectedTemplate,
-        })
+        }),
       );
       setSaveStatus("saved");
-    }, 5000);
+    }, 1500);
 
     return () => window.clearTimeout(timer);
   }, [candidateType, certifications, formData, languages, selectedTemplate, socialLinks]);
 
-  // Handlers
+  useEffect(() => {
+    const node = previewShellRef.current;
+    if (!node) return;
+
+    const resizeObserver = new ResizeObserver(([entry]) => {
+      const maxPreviewWidth = Math.min(entry.contentRect.width - 32, 520);
+      const nextScale = Math.min(0.72, maxPreviewWidth / 794);
+      if (nextScale > 0) {
+        setPreviewScale(Number(nextScale.toFixed(3)));
+      }
+    });
+
+    resizeObserver.observe(node);
+    return () => resizeObserver.disconnect();
+  }, []);
+
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const templateData = useMemo(
+    () =>
+      convertToTemplateData(
+        formData,
+        languages,
+        certifications,
+        socialLinks,
+        candidateType,
+      ),
+    [candidateType, certifications, formData, languages, socialLinks],
+  );
+
+  const selectedTemplateMeta = premiumTemplateOptions.find(
+    (template) => template.id === selectedTemplate,
+  );
+
+  const handleLoadSampleData = () => {
+    const sampleData = generateSampleData(candidateType);
+    setFormData({
+      ...defaultFormData,
+      ...sampleData.formData,
+    });
+    setLanguages(sampleData.languages);
+    setCertifications(sampleData.certifications);
+    setSocialLinks(sampleData.socialLinks);
+    toast.success(`${candidateType === "experienced" ? "Experienced" : "Fresher"} sample data loaded`);
+  };
+
+  const handleClearForm = () => {
+    if (!window.confirm("Are you sure you want to clear all form data?")) return;
+
+    const cleared = clearFormData(candidateType);
+    setFormData({
+      ...defaultFormData,
+      ...cleared.formData,
+    });
+    setLanguages(cleared.languages);
+    setCertifications(cleared.certifications);
+    setSocialLinks(cleared.socialLinks);
+    localStorage.removeItem("resume-builder-draft");
+    toast.info("Form cleared");
   };
 
   const handleRequestDownload = async () => {
@@ -183,35 +256,27 @@ const ResumeBuilder = () => {
     setIsSubmitting(true);
 
     try {
-      const resumeData = convertToTemplateData(
-        formData,
-        languages,
-        certifications,
-        socialLinks,
-        candidateType
-      );
-
-      const title = `${formData.fullName} Resume - ${candidateType === 'experienced' ? 'Experienced' : 'Fresher'}`;
+      const title = `${formData.fullName} Resume - ${
+        candidateType === "experienced" ? "Experienced" : "Fresher"
+      }`;
       let resumeId = editingResumeId;
 
       if (editingResumeId) {
-        // Update existing resume
         await resumeService.updateResume(user.uid, editingResumeId, {
           title,
-          resumeData,
+          resumeData: templateData,
           templateId: selectedTemplate,
         });
-        toast.success("Resume updated successfully!");
+        toast.success("Resume updated successfully");
       } else {
-        // Create new resume
         const result = await resumeService.createResume(
           user.uid,
-          resumeData,
+          templateData,
           selectedTemplate,
-          title
+          title,
         );
         resumeId = result.id;
-        toast.success("Resume created successfully!");
+        toast.success("Resume created successfully");
       }
 
       if (resumeId) {
@@ -220,7 +285,6 @@ const ResumeBuilder = () => {
 
       localStorage.removeItem("resume-builder-draft");
       navigate("/requests");
-
     } catch (error: unknown) {
       console.error("Submit error:", error);
       toast.error("Failed to save resume");
@@ -229,109 +293,54 @@ const ResumeBuilder = () => {
     }
   };
 
-  const handleLoadSampleData = () => {
-    const sampleData = generateSampleData(candidateType);
-    setFormData(sampleData.formData);
-    setLanguages(sampleData.languages);
-    setCertifications(sampleData.certifications);
-    setSocialLinks(sampleData.socialLinks);
-    toast.success(`${candidateType === 'experienced' ? 'Experienced' : 'Fresher'} sample data loaded!`);
-  };
-
-  const handleClearForm = () => {
-    if (window.confirm("Are you sure you want to clear all form data?")) {
-      const clearedData = clearFormData(candidateType);
-      setFormData(clearedData.formData);
-      setLanguages(clearedData.languages);
-      setCertifications(clearedData.certifications);
-      setSocialLinks(clearedData.socialLinks);
-      localStorage.removeItem("resume-builder-draft");
-      toast.info("Form cleared");
-    }
-  };
-
-  // Dynamic section handlers
   const addLanguage = () => {
-    if (newLanguage.language.trim()) {
-      setLanguages(prev => [...prev, { ...newLanguage }]);
-      setNewLanguage({ language: "", level: "Intermediate" });
-      toast.success("Language added");
-    }
-  };
-
-  const removeLanguage = (index: number) => {
-    setLanguages(prev => prev.filter((_, i) => i !== index));
-    toast.info("Language removed");
+    if (!newLanguage.language.trim()) return;
+    setLanguages((prev) => [...prev, { ...newLanguage }]);
+    setNewLanguage({ language: "", level: "Intermediate" });
+    toast.success("Language added");
   };
 
   const addCertification = () => {
-    if (newCertification.name.trim()) {
-      setCertifications(prev => [...prev, { ...newCertification }]);
-      setNewCertification({ name: "", issuer: "", year: "" });
-      toast.success("Certification added");
-    }
-  };
-
-  const removeCertification = (index: number) => {
-    setCertifications(prev => prev.filter((_, i) => i !== index));
-    toast.info("Certification removed");
+    if (!newCertification.name.trim()) return;
+    setCertifications((prev) => [...prev, { ...newCertification }]);
+    setNewCertification({ name: "", issuer: "", year: "" });
+    toast.success("Certification added");
   };
 
   const addSocialLink = () => {
-    if (newSocialLink.url.trim()) {
-      setSocialLinks(prev => [...prev, { ...newSocialLink }]);
-      setNewSocialLink({ platform: "LinkedIn", url: "" });
-      toast.success("Social link added");
-    }
+    if (!newSocialLink.url.trim()) return;
+    setSocialLinks((prev) => [...prev, { ...newSocialLink }]);
+    setNewSocialLink({ platform: "LinkedIn", url: "" });
+    toast.success("Social link added");
+  };
+
+  const removeLanguage = (index: number) => {
+    setLanguages((prev) => prev.filter((_, currentIndex) => currentIndex !== index));
+  };
+
+  const removeCertification = (index: number) => {
+    setCertifications((prev) => prev.filter((_, currentIndex) => currentIndex !== index));
   };
 
   const removeSocialLink = (index: number) => {
-    setSocialLinks(prev => prev.filter((_, i) => i !== index));
-    toast.info("Social link removed");
-  };
-
-  const templateData = convertToTemplateData(
-    formData,
-    languages,
-    certifications,
-    socialLinks,
-    candidateType
-  );
-
-  // Template color schemes
-  const templateColors = {
-    1: "bg-blue-100 text-blue-800 border-blue-200",
-    2: "bg-gray-100 text-gray-800 border-gray-200",
-    3: "bg-green-100 text-green-800 border-green-200",
-    4: "bg-indigo-100 text-indigo-800 border-indigo-200",
-    5: "bg-red-100 text-red-800 border-red-200",
-    6: "bg-purple-100 text-purple-800 border-purple-200",
-    7: "bg-amber-100 text-amber-800 border-amber-200",
-    8: "bg-slate-100 text-slate-800 border-slate-200",
-
-    // 🔹 Newly added templates
-    9: "bg-gray-900 text-gray-100 border-gray-700",
-    10: "bg-gradient-to-r from-blue-100 to-emerald-100 text-emerald-800 border-emerald-200",
-    11: "bg-indigo-50 text-indigo-900 border-indigo-200",
-    12: "bg-emerald-50 text-emerald-900 border-emerald-200",
-    13: "bg-fuchsia-50 text-fuchsia-900 border-fuchsia-200",
-    14: "bg-white text-slate-900 border-slate-300",
-    15: "bg-slate-50 text-slate-900 border-slate-300",
+    setSocialLinks((prev) => prev.filter((_, currentIndex) => currentIndex !== index));
   };
 
   return (
     <div className="flex min-h-screen bg-background">
       <UserSidebar />
 
-      <main className="flex-1 p-4 md:p-8 pt-20 md:pt-8">
-        <div className="max-w-7xl mx-auto">
+      <main className="flex-1 p-4 pt-20 md:p-8 md:pt-8">
+        <div className="mx-auto max-w-7xl">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold">Resume Builder</h1>
-            <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-gray-600">
+            <h1 className="text-3xl font-bold text-slate-950">Resume Builder</h1>
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-600">
               <p>
-                {editingResumeId ? "Edit and refine your saved resume" : "Create your professional resume in minutes"}
+                {editingResumeId
+                  ? "Edit and refine your saved resume"
+                  : "Create a premium recruiter-ready resume in one polished page"}
               </p>
-              <span className="px-2 py-1 rounded-full bg-muted text-muted-foreground">
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
                 {isLoadingResume
                   ? "Loading..."
                   : saveStatus === "saving"
@@ -341,68 +350,61 @@ const ResumeBuilder = () => {
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
-
-            {/* Form Section */}
-            <Card className="p-6 space-y-6 shadow-soft h-fit overflow-y-auto max-h-[calc(100vh-2rem)]">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Build Your Resume</h2>
+          <div className="grid gap-8 xl:grid-cols-[minmax(0,1.18fr)_minmax(380px,0.82fr)]">
+            <Card className="h-fit max-h-[calc(100vh-2rem)] space-y-6 overflow-y-auto rounded-[28px] border-slate-200 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)]">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-950">Build Your Resume</h2>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Better spacing, richer writing fields, and premium one-page templates.
+                  </p>
+                </div>
                 <div className="flex gap-2">
-                  <Button
-                    onClick={handleLoadSampleData}
-                    variant="outline"
-                    size="sm"
-                  >
+                  <Button onClick={handleLoadSampleData} variant="outline" size="sm">
                     Load Sample
                   </Button>
-                  <Button
-                    onClick={handleClearForm}
-                    variant="outline"
-                    size="sm"
-                  >
+                  <Button onClick={handleClearForm} variant="outline" size="sm">
                     Clear
                   </Button>
                 </div>
               </div>
 
-              {/* Candidate Type Toggle */}
-              <div className="space-y-3">
+              <section className="space-y-3">
                 <Label>Candidate Type</Label>
-                <div className="flex gap-3">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <Button
                     type="button"
                     variant={candidateType === "experienced" ? "default" : "outline"}
                     onClick={() => setCandidateType("experienced")}
-                    className="flex-1"
+                    className="h-11"
                   >
-                    <Briefcase className="h-4 w-4 mr-2" />
+                    <Briefcase className="mr-2 h-4 w-4" />
                     Experienced
                   </Button>
                   <Button
                     type="button"
                     variant={candidateType === "fresher" ? "default" : "outline"}
                     onClick={() => setCandidateType("fresher")}
-                    className="flex-1"
+                    className="h-11"
                   >
-                    <GraduationCap className="h-4 w-4 mr-2" />
+                    <GraduationCap className="mr-2 h-4 w-4" />
                     Fresher
                   </Button>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-slate-500">
                   {candidateType === "experienced"
-                    ? "For candidates with professional work experience"
-                    : "For students, graduates, and entry-level candidates"}
+                    ? "Optimized for candidates with professional work history."
+                    : "Optimized for students, graduates, interns, and entry-level roles."}
                 </p>
-              </div>
+              </section>
 
               <TemplateSelector
                 selectedTemplate={selectedTemplate}
                 onSelectTemplate={setSelectedTemplate}
               />
 
-              {/* Personal Information Section */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg">Personal Information</h3>
+              <section className="space-y-4">
+                <h3 className="text-lg font-semibold text-slate-900">Personal Information</h3>
 
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name *</Label>
@@ -410,12 +412,11 @@ const ResumeBuilder = () => {
                     id="fullName"
                     value={formData.fullName}
                     onChange={(e) => handleInputChange("fullName", e.target.value)}
-                    placeholder="John Doe"
-                    required
+                    placeholder="Avery Morgan"
                   />
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email *</Label>
                     <Input
@@ -423,8 +424,7 @@ const ResumeBuilder = () => {
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
-                      placeholder="john@example.com"
-                      required
+                      placeholder="avery@example.com"
                     />
                   </div>
                   <div className="space-y-2">
@@ -444,7 +444,11 @@ const ResumeBuilder = () => {
                     id="role"
                     value={formData.role}
                     onChange={(e) => handleInputChange("role", e.target.value)}
-                    placeholder={candidateType === "experienced" ? "Senior Software Engineer" : "Software Developer (Fresher)"}
+                    placeholder={
+                      candidateType === "experienced"
+                        ? "Senior Software Engineer"
+                        : "Frontend Developer"
+                    }
                   />
                 </div>
 
@@ -454,169 +458,142 @@ const ResumeBuilder = () => {
                     id="address"
                     value={formData.address}
                     onChange={(e) => handleInputChange("address", e.target.value)}
-                    placeholder="Your City / Location"
+                    placeholder="New York, NY"
                   />
                 </div>
-              </div>
+              </section>
 
-              {/* Content Sections */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg">Content Sections</h3>
-
-                <div className="space-y-2">
-                  <Label htmlFor="summary">
-                    {candidateType === "experienced" ? "Professional Summary" : "Career Objective"}
-                  </Label>
-                  <Textarea
-                    id="summary"
-                    value={formData.summary}
-                    onChange={(e) => handleInputChange("summary", e.target.value)}
-                    placeholder={
-                      candidateType === "experienced"
-                        ? "Brief overview of your professional background and achievements..."
-                        : "Career goals, academic achievements, and what you bring as a fresher..."
-                    }
-                    rows={3}
-                  />
-                  <p className="text-xs text-gray-500">
-                    {candidateType === "experienced"
-                      ? "Highlight your experience, skills, and career achievements"
-                      : "Focus on your educational background, skills, and career aspirations"}
+              <section className="space-y-5">
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">Content Sections</h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    These fields are designed for longer paragraphs, bullet points, and cleaner ATS-ready storytelling.
                   </p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="skills">Skills</Label>
-                  <Textarea
-                    id="skills"
-                    value={formData.skills}
-                    onChange={(e) => handleInputChange("skills", e.target.value)}
-                    placeholder={
-                      candidateType === "experienced"
-                        ? "JavaScript, React, Node.js, AWS, Docker, CI/CD"
-                        : "Programming languages, frameworks, tools learned in academics/internships"
-                    }
-                    rows={2}
-                  />
-                  <p className="text-xs text-gray-500">
-                    Separate skills with commas
-                  </p>
-                </div>
+                <SmartTextareaField
+                  id="summary"
+                  label={candidateType === "experienced" ? "Professional Summary" : "Career Objective"}
+                  value={formData.summary}
+                  onChange={(value) => handleInputChange("summary", value)}
+                  placeholder={
+                    candidateType === "experienced"
+                      ? "Write 3-5 lines about your strengths, domain experience, leadership, and measurable value.\nExample:\nProduct-minded engineer with 6+ years building SaaS platforms, improving performance, and mentoring distributed teams."
+                      : "Write 3-5 lines about your career goals, strengths, and how you add value.\nExample:\nRecent computer science graduate with internship experience in React and a strong interest in building accessible, high-quality web products."
+                  }
+                  helper="Open with your most marketable strengths and connect them to the role you want."
+                  recommended="280-420 characters"
+                  maxLength={700}
+                />
 
-                <div className="space-y-2">
-                  <Label htmlFor="education">Education</Label>
-                  <Textarea
-                    id="education"
-                    value={formData.education}
-                    onChange={(e) => handleInputChange("education", e.target.value)}
-                    placeholder={
-                      candidateType === "experienced"
-                        ? "Bachelor of Computer Science | MIT | 2015 | 2019 | 3.8"
-                        : "Bachelor of Computer Science | ABC University | 2020 | 2024 | 3.9"
-                    }
-                    rows={3}
-                  />
-                  <p className="text-xs text-gray-500">
-                    Format: Degree | School | Start Year | End Year | GPA (optional)<br />
-                    Add multiple entries on separate lines
-                  </p>
-                </div>
+                <SmartTextareaField
+                  id="skills"
+                  label="Skills"
+                  value={formData.skills}
+                  onChange={(value) => handleInputChange("skills", value)}
+                  placeholder="List skills separated by commas or new lines.\nExample:\nReact, TypeScript, Node.js, PostgreSQL, AWS, Design Systems"
+                  helper="Lead with hard skills most relevant to your target role."
+                  recommended="10-18 skills"
+                  maxLength={450}
+                  minHeightClassName="min-h-[110px]"
+                />
 
-                <div className="space-y-2">
-                  <Label htmlFor="experience">
-                    {candidateType === "experienced" ? "Work Experience" : "Experience (Internships/Training)"}
-                  </Label>
-                  <Textarea
-                    id="experience"
-                    value={formData.experience}
-                    onChange={(e) => handleInputChange("experience", e.target.value)}
-                    placeholder={
-                      candidateType === "experienced"
-                        ? "Senior Developer at TechCorp&#10;2021 - Present&#10;Led development of web applications..."
-                        : "Summer Intern at TechCorp&#10;Jun 2023 - Aug 2023&#10;Assisted in frontend development..."
-                    }
-                    rows={4}
-                  />
-                  <p className="text-xs text-gray-500">
-                    {candidateType === "experienced"
-                      ? "Format: Role at Company<br />Dates: Start - End<br />Description<br />Separate experiences with an empty line"
-                      : "Include internships, industrial training, academic projects with real-world impact"}
-                  </p>
-                </div>
+                <SmartTextareaField
+                  id="education"
+                  label="Education"
+                  value={formData.education}
+                  onChange={(value) => handleInputChange("education", value)}
+                  placeholder="Use one entry per block.\nExample:\nB.Tech in Computer Science | ABC University | 2020 | 2024 | 8.7 CGPA\n\n12th Grade | City Public School | 2018 | 2020 | 91%"
+                  helper="Format each entry as Degree | School | Start Year | End Year | GPA/CGPA."
+                  recommended="1-3 entries"
+                  maxLength={650}
+                />
 
-                <div className="space-y-2">
-                  <Label htmlFor="projects">Projects / Achievements</Label>
-                  <Textarea
-                    id="projects"
-                    value={formData.projects}
-                    onChange={(e) => handleInputChange("projects", e.target.value)}
-                    placeholder={
-                      candidateType === "experienced"
-                        ? "E-commerce Platform&#10;Built full-stack platform with React and Node.js&#10;React, Node.js, MongoDB"
-                        : "Student Management System&#10;Developed for final year project&#10;Java, MySQL, Spring Boot"
-                    }
-                    rows={3}
-                  />
-                  <p className="text-xs text-gray-500">
-                    Format: Project Name<br />
-                    Description<br />
-                    Technologies (comma-separated)<br />
-                    Separate projects with an empty line
-                  </p>
-                </div>
+                <SmartTextareaField
+                  id="experience"
+                  label={
+                    candidateType === "experienced"
+                      ? "Work Experience Description"
+                      : "Internship / Training Description"
+                  }
+                  value={formData.experience}
+                  onChange={(value) => handleInputChange("experience", value)}
+                  placeholder={
+                    candidateType === "experienced"
+                      ? "Create one block per role.\nExample:\nSenior Software Engineer at TechCorp\n2021 - Present\n• Led migration to a shared design system across 4 squads\n• Reduced page load time by 31% through performance optimization\n• Used React, TypeScript, Node.js, and AWS"
+                      : "Create one block per internship or training program.\nExample:\nFrontend Intern at TechCorp\nJun 2023 - Aug 2023\n• Built reusable React components for the admin dashboard\n• Partnered with QA to close 20+ UI bugs before release\n• Used React, Tailwind CSS, and Git"
+                  }
+                  helper="Describe responsibilities, tools used, impact, ownership, and measurable outcomes."
+                  recommended="2-4 bullets per role"
+                  maxLength={1800}
+                  minHeightClassName="min-h-[190px]"
+                />
 
-                {/* Fresher-specific sections */}
-                {candidateType === "fresher" && (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="strengths">Strengths</Label>
-                      <Textarea
-                        id="strengths"
-                        value={formData.strengths}
-                        onChange={(e) => handleInputChange("strengths", e.target.value)}
-                        placeholder="Hardworking, Quick learner, Team player, Adaptable, Problem-solving"
-                        rows={2}
-                      />
-                      <p className="text-xs text-gray-500">
-                        Personal and professional strengths that make you a good candidate
-                      </p>
-                    </div>
+                <SmartTextareaField
+                  id="projects"
+                  label="Project Description"
+                  value={formData.projects}
+                  onChange={(value) => handleInputChange("projects", value)}
+                  placeholder="Create one block per project.\nExample:\nResume Builder Platform\n• Designed a responsive builder with PDF export and live preview\n• Built with React, TypeScript, Tailwind CSS, and Firebase\n• Improved completion rate by 24% during beta testing"
+                  helper="Explain the project purpose, technologies used, your role, and measurable results."
+                  recommended="2-3 strong projects"
+                  maxLength={1200}
+                  minHeightClassName="min-h-[170px]"
+                />
 
-                    <div className="space-y-2">
-                      <Label htmlFor="hobbies">Hobbies / Interests</Label>
-                      <Textarea
-                        id="hobbies"
-                        value={formData.hobbies}
-                        onChange={(e) => handleInputChange("hobbies", e.target.value)}
-                        placeholder="Coding competitions, Reading tech blogs, Open source contributions, Sports"
-                        rows={2}
-                      />
-                      <p className="text-xs text-gray-500">
-                        Helps show personality and cultural fit
-                      </p>
-                    </div>
-                  </>
-                )}
-              </div>
+                <SmartTextareaField
+                  id="strengths"
+                  label="Custom Section Description"
+                  value={formData.strengths}
+                  onChange={(value) => handleInputChange("strengths", value)}
+                  placeholder="Use this flexible field for strengths, achievements, responsibilities, leadership, awards, or other highlights.\nExample:\n• Mentored 3 junior developers\n• Employee of the Quarter, Q3 2025\n• Strong stakeholder communication and roadmap ownership"
+                  helper="Great for achievements, responsibilities highlights, leadership notes, or differentiators."
+                  recommended="3-5 concise bullets"
+                  maxLength={600}
+                />
 
-              {/* Dynamic Sections */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg">Additional Information</h3>
+                <SmartTextareaField
+                  id="hobbies"
+                  label="Achievements / Interests"
+                  value={formData.hobbies}
+                  onChange={(value) => handleInputChange("hobbies", value)}
+                  placeholder="Add notable extracurriculars, competitions, volunteer work, or professional interests.\nExample:\n• Hackathon finalist\n• Open source contributor\n• Volunteer mentor for coding bootcamp students"
+                  helper="Keep entries professional and relevant. Specific achievements are stronger than generic hobbies."
+                  recommended="2-4 entries"
+                  maxLength={450}
+                />
 
-                {/* Languages Section */}
+                <SmartTextareaField
+                  id="referenceNotes"
+                  label="Reference Notes (optional)"
+                  value={formData.referenceNotes}
+                  onChange={(value) => handleInputChange("referenceNotes", value)}
+                  placeholder="Add short reference notes only when helpful.\nExample:\nReferences available upon request\nProf. Maria Chen - Faculty Mentor, Computer Science Department"
+                  helper="Short notes are enough. Most resumes do not need full reference details."
+                  recommended="0-2 lines"
+                  maxLength={260}
+                  minHeightClassName="min-h-[96px]"
+                />
+              </section>
+
+              <section className="space-y-5">
+                <h3 className="text-lg font-semibold text-slate-900">Additional Information</h3>
+
                 <div className="space-y-3">
                   <Label>Languages</Label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <Input
-                      placeholder="Language (e.g., Spanish)"
+                      placeholder="Language"
                       value={newLanguage.language}
-                      onChange={(e) => setNewLanguage(prev => ({ ...prev, language: e.target.value }))}
+                      onChange={(e) =>
+                        setNewLanguage((prev) => ({ ...prev, language: e.target.value }))
+                      }
                     />
                     <Select
                       value={newLanguage.level}
-                      onValueChange={(value: "Native" | "Fluent" | "Intermediate" | "Beginner") =>
-                        setNewLanguage(prev => ({ ...prev, level: value }))
-                      }
+                      onValueChange={(
+                        value: "Native" | "Fluent" | "Intermediate" | "Beginner",
+                      ) => setNewLanguage((prev) => ({ ...prev, level: value }))}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select level" />
@@ -630,78 +607,62 @@ const ResumeBuilder = () => {
                     </Select>
                   </div>
                   <Button onClick={addLanguage} size="sm" className="w-full">
-                    <Plus size={16} className="mr-2" /> Add Language
+                    <Plus className="mr-2 h-4 w-4" /> Add Language
                   </Button>
-
-                  {/* Display Languages */}
-                  <div className="space-y-2">
-                    {languages.map((lang, index) => (
-                      <div key={index} className="flex justify-between items-center bg-gray-50 p-3 rounded">
-                        <div>
-                          <span className="font-medium">{lang.language}</span>
-                          <span className="text-sm text-gray-600 ml-3">({lang.level})</span>
-                        </div>
-                        <button
-                          onClick={() => removeLanguage(index)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                  <StackedList
+                    items={languages.map((item) => ({
+                      title: item.language,
+                      subtitle: item.level,
+                    }))}
+                    onRemove={removeLanguage}
+                  />
                 </div>
 
-                {/* Certifications Section */}
                 <div className="space-y-3">
                   <Label>Certifications</Label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid gap-3 md:grid-cols-3">
                     <Input
                       placeholder="Certification Name"
                       value={newCertification.name}
-                      onChange={(e) => setNewCertification(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={(e) =>
+                        setNewCertification((prev) => ({ ...prev, name: e.target.value }))
+                      }
                     />
                     <Input
-                      placeholder="Issuer (e.g., Amazon)"
+                      placeholder="Issuer"
                       value={newCertification.issuer}
-                      onChange={(e) => setNewCertification(prev => ({ ...prev, issuer: e.target.value }))}
+                      onChange={(e) =>
+                        setNewCertification((prev) => ({ ...prev, issuer: e.target.value }))
+                      }
                     />
                     <Input
                       placeholder="Year"
                       value={newCertification.year}
-                      onChange={(e) => setNewCertification(prev => ({ ...prev, year: e.target.value }))}
+                      onChange={(e) =>
+                        setNewCertification((prev) => ({ ...prev, year: e.target.value }))
+                      }
                     />
                   </div>
                   <Button onClick={addCertification} size="sm" className="w-full">
-                    <Plus size={16} className="mr-2" /> Add Certification
+                    <Plus className="mr-2 h-4 w-4" /> Add Certification
                   </Button>
-
-                  {/* Display Certifications */}
-                  <div className="space-y-2">
-                    {certifications.map((cert, index) => (
-                      <div key={index} className="flex justify-between items-center bg-gray-50 p-3 rounded">
-                        <div>
-                          <span className="font-medium">{cert.name}</span>
-                          <span className="text-sm text-gray-600 ml-3">by {cert.issuer} ({cert.year})</span>
-                        </div>
-                        <button
-                          onClick={() => removeCertification(index)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                  <StackedList
+                    items={certifications.map((item) => ({
+                      title: item.name,
+                      subtitle: [item.issuer, item.year].filter(Boolean).join(" • "),
+                    }))}
+                    onRemove={removeCertification}
+                  />
                 </div>
 
-                {/* Social Links Section */}
                 <div className="space-y-3">
                   <Label>Social Links</Label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid gap-3 md:grid-cols-3">
                     <Select
                       value={newSocialLink.platform}
-                      onValueChange={(value) => setNewSocialLink(prev => ({ ...prev, platform: value }))}
+                      onValueChange={(value) =>
+                        setNewSocialLink((prev) => ({ ...prev, platform: value }))
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -710,245 +671,168 @@ const ResumeBuilder = () => {
                         <SelectItem value="LinkedIn">LinkedIn</SelectItem>
                         <SelectItem value="GitHub">GitHub</SelectItem>
                         <SelectItem value="Portfolio">Portfolio</SelectItem>
-                        <SelectItem value="Twitter">Twitter</SelectItem>
-                        <SelectItem value="Facebook">Facebook</SelectItem>
-                        <SelectItem value="Instagram">Instagram</SelectItem>
                         <SelectItem value="Website">Website</SelectItem>
+                        <SelectItem value="Twitter">Twitter</SelectItem>
                       </SelectContent>
                     </Select>
                     <Input
-                      className="col-span-2"
+                      className="md:col-span-2"
                       placeholder="URL"
                       value={newSocialLink.url}
-                      onChange={(e) => setNewSocialLink(prev => ({ ...prev, url: e.target.value }))}
+                      onChange={(e) =>
+                        setNewSocialLink((prev) => ({ ...prev, url: e.target.value }))
+                      }
                     />
                   </div>
                   <Button onClick={addSocialLink} size="sm" className="w-full">
-                    <Plus size={16} className="mr-2" /> Add Social Link
+                    <Plus className="mr-2 h-4 w-4" /> Add Social Link
                   </Button>
-
-                  {/* Display Social Links */}
                   <div className="space-y-2">
-                    {socialLinks.map((link, index) => (
-                      <div key={index} className="flex justify-between items-center bg-gray-50 p-3 rounded">
-                        <div className="flex items-center gap-2">
-                          {link.platform === "LinkedIn" && <Linkedin size={16} className="text-blue-600" />}
-                          {link.platform === "GitHub" && <Github size={16} />}
-                          {link.platform === "Portfolio" && <Globe size={16} className="text-green-600" />}
-                          <span className="font-medium">{link.platform}:</span>
-                          <span className="text-sm text-gray-600">{link.url}</span>
+                    {socialLinks.map((item, index) => (
+                      <div
+                        key={`${item.platform}-${index}`}
+                        className="flex items-center justify-between rounded-2xl bg-slate-50 p-3"
+                      >
+                        <div className="flex items-center gap-2 text-sm text-slate-700">
+                          {item.platform === "LinkedIn" ? (
+                            <Linkedin className="h-4 w-4 text-blue-600" />
+                          ) : item.platform === "GitHub" ? (
+                            <Github className="h-4 w-4" />
+                          ) : (
+                            <Globe className="h-4 w-4 text-emerald-600" />
+                          )}
+                          <span className="font-medium">{item.platform}</span>
+                          <span className="truncate text-slate-500">{item.url}</span>
                         </div>
                         <button
+                          type="button"
                           onClick={() => removeSocialLink(index)}
-                          className="text-red-500 hover:text-red-700"
+                          className="text-rose-500 transition hover:text-rose-700"
                         >
-                          <X size={16} />
+                          <X className="h-4 w-4" />
                         </button>
                       </div>
                     ))}
                   </div>
                 </div>
-              </div>
+              </section>
 
-              {/* Request Section */}
-              <div className="space-y-4 pt-4 border-t">
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <h3 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
-                    <Send size={16} />
+              <section className="space-y-4 border-t border-slate-200 pt-5">
+                <div className="rounded-[24px] border border-blue-200 bg-blue-50 p-4">
+                  <h3 className="mb-2 flex items-center gap-2 font-semibold text-blue-900">
+                    <Send className="h-4 w-4" />
                     Submit for Approval
                   </h3>
-                  <p className="text-sm text-blue-700 mb-3">
-                    Our team will review your resume and send you a high-quality PDF within 24 hours.
-                    {candidateType === "fresher" && " We'll help optimize it for entry-level positions."}
+                  <p className="text-sm text-blue-800">
+                    Your resume will be reviewed and exported as a polished PDF. These templates are designed to stay premium, readable, and ATS-safe on a single page.
                   </p>
-                  <ul className="text-xs text-blue-600 space-y-1">
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-600">✓</span>
-                      <span>Professional formatting & optimization</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-600">✓</span>
-                      <span>ATS-friendly resume formatting</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-600">✓</span>
-                      <span>24-hour turnaround time</span>
-                    </li>
-                    {candidateType === "fresher" && (
-                      <li className="flex items-start gap-2">
-                        <span className="text-green-600">✓</span>
-                        <span>Entry-level resume optimization</span>
-                      </li>
-                    )}
-                  </ul>
                 </div>
 
                 <Button
                   onClick={handleRequestDownload}
                   disabled={isSubmitting || !formData.fullName || !formData.email}
-                  className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-lg"
+                  className="h-12 w-full text-lg"
                   size="lg"
                 >
-                  <Send size={20} className="mr-2" />
+                  <Send className="mr-2 h-5 w-5" />
                   {isSubmitting ? "Submitting Request..." : "Submit for Admin Approval"}
                 </Button>
 
-                <div className="text-xs text-gray-500 text-center">
-                  <p>You will be redirected to your requests page after submission</p>
-                  <p className="mt-1">Candidate Type: <span className="font-semibold">{candidateType === 'experienced' ? 'Experienced' : 'Fresher'}</span></p>
+                <div className="text-center text-xs text-slate-500">
+                  Candidate Type:{" "}
+                  <span className="font-semibold text-slate-700">
+                    {candidateType === "experienced" ? "Experienced" : "Fresher"}
+                  </span>
                 </div>
-              </div>
+              </section>
             </Card>
 
-            {/* Live Preview Section */}
-            <Card className="p-6 shadow-soft sticky top-8 h-fit">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Live Preview
-                </h2>
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs px-2 py-1 rounded-full ${candidateType === 'experienced' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
-                    {candidateType === 'experienced' ? 'Experienced' : 'Fresher'}
-                  </span>
-                  <span className={`text-sm px-3 py-1 rounded-full border ${templateColors[selectedTemplate as keyof typeof templateColors]}`}>
-                    Template #{selectedTemplate}
+            <Card className="sticky top-8 h-fit rounded-[28px] border-slate-200 p-5 shadow-[0_24px_70px_rgba(15,23,42,0.08)] xl:max-w-[640px] xl:justify-self-end">
+              <div className="mb-6 flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="flex items-center gap-2 text-xl font-semibold text-slate-950">
+                    <FileText className="h-5 w-5" />
+                    Live Preview
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Responsive A4 preview with one-page premium layout rules.
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+                    {selectedTemplateMeta?.name || `Template ${selectedTemplate}`}
                   </span>
                 </div>
               </div>
 
-              <div className="bg-gray-50 p-4 rounded-lg border min-h-[800px] overflow-auto">
+              <div
+                ref={previewShellRef}
+                className="max-h-[72vh] overflow-auto rounded-[24px] border border-slate-200 bg-[linear-gradient(180deg,#f8fafc,#eef2ff)] p-3 sm:p-4"
+              >
                 {formData.fullName ? (
-                  <div ref={resumeRef} className="w-full max-w-md mx-auto scale-[0.75] origin-top">
-                    <ResumeRenderer
-                      templateId={selectedTemplate}
-                      data={templateData}
-                      mode="preview"
-                    />
+                  <div
+                    className="mx-auto origin-top"
+                    style={{
+                      height: `${1123 * previewScale}px`,
+                      width: `${794 * previewScale}px`,
+                    }}
+                  >
+                    <div
+                      style={{
+                        transform: `scale(${previewScale})`,
+                        transformOrigin: "top center",
+                        width: "794px",
+                      }}
+                    >
+                      <ResumeRenderer templateId={selectedTemplate} data={templateData} mode="preview" />
+                    </div>
                   </div>
                 ) : (
                   <EmptyTemplate />
                 )}
               </div>
 
-              {/* Template Descriptions */}
-              <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                <h3 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
-                  <FileText size={16} />
-                  Template Colors
-                </h3>
-
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                    <span>#1: Classic Blue</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-gray-500"></div>
-                    <span>#2: Modern Gray</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    <span>#3: Creative Green</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
-                    <span>#4: Professional Indigo</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <span>#5: Bold Red</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                    <span>#6: Elegant Purple</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                    <span>#7: Warm Amber</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-slate-500"></div>
-                    <span>#8: Clean Slate</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-gray-900"></div>
-                    <span>#9: Dark Professional</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                    <span>#10: Modern Gradient</span>
-                  </div>
-
-                  {/* New templates */}
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-indigo-400"></div>
-                    <span>#11: Soft Indigo</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
-                    <span>#12: Fresh Emerald</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-fuchsia-400"></div>
-                    <span>#13: Modern Fuchsia</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-slate-300"></div>
-                    <span>#14: Minimal White</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-slate-400"></div>
-                    <span>#15: Clean Professional</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Request Process Info */}
-              <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                <h3 className="font-semibold text-green-800 mb-2 flex items-center gap-2">
-                  <Send size={16} />
-                  How It Works
-                </h3>
-                <ol className="text-sm text-green-700 space-y-2">
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold">1.</span>
-                    <span>Select candidate type and fill in your details</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold">2.</span>
-                    <span>Click "Submit for Admin Approval"</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold">3.</span>
-                    <span>Our team reviews & optimizes your resume</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold">4.</span>
-                    <span>Receive high-quality PDF via email</span>
-                  </li>
-                </ol>
+              <div className="mt-5 rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+                <h3 className="font-semibold text-slate-900">Current Template</h3>
+                <p className="mt-1 text-sm text-slate-600">
+                  {selectedTemplateMeta?.name || "Premium Template"} keeps the resume inside the A4 frame while adjusting spacing and typography as content grows.
+                </p>
               </div>
             </Card>
-
           </div>
         </div>
       </main>
     </div>
   );
 };
+
+const StackedList = ({
+  items,
+  onRemove,
+}: {
+  items: Array<{ title: string; subtitle?: string }>;
+  onRemove: (index: number) => void;
+}) => (
+  <div className="space-y-2">
+    {items.map((item, index) => (
+      <div
+        key={`${item.title}-${index}`}
+        className="flex items-center justify-between rounded-2xl bg-slate-50 p-3"
+      >
+        <div>
+          <p className="font-medium text-slate-800">{item.title}</p>
+          {item.subtitle ? <p className="text-sm text-slate-500">{item.subtitle}</p> : null}
+        </div>
+        <button
+          type="button"
+          onClick={() => onRemove(index)}
+          className="text-rose-500 transition hover:text-rose-700"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+    ))}
+  </div>
+);
 
 export default ResumeBuilder;
