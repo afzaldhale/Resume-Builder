@@ -1,290 +1,284 @@
-import React from 'react';
-import { ResumeData } from './types';
+import React from "react";
+import { ResumeData } from "./types";
 
 interface Template7Props {
   data: ResumeData;
 }
 
+const Section: React.FC<{
+  title: string;
+  children: React.ReactNode;
+}> = ({ title, children }) => (
+  <section className="mb-4 page-safe">
+    <div className="flex items-center gap-3 mb-2">
+      <h2 className="text-[12px] font-bold uppercase tracking-[0.18em] text-slate-800 whitespace-nowrap">
+        {title}
+      </h2>
+      <div className="h-px w-full bg-slate-300" />
+    </div>
+    {children}
+  </section>
+);
+
 const Template7: React.FC<Template7Props> = ({ data }) => {
-  const isFresher = data.candidateType === 'fresher';
+  const isFresher = data.candidateType === "fresher";
+
+  const summaryText = isFresher
+    ? data.careerObjective || data.summary
+    : data.summary || data.careerObjective;
+
+  const summaryTitle = isFresher ? "Career Objective" : "Professional Summary";
 
   return (
-    <div className="w-[794px] h-[1123px] bg-white font-sans flex overflow-hidden">
-      {/* Left Main Content */}
-      <div className="w-[65%] p-5 flex flex-col overflow-y-auto">
-        {/* Header */}
-        <header className="mb-4 page-safe flex-shrink-0">
-          <h1 className="text-2xl font-bold text-gray-900 mb-0.5 break-words">
-            {data.fullName || 'Your Name'}
-          </h1>
-          <p className="text-base text-blue-600 mb-2 break-words">
-            {data.role || 'Professional Title'}
-          </p>
-        </header>
+    <div className="w-[794px] h-[1123px] bg-white mx-auto overflow-hidden font-sans text-slate-800 flex flex-col">
+      {/* TOP HEADER */}
+      <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-blue-900 text-white px-8 pt-7 pb-6 flex-shrink-0">
+        <h1 className="text-[34px] font-bold tracking-tight leading-none break-words">
+          {data.fullName || "Your Name"}
+        </h1>
 
-        <div className="flex-1">
-          {/* Summary / Career Objective */}
-          {(data.summary || data.careerObjective) && (
-            <section className="mb-4 page-safe">
-              <h2 className="text-[12px] font-semibold text-gray-800 uppercase tracking-wide mb-1.5">
-                {isFresher ? 'Career Objective' : 'Professional Summary'}
-              </h2>
-              <p className="text-[10px] text-gray-700 leading-relaxed break-words">
-                {isFresher ? data.careerObjective : data.summary}
-              </p>
-            </section>
-          )}
+        <p className="text-[15px] text-blue-200 mt-2 font-medium break-words">
+          {data.role || "Professional Title"}
+        </p>
 
-          {/* Experience */}
-          {data.experience && data.experience.length > 0 && (
-            <section className="mb-4 page-safe">
-              <h2 className="text-[12px] font-semibold text-gray-800 uppercase tracking-wide mb-1.5">
-                Work Experience
-              </h2>
-              <div className="space-y-2">
-                {data.experience.map((exp, idx) => (
-                  <div key={idx} className="break-words">
-                    <div className="flex justify-between items-baseline mb-0.5 flex-wrap gap-1">
-                      <h3 className="text-[11px] font-bold text-gray-900">{exp.role}</h3>
-                      <span className="text-[9px] text-gray-500">{exp.startDate} - {exp.endDate}</span>
-                    </div>
-                    <p className="text-[10px] text-blue-600 mb-0.5">{exp.company}</p>
-                    <p className="text-[10px] text-gray-700 leading-relaxed">{exp.description}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-slate-300">
+          {data.email && <span>{data.email}</span>}
+          {data.phone && <span>{data.phone}</span>}
+          {data.address && <span>{data.address}</span>}
+        </div>
 
-          {/* Projects */}
-          {data.projects && data.projects.length > 0 && (
-            <section className="mb-4 page-safe">
-              <h2 className="text-[12px] font-semibold text-gray-800 uppercase tracking-wide mb-1.5">
-                Featured Projects
-              </h2>
-              <div className="space-y-2">
-                {data.projects.map((project, idx) => (
-                  <div key={idx} className="break-words">
-                    <div className="flex justify-between items-baseline flex-wrap gap-1">
-                      <h3 className="text-[11px] font-bold text-gray-900">{project.name}</h3>
-                      {project.link && (
-                        <a href={project.link} className="text-[9px] text-blue-600 hover:underline">
-                          View Project
-                        </a>
-                      )}
-                    </div>
-                    <p className="text-[10px] text-gray-700 leading-relaxed">{project.description}</p>
-                    {project.technologies && project.technologies.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-0.5">
-                        {project.technologies.map((tech, i) => (
-                          <span key={i} className="text-[9px] bg-gray-100 px-2 py-0.5 text-gray-700">
-                            {tech}
-                          </span>
-                        ))}
+        {data.socialLinks && data.socialLinks.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-blue-200">
+            {data.socialLinks.map((link, idx) => (
+              <a key={idx} href={link.url} className="hover:text-white">
+                {link.platform}
+              </a>
+            ))}
+          </div>
+        )}
+      </header>
+
+      {/* BODY */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* LEFT MAIN */}
+        <main className="w-[68%] px-8 py-6 overflow-hidden flex flex-col justify-between border-r border-slate-200">
+          <div>
+            {/* SUMMARY */}
+            {summaryText && (
+              <Section title={summaryTitle}>
+                <p className="text-[11px] text-slate-700 leading-[1.7] text-justify">
+                  {summaryText}
+                </p>
+              </Section>
+            )}
+
+            {/* EXPERIENCE */}
+            {data.experience && data.experience.length > 0 && (
+              <Section title="Work Experience">
+                <div className="space-y-3">
+                  {data.experience.map((exp, idx) => (
+                    <div key={idx}>
+                      <div className="flex justify-between gap-3">
+                        <div>
+                          <h3 className="text-[12px] font-bold text-slate-900">
+                            {exp.role}
+                          </h3>
+                          <p className="text-[10px] text-blue-700 mt-0.5 font-medium">
+                            {exp.company}
+                          </p>
+                        </div>
+
+                        <span className="text-[9px] text-slate-500 whitespace-nowrap mt-0.5">
+                          {exp.startDate} - {exp.endDate}
+                        </span>
                       </div>
+
+                      <p className="text-[10px] text-slate-700 leading-[1.65] mt-1 text-justify">
+                        {exp.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* PROJECTS */}
+            {data.projects && data.projects.length > 0 && (
+              <Section title="Featured Projects">
+                <div className="space-y-3">
+                  {data.projects.map((project, idx) => (
+                    <div key={idx}>
+                      <div className="flex justify-between gap-2">
+                        <h3 className="text-[12px] font-bold text-slate-900">
+                          {project.name}
+                        </h3>
+
+                        {project.link && (
+                          <a
+                            href={project.link}
+                            className="text-[9px] text-blue-700 hover:underline"
+                          >
+                            View
+                          </a>
+                        )}
+                      </div>
+
+                      <p className="text-[10px] text-slate-700 leading-[1.65] text-justify">
+                        {project.description}
+                      </p>
+
+                      {project.technologies &&
+                        project.technologies.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {project.technologies.map((tech, i) => (
+                              <span
+                                key={i}
+                                className="text-[8px] bg-slate-100 text-slate-700 px-2 py-1 rounded-md"
+                              >
+                                {tech}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            )}
+          </div>
+
+          {/* EDUCATION */}
+          {data.education && data.education.length > 0 && (
+            <Section title="Education">
+              <div className="space-y-2">
+                {data.education.map((edu, idx) => (
+                  <div key={idx}>
+                    <div className="flex justify-between gap-2">
+                      <h3 className="text-[11px] font-bold text-slate-900">
+                        {edu.degree}
+                      </h3>
+
+                      <span className="text-[9px] text-slate-500">
+                        {edu.startYear} - {edu.endYear}
+                      </span>
+                    </div>
+
+                    <p className="text-[10px] text-slate-600">
+                      {edu.school}
+                    </p>
+
+                    {edu.gpa && (
+                      <p className="text-[9px] text-slate-500 mt-0.5">
+                        GPA: {edu.gpa}
+                      </p>
                     )}
                   </div>
                 ))}
               </div>
-            </section>
+            </Section>
           )}
+        </main>
 
-          {/* Education */}
-          {data.education && data.education.length > 0 && (
-            <section className="mb-4 page-safe">
-              <h2 className="text-[12px] font-semibold text-gray-800 uppercase tracking-wide mb-1.5">
-                Education
-              </h2>
-              <div className="space-y-1.5">
-                {data.education.map((edu, idx) => (
-                  <div key={idx} className="break-words">
-                    <div className="flex justify-between items-baseline flex-wrap gap-1">
-                      <h3 className="text-[11px] font-bold text-gray-900">{edu.degree}</h3>
-                      <span className="text-[9px] text-gray-500">{edu.startYear} - {edu.endYear}</span>
+        {/* RIGHT SIDEBAR */}
+        <aside className="w-[32%] bg-slate-50 px-6 py-6 overflow-hidden flex flex-col justify-between">
+          <div>
+            {/* SKILLS */}
+            {data.skills && data.skills.length > 0 && (
+              <Section title="Skills">
+                <div className="flex flex-wrap gap-1.5">
+                  {data.skills.map((skill, idx) => (
+                    <span
+                      key={idx}
+                      className="text-[9px] bg-white border border-slate-200 px-2 py-1 rounded-md text-slate-700"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* LANGUAGES */}
+            {data.languages && data.languages.length > 0 && (
+              <Section title="Languages">
+                <div className="space-y-1.5">
+                  {data.languages.map((lang, idx) => (
+                    <div
+                      key={idx}
+                      className="flex justify-between gap-2 text-[10px]"
+                    >
+                      <span className="font-medium text-slate-900">
+                        {lang.language}
+                      </span>
+                      <span className="text-slate-500">
+                        {lang.level}
+                      </span>
                     </div>
-                    <p className="text-[10px] text-gray-700">{edu.school}</p>
-                    {edu.gpa && <p className="text-[9px] text-gray-500">GPA: {edu.gpa}</p>}
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {/* CERTIFICATIONS */}
+            {data.certifications &&
+              data.certifications.length > 0 && (
+                <Section title="Certifications">
+                  <div className="space-y-2">
+                    {data.certifications.map((cert, idx) => (
+                      <div key={idx}>
+                        <p className="text-[10px] font-semibold text-slate-900">
+                          {cert.name}
+                        </p>
+                        <p className="text-[9px] text-slate-600">
+                          {cert.issuer}
+                          {cert.year && ` • ${cert.year}`}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </section>
-          )}
+                </Section>
+              )}
 
-          {/* Custom Sections */}
-          {data.customSections && data.customSections.length > 0 && (
-            <>
-              {data.customSections.map((section, idx) => (
-                <section key={idx} className="mb-4 page-safe">
-                  <h2 className="text-[12px] font-semibold text-gray-800 uppercase tracking-wide mb-1.5">
-                    {section.title}
-                  </h2>
-                  {section.description && (
-                    <p className="text-[10px] text-gray-700 leading-relaxed mb-1 break-words">
-                      {section.description}
+            {/* STRENGTHS */}
+            {isFresher && data.strengths && data.strengths.length > 0 && (
+              <Section title="Strengths">
+                <div className="space-y-1">
+                  {data.strengths.map((strength, idx) => (
+                    <p key={idx} className="text-[10px] text-slate-700">
+                      • {strength}
                     </p>
-                  )}
-                  {section.items && section.items.length > 0 && (
-                    <ul className="list-disc list-inside space-y-0.5">
-                      {section.items.map((item, i) => (
-                        <li key={i} className="text-[10px] text-gray-700 break-words">{item}</li>
-                      ))}
-                    </ul>
-                  )}
-                  {section.date && (
-                    <p className="text-[9px] text-gray-500 mt-0.5">{section.date}</p>
-                  )}
-                </section>
-              ))}
-            </>
-          )}
-        </div>
-      </div>
+                  ))}
+                </div>
+              </Section>
+            )}
 
-      {/* Right Sidebar */}
-      <div className="w-[35%] bg-gradient-to-b from-blue-50 to-white p-5 page-safe flex flex-col overflow-y-auto">
-        {/* Contact Info */}
-        <section className="mb-4 page-safe">
-          <h2 className="text-[12px] font-semibold text-gray-800 border-b-2 border-blue-600 pb-1 mb-2">
-            Contact
-          </h2>
-          <div className="space-y-1.5">
-            {data.email && (
-              <div>
-                <p className="text-[9px] text-gray-500 uppercase">Email</p>
-                <p className="text-[10px] text-gray-800 break-words">{data.email}</p>
-              </div>
-            )}
-            {data.phone && (
-              <div>
-                <p className="text-[9px] text-gray-500 uppercase">Phone</p>
-                <p className="text-[10px] text-gray-800 break-words">{data.phone}</p>
-              </div>
-            )}
-            {data.address && (
-              <div>
-                <p className="text-[9px] text-gray-500 uppercase">Address</p>
-                <p className="text-[10px] text-gray-800 break-words">{data.address}</p>
-              </div>
+            {/* HOBBIES */}
+            {isFresher && data.hobbies && data.hobbies.length > 0 && (
+              <Section title="Interests">
+                <div className="space-y-1">
+                  {data.hobbies.map((hobby, idx) => (
+                    <p key={idx} className="text-[10px] text-slate-700">
+                      • {hobby}
+                    </p>
+                  ))}
+                </div>
+              </Section>
             )}
           </div>
-        </section>
 
-        {/* Skills */}
-        {data.skills && data.skills.length > 0 && (
-          <section className="mb-4 page-safe">
-            <h2 className="text-[12px] font-semibold text-gray-800 border-b-2 border-blue-600 pb-1 mb-2">
-              Skills
-            </h2>
-            <div className="flex flex-wrap gap-1.5">
-              {data.skills.map((skill, idx) => (
-                <span key={idx} className="text-[10px] bg-white px-2 py-1 shadow-sm text-gray-700 break-words">
-                  {skill}
-                </span>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Strengths (Fresher) */}
-        {isFresher && data.strengths && data.strengths.length > 0 && (
-          <section className="mb-4 page-safe">
-            <h2 className="text-[12px] font-semibold text-gray-800 border-b-2 border-blue-600 pb-1 mb-2">
-              Strengths
-            </h2>
-            <div className="space-y-0.5">
-              {data.strengths.map((strength, idx) => (
-                <p key={idx} className="text-[10px] text-gray-700 break-words">• {strength}</p>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Languages */}
-        {data.languages && data.languages.length > 0 && (
-          <section className="mb-4 page-safe">
-            <h2 className="text-[12px] font-semibold text-gray-800 border-b-2 border-blue-600 pb-1 mb-2">
-              Languages
-            </h2>
-            <div className="space-y-1.5">
-              {data.languages.map((lang, idx) => (
-                <div key={idx} className="break-words">
-                  <p className="text-[10px] font-medium text-gray-800">{lang.language}</p>
-                  <p className="text-[9px] text-gray-600">{lang.level}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Certifications */}
-        {data.certifications && data.certifications.length > 0 && (
-          <section className="mb-4 page-safe">
-            <h2 className="text-[12px] font-semibold text-gray-800 border-b-2 border-blue-600 pb-1 mb-2">
-              Certifications
-            </h2>
-            <div className="space-y-1.5">
-              {data.certifications.map((cert, idx) => (
-                <div key={idx} className="break-words">
-                  <p className="text-[10px] font-medium text-gray-800">{cert.name}</p>
-                  <p className="text-[9px] text-gray-600">{cert.issuer}, {cert.year}</p>
-                  {cert.credentialId && (
-                    <p className="text-[8px] text-gray-400">ID: {cert.credentialId}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Social Links */}
-        {data.socialLinks && data.socialLinks.length > 0 && (
-          <section className="mb-4 page-safe">
-            <h2 className="text-[12px] font-semibold text-gray-800 border-b-2 border-blue-600 pb-1 mb-2">
-              Social
-            </h2>
-            <div className="space-y-1">
-              {data.socialLinks.map((link, idx) => (
-                <a
-                  key={idx}
-                  href={link.url}
-                  className="block text-[10px] text-blue-600 hover:underline break-words"
-                >
-                  {link.platform}
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Hobbies (Fresher) */}
-        {isFresher && data.hobbies && data.hobbies.length > 0 && (
-          <section className="mb-4 page-safe">
-            <h2 className="text-[12px] font-semibold text-gray-800 border-b-2 border-blue-600 pb-1 mb-2">
-              Interests
-            </h2>
-            <div className="flex flex-wrap gap-1.5">
-              {data.hobbies.map((hobby, idx) => (
-                <span key={idx} className="text-[10px] text-gray-700 break-words">
-                  {hobby}{idx < data.hobbies!.length - 1 ? ',' : ''}
-                </span>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* References */}
-        {data.references && data.references.length > 0 && (
-          <section className="page-safe">
-            <h2 className="text-[12px] font-semibold text-gray-800 border-b-2 border-blue-600 pb-1 mb-2">
-              References
-            </h2>
-            <div className="space-y-1.5">
-              {data.references.map((ref, idx) => (
-                <p key={idx} className="text-[10px] text-gray-700 break-words">{ref}</p>
-              ))}
-            </div>
-          </section>
-        )}
+          {/* BOTTOM */}
+          {data.references && data.references.length > 0 && (
+            <Section title="References">
+              <div className="space-y-1">
+                {data.references.map((ref, idx) => (
+                  <p key={idx} className="text-[10px] text-slate-700">
+                    {ref}
+                  </p>
+                ))}
+              </div>
+            </Section>
+          )}
+        </aside>
       </div>
     </div>
   );
