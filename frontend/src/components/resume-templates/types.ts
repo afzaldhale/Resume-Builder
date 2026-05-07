@@ -86,6 +86,7 @@ export interface ResumeData {
    */
   strengths?: string[]; // ✅ NEW
   hobbies?: string[];
+  achievements?: string[];
   candidateType?: "experienced" | "fresher";
 
   /**

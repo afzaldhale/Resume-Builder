@@ -1,3 +1,5 @@
+import { renderSupplementarySections, sharedTemplateStyles } from "./templateShared.js";
+
 // template9.js - ONE PAGE DARK THEME (STRICT A4)
 export function template9HTML(data) {
   const safeData = {
@@ -8,17 +10,23 @@ export function template9HTML(data) {
     address: data.address || "",
     summary: data.summary || "",
     careerObjective: data.careerObjective || "",
-    skills: Array.isArray(data.skills) ? data.skills.slice(0, 8) : [],
-    experience: Array.isArray(data.experience) ? data.experience.slice(0, 2) : [],
-    education: Array.isArray(data.education) ? data.education.slice(0, 2) : [],
-    projects: Array.isArray(data.projects) ? data.projects.slice(0, 2) : [],
-    certifications: Array.isArray(data.certifications) ? data.certifications.slice(0, 3) : [],
-    languages: Array.isArray(data.languages) ? data.languages.slice(0, 3) : [],
-    strengths: Array.isArray(data.strengths) ? data.strengths.slice(0, 4) : [],
-    hobbies: Array.isArray(data.hobbies) ? data.hobbies.slice(0, 3) : [],
-    socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks.slice(0, 2) : [],
+    skills: Array.isArray(data.skills) ? data.skills : [],
+    experience: Array.isArray(data.experience) ? data.experience : [],
+    education: Array.isArray(data.education) ? data.education : [],
+    projects: Array.isArray(data.projects) ? data.projects : [],
+    certifications: Array.isArray(data.certifications) ? data.certifications : [],
+    languages: Array.isArray(data.languages) ? data.languages : [],
+    strengths: Array.isArray(data.strengths) ? data.strengths : [],
+    hobbies: Array.isArray(data.hobbies) ? data.hobbies : [],
+    socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : [],
+    achievements: Array.isArray(data.achievements) ? data.achievements : [],
+    references: Array.isArray(data.references) ? data.references : [],
+    customSections: Array.isArray(data.customSections) ? data.customSections : [],
     candidateType: data.candidateType || "experienced"
   };
+  const supplementarySections = renderSupplementarySections(safeData, {
+    include: ["achievements", "references", "customSections"],
+  });
 
   const isFresher = data.candidateType === "fresher" || safeData.experience.length === 0;
 
@@ -258,10 +266,13 @@ export function template9HTML(data) {
     body { background: #111827; }
     .background-pattern { display: none; }
   }
+
+  ${sharedTemplateStyles}
 </style>
 </head>
 
 <body>
+<div class="page">
 <div class="background-pattern">
   <div class="dot-pattern"></div>
   <div class="top-line"></div>
@@ -299,21 +310,21 @@ ${(safeData.summary || safeData.careerObjective) ? `
 <div>
   ${safeData.skills.length ? `<section class="section"><h2 class="section-title">SKILLS</h2>${safeData.skills.map(s => `<div class="skill-item"><span class="skill-bullet"></span>${s}</div>`).join("")}</section>` : ""}
   ${safeData.education.length ? `<section class="section"><h2 class="section-title">EDUCATION</h2>${safeData.education.map(e => `<div class="education-card"><div class="edu-degree">${e.degree}</div><div class="edu-school">${e.school}</div></div>`).join("")}</section>` : ""}
+  ${safeData.languages.length ? `<section class="section"><h2 class="section-title">LANGUAGES</h2>${safeData.languages.map(lang => `<div class="education-card"><div class="edu-degree">${lang.language}</div><div class="edu-school">${lang.level || ""}</div></div>`).join("")}</section>` : ""}
 </div>
 
 <div>
   ${safeData.experience.length ? `<section class="section"><h2 class="section-title">EXPERIENCE</h2>${safeData.experience.map(e => `<div class="exp-card"><div class="exp-title">${e.role}</div><div class="exp-company">${e.company}</div><div class="exp-description">${e.description}</div></div>`).join("")}</section>` : ""}
   ${safeData.projects.length ? `<section class="section"><h2 class="section-title">PROJECTS</h2>${safeData.projects.map(p => `<div class="project-card"><div class="project-name">${p.name}</div><div class="project-description">${p.description}</div></div>`).join("")}</section>` : ""}
+  ${safeData.certifications.length ? `<section class="section"><h2 class="section-title">CERTIFICATIONS</h2>${safeData.certifications.map(cert => `<div class="project-card"><div class="project-name">${cert.name}</div><div class="project-description">${cert.issuer || ""}${cert.year ? ` • ${cert.year}` : ""}</div></div>`).join("")}</section>` : ""}
   ${safeData.strengths.length ? `<section class="section"><h2 class="section-title">STRENGTHS</h2><div class="strengths-grid">${safeData.strengths.map(s => `<div class="strength-item"><span class="strength-bullet">•</span>${s}</div>`).join("")}</div></section>` : ""}
   ${safeData.hobbies.length ? `<section class="section"><h2 class="section-title">HOBBIES</h2><div class="hobbies-content">${safeData.hobbies.join(", ")}</div></section>` : ""}
+  ${supplementarySections}
 </div>
 
 </div>
 
-<footer class="footer">
-  ${safeData.fullName || "Your Name"} • Dark Resume • ${new Date().getFullYear()}
-</footer>
-
+</div>
 </div>
 </body>
 </html>

@@ -1,4 +1,5 @@
 import axios, { AxiosError } from "axios";
+import { API_BASE_URL } from "../../lib/apiBaseUrl";
 
 /**
  * =========================
@@ -8,7 +9,7 @@ import axios, { AxiosError } from "axios";
  * - Cookies / sessions supported
  */
 const api = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -52,7 +53,7 @@ export default api;
  */
 export const downloadResumePDF = async (resumeId: number) => {
   const response = await axios.get(
-    `http://localhost:8000/api/resumes/${resumeId}/pdf`,
+    `${API_BASE_URL}/api/resumes/${resumeId}/pdf`,
     {
       responseType: "blob", // 🔴 REQUIRED
       withCredentials: true,

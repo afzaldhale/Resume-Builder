@@ -1,3 +1,5 @@
+import { renderSupplementarySections, sharedTemplateStyles } from "./templateShared.js";
+
 // template7.js
 export function template7HTML(data) {
   // Safe data handling
@@ -17,8 +19,12 @@ export function template7HTML(data) {
     languages: Array.isArray(data.languages) ? data.languages : [],
     socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : [],
     hobbies: Array.isArray(data.hobbies) ? data.hobbies : [],
-    strengths: Array.isArray(data.strengths) ? data.strengths : []
+    strengths: Array.isArray(data.strengths) ? data.strengths : [],
+    achievements: Array.isArray(data.achievements) ? data.achievements : [],
+    references: Array.isArray(data.references) ? data.references : [],
+    customSections: Array.isArray(data.customSections) ? data.customSections : []
   };
+  const supplementarySections = renderSupplementarySections(safeData);
 
   // Check if this is a creative/designer profile
   const isCreative = safeData.skills.some(skill => 
@@ -765,9 +771,11 @@ export function template7HTML(data) {
       box-shadow: none;
     }
   }
+  ${sharedTemplateStyles}
 </style>
 </head>
 <body>
+  <div class="page">
   <!-- Creative Background -->
   <div class="creative-bg">
     <div class="bg-top-line"></div>
@@ -1115,29 +1123,13 @@ export function template7HTML(data) {
             </div>
           </section>
           ` : ""}
+
+          ${supplementarySections}
         </div>
       </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-      <div class="footer-content">
-        <div class="footer-row">
-          <span class="footer-text">Creative Portfolio Template</span>
-          <div class="footer-dots">
-            <div class="footer-dot dot-pink"></div>
-            <div class="footer-dot dot-purple"></div>
-            <div class="footer-dot dot-blue"></div>
-          </div>
-          <span class="footer-text">Designed for Creatives</span>
-        </div>
-        <div class="footer-note">
-          <span class="sparkle">✨</span>
-          Showcasing creativity with professional integrity
-          <span class="sparkle">✨</span>
-        </div>
-      </div>
-    </footer>
+  </div>
   </div>
 </body>
 </html>

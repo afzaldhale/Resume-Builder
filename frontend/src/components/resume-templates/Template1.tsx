@@ -1,15 +1,13 @@
 import React from "react";
 import { ResumeData } from "./types";
+import { getSummaryConfig } from "./templatePolicy";
 
 interface Template1Props {
   data: ResumeData;
 }
 
 const Template1: React.FC<Template1Props> = ({ data }) => {
-  const summaryText = data.candidateType === "fresher"
-    ? data.careerObjective || data.summary
-    : data.summary || data.careerObjective;
-  const summaryTitle = data.candidateType === "fresher" ? "Career Objective" : "Professional Summary";
+  const { summaryText, summaryTitle } = getSummaryConfig(data);
 
   return (
     <div className="bg-white text-gray-800 w-[794px] min-h-[1123px] mx-auto p-8 font-sans">
@@ -96,7 +94,7 @@ const Template1: React.FC<Template1Props> = ({ data }) => {
               Projects
             </h2>
             <div className="space-y-4">
-              {data.projects.slice(0, 2).map((project, index) => (
+              {data.projects.map((project, index) => (
                 <div key={index}>
                   <h3 className="text-sm font-bold">{project.name}</h3>
                   <p className="text-sm">{project.description}</p>
@@ -155,6 +153,16 @@ const Template1: React.FC<Template1Props> = ({ data }) => {
               Languages
             </h2>
             <p className="text-sm">{data.languages.map(l => `${l.language} (${l.level})`).join(", ")}</p>
+          </section>
+        )}
+
+        {/* Strengths */}
+        {data.strengths && data.strengths.length > 0 && (
+          <section>
+            <h2 className="text-base font-bold uppercase border-b border-gray-300 pb-1 mb-2">
+              Strengths
+            </h2>
+            <p className="text-sm">{data.strengths.join(", ")}</p>
           </section>
         )}
 

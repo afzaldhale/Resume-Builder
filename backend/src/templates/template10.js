@@ -1,3 +1,5 @@
+import { renderSupplementarySections, sharedTemplateStyles } from "./templateShared.js";
+
 // template10.js - ONE PAGE MODERN GRADIENT VERSION
 export function template10HTML(data) {
   // Safe data handling with limits for one page
@@ -9,19 +11,23 @@ export function template10HTML(data) {
     address: data.address || "",
     summary: data.summary || "",
     careerObjective: data.careerObjective || "",
-    skills: Array.isArray(data.skills) ? data.skills.slice(0, 8) : [],
-    experience: Array.isArray(data.experience) ? data.experience.slice(0, 2) : [],
-    education: Array.isArray(data.education) ? data.education.slice(0, 2) : [],
-    projects: Array.isArray(data.projects) ? data.projects.slice(0, 2) : [],
-    certifications: Array.isArray(data.certifications) ? data.certifications.slice(0, 3) : [],
-    languages: Array.isArray(data.languages) ? data.languages.slice(0, 3) : [],
-    strengths: Array.isArray(data.strengths) ? data.strengths.slice(0, 4) : [],
-    hobbies: Array.isArray(data.hobbies) ? data.hobbies.slice(0, 3) : [],
-    socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks.slice(0, 2) : [],
-    references: Array.isArray(data.references) ? data.references.slice(0, 2) : [],
-    customSections: Array.isArray(data.customSections) ? data.customSections.slice(0, 1) : [],
+    skills: Array.isArray(data.skills) ? data.skills : [],
+    experience: Array.isArray(data.experience) ? data.experience : [],
+    education: Array.isArray(data.education) ? data.education : [],
+    projects: Array.isArray(data.projects) ? data.projects : [],
+    certifications: Array.isArray(data.certifications) ? data.certifications : [],
+    languages: Array.isArray(data.languages) ? data.languages : [],
+    strengths: Array.isArray(data.strengths) ? data.strengths : [],
+    hobbies: Array.isArray(data.hobbies) ? data.hobbies : [],
+    socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : [],
+    achievements: Array.isArray(data.achievements) ? data.achievements : [],
+    references: Array.isArray(data.references) ? data.references : [],
+    customSections: Array.isArray(data.customSections) ? data.customSections : [],
     candidateType: data.candidateType || "experienced"
   };
+  const supplementarySections = renderSupplementarySections(safeData, {
+    include: ["achievements", "references", "customSections"],
+  });
 
   // Check if fresher
   const isFresher = data.candidateType === "fresher" || safeData.experience.length === 0;
@@ -533,9 +539,12 @@ export function template10HTML(data) {
       text-decoration: none !important;
     }
   }
+
+  ${sharedTemplateStyles}
 </style>
 </head>
 <body>
+  <div class="page">
   <!-- Background Pattern -->
   <div class="background-pattern">
     <div class="top-line"></div>
@@ -755,19 +764,13 @@ export function template10HTML(data) {
             </div>
           </section>
           ` : ""}
+
+          ${supplementarySections}
         </div>
       </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-      <div class="footer-name">
-        ${safeData.fullName || "Your Name"} • Professional Resume
-      </div>
-      <div class="footer-template">
-        Template 10 • Modern Gradient • ${new Date().getFullYear()}
-      </div>
-    </footer>
+  </div>
   </div>
 </body>
 </html>

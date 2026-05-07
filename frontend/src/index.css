@@ -128,3 +128,195 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+.resume-document-shell {
+  position: relative;
+  overflow: visible;
+}
+
+.resume-document-scale {
+  position: relative;
+}
+
+.resume-document-shell[data-compact-mode="true"] {
+  --resume-compact-line-height: 1.35;
+}
+
+.resume-document-shell[data-compact-mode="true"] section,
+.resume-document-shell[data-compact-mode="true"] p,
+.resume-document-shell[data-compact-mode="true"] li,
+.resume-document-shell[data-compact-mode="true"] span,
+.resume-document-shell[data-compact-mode="true"] div {
+  line-height: var(--resume-compact-line-height);
+}
+
+.resume-document-shell[data-compact-mode="true"] h1,
+.resume-document-shell[data-compact-mode="true"] h2,
+.resume-document-shell[data-compact-mode="true"] h3 {
+  line-height: 1.2;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="space-y-12"] > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 1.75rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="space-y-10"] > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 1.5rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="space-y-8"] > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 1.125rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="space-y-6"] > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0.9rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="gap-12"] {
+  gap: 2rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="gap-10"] {
+  gap: 1.75rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="gap-8"] {
+  gap: 1.25rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="p-10"] {
+  padding: 2rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="p-8"] {
+  padding: 1.5rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="px-12"] {
+  padding-left: 2.25rem !important;
+  padding-right: 2.25rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="px-10"] {
+  padding-left: 2rem !important;
+  padding-right: 2rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="py-10"] {
+  padding-top: 2rem !important;
+  padding-bottom: 2rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="py-8"] {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="mb-10"] {
+  margin-bottom: 1.75rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="mb-8"] {
+  margin-bottom: 1.25rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="mt-12"] {
+  margin-top: 1.75rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="mt-10"] {
+  margin-top: 1.5rem !important;
+}
+
+.resume-document-shell[data-compact-mode="true"] [class~="mt-8"] {
+  margin-top: 1.125rem !important;
+}
+
+.resume-document-shell[data-resume-mode="fresher"][data-compact-mode="true"] {
+  --resume-compact-line-height: 1.3;
+}
+
+.resume-print-mode {
+  margin: 0;
+  background: #ffffff !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.resume-pdf-mode,
+.resume-pdf-mode * {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  forced-color-adjust: none !important;
+}
+
+.resume-pdf-mode body {
+  background: #ffffff !important;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}
+
+.resume-pdf-mode [class*="animate-"] {
+  animation: none !important;
+}
+
+.resume-pdf-mode [class*="transition"] {
+  transition: none !important;
+}
+
+.resume-pdf-mode .group:hover .group-hover\:from-blue-400,
+.resume-pdf-mode .group:hover .group-hover\:to-cyan-300 {
+  filter: none !important;
+}
+
+.resume-print-root {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box;
+  background: #ffffff;
+  overflow: hidden;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.resume-print-root .resume-document-shell {
+  width: 210mm !important;
+  min-height: 297mm !important;
+}
+
+.resume-print-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  color: hsl(var(--muted-foreground));
+  background: #ffffff;
+}
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body,
+  #root {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0;
+    padding: 0;
+    background: #ffffff !important;
+  }
+
+  .resume-print-root {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0;
+    overflow: hidden;
+  }
+}

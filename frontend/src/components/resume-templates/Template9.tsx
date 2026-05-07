@@ -1,13 +1,13 @@
 import React from "react";
 import { ResumeData } from "./types";
+import { getSummaryConfig } from "./templatePolicy";
 
 interface Template9Props {
   data: ResumeData;
 }
 
 const Template9: React.FC<Template9Props> = ({ data }) => {
-  // Check if fresher
-  const isFresher = data.candidateType === "fresher" || data.experience.length === 0;
+  const { isFresher, summaryText, summaryTitle } = getSummaryConfig(data);
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white w-[794px] min-h-[1123px] mx-auto relative overflow-hidden font-sans">
@@ -83,14 +83,14 @@ const Template9: React.FC<Template9Props> = ({ data }) => {
         </header>
 
         {/* Summary/Objective */}
-        {(data.summary || data.careerObjective) && (
+        {summaryText && (
           <section className="mb-12">
             <h2 className="text-2xl font-bold mb-6 text-center tracking-wide">
-              {isFresher ? "CAREER OBJECTIVE" : "PROFESSIONAL SUMMARY"}
+              {summaryTitle.toUpperCase()}
             </h2>
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-8 border border-gray-700">
               <p className="text-gray-300 leading-relaxed text-center">
-                {isFresher ? (data.careerObjective || data.summary) : (data.summary || data.careerObjective)}
+                {summaryText}
               </p>
             </div>
           </section>

@@ -1,10 +1,12 @@
+import { getSummaryConfig, renderSupplementarySections, sharedTemplateStyles } from "./templateShared.js";
+
 export function template2HTML(data) {
   const skillPercent = (i) => Math.min(95, 65 + i * 10);
-  const isFresher = data.candidateType === "fresher";
-  const summaryText = isFresher
-    ? data.careerObjective || data.summary
-    : data.summary || data.careerObjective;
+  const { summaryText, isFresher } = getSummaryConfig(data);
   const summaryTitle = isFresher ? "Career Objective" : "Profile Summary";
+  const supplementarySections = renderSupplementarySections(data, {
+    include: ["strengths", "achievements", "references", "customSections"],
+  });
 
   return `
 <!DOCTYPE html>
@@ -131,17 +133,7 @@ export function template2HTML(data) {
     margin-right: 6px;
   }
 
-  footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    background: #111827;
-    color: #e5e7eb;
-    font-size: 11px;
-    padding: 8px 16px;
-    display: flex;
-    justify-content: space-between;
-  }
+  ${sharedTemplateStyles}
 </style>
 </head>
 
@@ -241,12 +233,9 @@ export function template2HTML(data) {
     <div class="box">${data.hobbies.join(", ")}</div>
     ` : ""}
 
-  </div>
+    ${supplementarySections}
 
-  <footer>
-    <span>Resume Template 2</span>
-    <span>${new Date().getFullYear()}</span>
-  </footer>
+  </div>
 
 </div>
 </body>

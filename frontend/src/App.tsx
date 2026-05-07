@@ -11,6 +11,7 @@ import Dashboard from "./components/pages/Dashboard";
 import ResumeBuilder from "./components/pages/ResumeBuilder";
 import Requests from "./components/pages/Requests";
 import MyResumes from "./components/pages/MyResumes";
+import ResumePrint from "./components/pages/ResumePrint";
 
 import ResumePDF from "./components/pages/ResumePDF"; // ✅ NEW
 
@@ -89,6 +90,7 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+          <Route path="/print/resume" element={<ResumePrint />} />
 
           {/* ================= ADMIN ROUTES ================= */}
           <Route path="/admin/login" element={<AdminLogin />} />

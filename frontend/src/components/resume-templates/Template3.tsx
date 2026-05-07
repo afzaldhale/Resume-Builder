@@ -1,5 +1,6 @@
 import React from "react";
 import { ResumeData } from "./types";
+import { getSummaryConfig } from "./templatePolicy";
 import { 
   Mail, Phone, MapPin, Linkedin, Github, Globe, 
   Briefcase, GraduationCap, Award, Languages, Star,
@@ -11,11 +12,7 @@ interface Template3Props {
 }
 
 const Template3: React.FC<Template3Props> = ({ data }) => {
-  const isFresher = data.candidateType === "fresher";
-  const summaryText = isFresher
-    ? data.careerObjective || data.summary
-    : data.summary || data.careerObjective;
-  const summaryTitle = isFresher ? "Career Objective" : "Professional Summary";
+  const { isFresher, summaryText, summaryTitle } = getSummaryConfig(data);
 
   // Icon mapping for social platforms
   const getSocialIcon = (platform: string) => {

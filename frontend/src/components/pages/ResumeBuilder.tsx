@@ -19,7 +19,7 @@ import { FileText, X, Plus, Globe, Linkedin, Github, Send, Briefcase, Graduation
 import { toast } from "sonner";
 import { useNavigate, useParams } from "react-router-dom";
 import { TemplateSelector } from "@/components/resume-templates/TemplateSelector";
-import { LazyTemplateRenderer } from "@/components/resume-templates/TemplateRegistry";
+import ResumeDocument from "@/components/resume-templates/ResumeDocument";
 import EmptyTemplate from "@/components/resume-templates/EmptyTemplate";
 import { LanguageItem, CertificationItem, SocialLink } from "@/components/resume-templates/types";
 import {
@@ -30,7 +30,6 @@ import {
   FormData,
   CandidateType,
 } from "../../types/resumeDataConverter";
-import { fitResumeData } from "@/utils/fitResumeData";
 
 const ResumeBuilder = () => {
   const navigate = useNavigate();
@@ -292,14 +291,12 @@ const ResumeBuilder = () => {
   };
 
   // Template rendering
-  const templateData = fitResumeData(
-    convertToTemplateData(
-      formData,
-      languages,
-      certifications,
-      socialLinks,
-      candidateType
-    )
+  const templateData = convertToTemplateData(
+    formData,
+    languages,
+    certifications,
+    socialLinks,
+    candidateType
   );
 
   // Template color schemes
@@ -823,8 +820,12 @@ const ResumeBuilder = () => {
 
               <div className="bg-gray-50 p-4 rounded-lg border min-h-[800px] overflow-auto">
                 {formData.fullName ? (
-                  <div ref={resumeRef} className="w-full max-w-md mx-auto transform scale-75 origin-top">
-                    <LazyTemplateRenderer templateId={selectedTemplate} data={templateData} />
+                  <div ref={resumeRef} className="w-full max-w-md mx-auto">
+                    <ResumeDocument
+                      templateId={selectedTemplate}
+                      data={templateData}
+                      scale={0.75}
+                    />
                   </div>
                 ) : (
                   <EmptyTemplate />

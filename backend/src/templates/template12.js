@@ -1,3 +1,5 @@
+import { renderSupplementarySections, sharedTemplateStyles } from "./templateShared.js";
+
 // template12.js
 export function template12HTML(data) {
   const safe = {
@@ -17,8 +19,12 @@ export function template12HTML(data) {
     certifications: Array.isArray(data.certifications) ? data.certifications : [],
     socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : [],
     strengths: Array.isArray(data.strengths) ? data.strengths : [],
+    achievements: Array.isArray(data.achievements) ? data.achievements : [],
+    references: Array.isArray(data.references) ? data.references : [],
+    customSections: Array.isArray(data.customSections) ? data.customSections : [],
     candidateType: data.candidateType || "experienced"
   };
+  const supplementarySections = renderSupplementarySections(safe);
 
   const isFresher = data.candidateType === "fresher" || safe.experience.length === 0;
 
@@ -101,10 +107,13 @@ export function template12HTML(data) {
     margin-bottom: 4px;
   }
 
+  ${sharedTemplateStyles}
+
 </style>
 </head>
 
 <body>
+  <div class="page">
 
   <div class="header">
     <h1>${safe.fullName || "Your Name"}</h1>
@@ -210,7 +219,11 @@ export function template12HTML(data) {
         <p>${safe.hobbies.join(", ")}</p>
       </div>` : ""}
 
+      ${supplementarySections}
+
     </div>
+  </div>
+
   </div>
 
 </body>

@@ -1,5 +1,6 @@
 import React from "react";
 import { ResumeData } from "./types";
+import { getSummaryConfig } from "./templatePolicy";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 interface Template14Props {
@@ -7,7 +8,7 @@ interface Template14Props {
 }
 
 const Template14: React.FC<Template14Props> = ({ data }) => {
-  const isFresher = data.candidateType === "fresher" || data.experience.length === 0;
+  const { summaryText, summaryTitle } = getSummaryConfig(data);
 
   return (
     <div className="w-[794px] min-h-[1123px] mx-auto bg-gray-100 border border-gray-300 font-sans text-gray-900">
@@ -40,23 +41,27 @@ const Template14: React.FC<Template14Props> = ({ data }) => {
               </span>
             )}
           </div>
+
+          {data.socialLinks && data.socialLinks.length > 0 && (
+            <div className="flex flex-wrap gap-4 text-sm text-teal-700 mt-3">
+              {data.socialLinks.map((link, i) => (
+                <span key={i}>
+                  {link.platform}: {link.url}
+                </span>
+              ))}
+            </div>
+          )}
         </header>
 
         {/* TIMELINE WRAPPER */}
         <div className="relative border-l-2 border-teal-600 pl-8 space-y-10">
 
           {/* SUMMARY */}
-          {(data.summary || data.careerObjective) && (
+          {summaryText && (
             <section className="relative">
               <TimelineDot />
-              <h2 className="section-title">
-                {isFresher ? "CAREER OBJECTIVE" : "PROFESSIONAL SUMMARY"}
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed">
-                {isFresher
-                  ? data.careerObjective || data.summary
-                  : data.summary || data.careerObjective}
-              </p>
+              <h2 className="section-title">{summaryTitle.toUpperCase()}</h2>
+              <p className="mt-2 text-sm leading-relaxed">{summaryText}</p>
             </section>
           )}
 
@@ -128,6 +133,23 @@ const Template14: React.FC<Template14Props> = ({ data }) => {
             </section>
           )}
 
+          {data.certifications && data.certifications.length > 0 && (
+            <section className="relative">
+              <TimelineDot />
+              <h2 className="section-title">CERTIFICATIONS</h2>
+              <div className="mt-3 space-y-3">
+                {data.certifications.map((cert, i) => (
+                  <div key={i}>
+                    <p className="font-semibold text-sm">{cert.name}</p>
+                    <p className="text-xs text-gray-600">
+                      {cert.issuer} | {cert.year}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* LANGUAGES */}
           {data.languages && data.languages.length > 0 && (
             <section className="relative">
@@ -171,6 +193,39 @@ const Template14: React.FC<Template14Props> = ({ data }) => {
                 {data.hobbies.join(", ")}
               </div>
             </section>
+          )}
+
+          {data.achievements && data.achievements.length > 0 && (
+            <section className="relative">
+              <TimelineDot />
+              <h2 className="section-title">ACHIEVEMENTS</h2>
+              <ul className="mt-3 space-y-1 text-sm">
+                {data.achievements.map((achievement, i) => (
+                  <li key={i}>• {achievement}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {data.customSections && data.customSections.length > 0 && (
+            <>
+              {data.customSections.map((section, i) => (
+                <section key={i} className="relative">
+                  <TimelineDot />
+                  <h2 className="section-title">{section.title.toUpperCase()}</h2>
+                  {section.description && (
+                    <p className="mt-3 text-sm">{section.description}</p>
+                  )}
+                  {section.items && section.items.length > 0 && (
+                    <ul className="mt-3 space-y-1 text-sm">
+                      {section.items.map((item, itemIndex) => (
+                        <li key={itemIndex}>• {item}</li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              ))}
+            </>
           )}
 
         </div>

@@ -1,10 +1,20 @@
 import React from "react";
 import { ResumeData } from "./types";
-import { 
-  Mail, Phone, MapPin, Palette, Brush, Code, 
-  Camera, Music, BookOpen, Globe, Sparkles,
-  Award, Users, Zap, Star, Target, Circle,
-  Briefcase, GraduationCap, ChevronRight, Heart
+import { getSummaryConfig } from "./templatePolicy";
+import {
+  Award,
+  Briefcase,
+  Code,
+  Globe,
+  GraduationCap,
+  Heart,
+  Mail,
+  MapPin,
+  Palette,
+  Phone,
+  Sparkles,
+  Star,
+  Target,
 } from "lucide-react";
 
 interface Template7Props {
@@ -12,19 +22,10 @@ interface Template7Props {
 }
 
 const Template7: React.FC<Template7Props> = ({ data }) => {
-  // Check if this is a creative/designer profile
-  const isCreative = data.skills.some(skill => 
-    skill.toLowerCase().includes('design') || 
-    skill.toLowerCase().includes('figma') || 
-    skill.toLowerCase().includes('ui') || 
-    skill.toLowerCase().includes('ux') ||
-    skill.toLowerCase().includes('photo') ||
-    skill.toLowerCase().includes('video')
-  );
+  const { isFresher, summaryText, summaryTitle } = getSummaryConfig(data);
 
   return (
     <div className="bg-gradient-to-br from-gray-50 via-white to-rose-50 text-gray-800 w-[794px] min-h-[1123px] mx-auto relative overflow-hidden font-sans">
-      {/* Creative Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 to-blue-500"></div>
         <div className="absolute top-20 right-10 w-40 h-40 border-2 border-pink-300 rounded-full"></div>
@@ -32,9 +33,7 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
         <div className="absolute top-1/3 left-1/4 w-24 h-24 border-2 border-purple-300 rounded-lg rotate-12"></div>
       </div>
 
-      {/* Main Content */}
       <div className="relative z-10 px-10 py-8">
-        {/* Creative Header */}
         <header className="mb-10">
           <div className="flex justify-between items-start mb-8">
             <div>
@@ -53,18 +52,17 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                   )}
                 </div>
               </div>
-              
-              {/* Creative Tagline */}
-              {data.summary && (
+
+              {summaryText && (
                 <div className="mt-4 pl-16">
                   <div className="text-sm text-gray-600 italic border-l-2 border-pink-400 pl-3">
-                    "{data.summary.substring(0, 120)}..."
+                    "{summaryTitle}: {summaryText.substring(0, 120)}
+                    {summaryText.length > 120 ? "..." : ""}"
                   </div>
                 </div>
               )}
             </div>
-            
-            {/* Contact Info - Creative Layout */}
+
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200 shadow-sm">
               <div className="space-y-3">
                 {data.email && (
@@ -73,14 +71,14 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                     <span className="text-gray-700">{data.email}</span>
                   </div>
                 )}
-                
+
                 {data.phone && (
                   <div className="flex items-center gap-2 text-sm">
                     <Phone size={14} className="text-blue-500" />
                     <span className="text-gray-700">{data.phone}</span>
                   </div>
                 )}
-                
+
                 {data.address && (
                   <div className="flex items-center gap-2 text-sm">
                     <MapPin size={14} className="text-purple-500" />
@@ -90,8 +88,23 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
               </div>
             </div>
           </div>
-          
-          {/* Divider with creative dots */}
+
+          {data.socialLinks && data.socialLinks.length > 0 && (
+            <div className="flex flex-wrap gap-3 pl-16 mt-4 text-sm text-pink-700">
+              {data.socialLinks.map((link, index) => (
+                <a
+                  key={index}
+                  href={link.url.startsWith("http") ? link.url : `https://${link.url}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline"
+                >
+                  {link.platform}
+                </a>
+              ))}
+            </div>
+          )}
+
           <div className="flex items-center">
             <div className="h-0.5 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 flex-1"></div>
             <div className="mx-4 flex gap-1">
@@ -103,11 +116,8 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
           </div>
         </header>
 
-        {/* Main Content Grid */}
         <div className="grid grid-cols-3 gap-8">
-          {/* Left Column - Skills & Creative Profile */}
           <div className="col-span-1 space-y-8">
-            {/* Creative Skills */}
             <section>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-1 bg-pink-500 rounded"></div>
@@ -116,7 +126,7 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                   CREATIVE SKILLS
                 </h2>
               </div>
-              
+
               <div className="space-y-4">
                 {data.skills.map((skill, index) => (
                   <div key={index} className="group">
@@ -124,18 +134,18 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                       <span className="text-sm font-medium text-gray-800">{skill}</span>
                       <div className="flex items-center gap-1">
                         {[...Array(5)].map((_, i) => (
-                          <Star 
-                            key={i} 
-                            size={10} 
-                            className={`${i < 4 ? 'text-amber-500 fill-amber-500' : 'text-gray-300'}`} 
+                          <Star
+                            key={i}
+                            size={10}
+                            className={i < 4 ? "text-amber-500 fill-amber-500" : "text-gray-300"}
                           />
                         ))}
                       </div>
                     </div>
                     <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className="h-full bg-gradient-to-r from-pink-500 to-purple-500 rounded-full transition-all duration-500"
-                        style={{ width: `${Math.min(95, 70 + (index * 8))}%` }}
+                        style={{ width: `${Math.min(95, 70 + index * 8)}%` }}
                       ></div>
                     </div>
                   </div>
@@ -143,7 +153,6 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
               </div>
             </section>
 
-            {/* Tools & Technologies */}
             {data.projects.length > 0 && (
               <section>
                 <div className="flex items-center gap-2 mb-4">
@@ -153,21 +162,22 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                     TOOLS & TECH
                   </h2>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2">
-                  {[...new Set(data.projects.flatMap(p => p.technologies))].slice(0, 10).map((tech, index) => (
-                    <div 
-                      key={index}
-                      className="px-3 py-1.5 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg border border-blue-100"
-                    >
-                      <span className="text-xs font-medium text-blue-800">{tech}</span>
-                    </div>
-                  ))}
+                  {[...new Set(data.projects.flatMap((project) => project.technologies))]
+                    .slice(0, 10)
+                    .map((tech, index) => (
+                      <div
+                        key={index}
+                        className="px-3 py-1.5 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg border border-blue-100"
+                      >
+                        <span className="text-xs font-medium text-blue-800">{tech}</span>
+                      </div>
+                    ))}
                 </div>
               </section>
             )}
 
-            {/* Languages */}
             {data.languages && data.languages.length > 0 && (
               <section>
                 <div className="flex items-center gap-2 mb-4">
@@ -177,24 +187,32 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                     LANGUAGES
                   </h2>
                 </div>
-                
+
                 <div className="space-y-3">
                   {data.languages.map((lang, index) => (
                     <div key={index} className="flex items-center justify-between">
                       <span className="text-sm font-medium text-gray-800">{lang.language}</span>
                       <div className="flex items-center gap-2">
                         <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                          <div 
+                          <div
                             className={`h-full ${
-                              lang.level === "Native" ? "bg-emerald-500" :
-                              lang.level === "Fluent" ? "bg-green-500" :
-                              lang.level === "Intermediate" ? "bg-amber-500" :
-                              "bg-orange-400"
+                              lang.level === "Native"
+                                ? "bg-emerald-500"
+                                : lang.level === "Fluent"
+                                  ? "bg-green-500"
+                                  : lang.level === "Intermediate"
+                                    ? "bg-amber-500"
+                                    : "bg-orange-400"
                             }`}
                             style={{
-                              width: lang.level === "Native" ? "100%" :
-                                     lang.level === "Fluent" ? "90%" :
-                                     lang.level === "Intermediate" ? "70%" : "40%"
+                              width:
+                                lang.level === "Native"
+                                  ? "100%"
+                                  : lang.level === "Fluent"
+                                    ? "90%"
+                                    : lang.level === "Intermediate"
+                                      ? "70%"
+                                      : "40%",
                             }}
                           ></div>
                         </div>
@@ -206,7 +224,6 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
               </section>
             )}
 
-            {/* Strengths */}
             {data.strengths && data.strengths.length > 0 && (
               <section>
                 <div className="flex items-center gap-2 mb-4">
@@ -216,7 +233,7 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                     STRENGTHS
                   </h2>
                 </div>
-                
+
                 <div className="space-y-2">
                   {data.strengths.map((strength, index) => (
                     <div key={index} className="flex items-start gap-2">
@@ -228,7 +245,6 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
               </section>
             )}
 
-            {/* Hobbies */}
             {data.hobbies && data.hobbies.length > 0 && (
               <section>
                 <div className="flex items-center gap-2 mb-4">
@@ -238,17 +254,13 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                     HOBBIES
                   </h2>
                 </div>
-                
-                <div className="text-sm text-gray-700">
-                  {data.hobbies.join(", ")}
-                </div>
+
+                <div className="text-sm text-gray-700">{data.hobbies.join(", ")}</div>
               </section>
             )}
           </div>
 
-          {/* Right Column - Experience & Projects */}
           <div className="col-span-2 space-y-8">
-            {/* Experience */}
             {data.experience.length > 0 && (
               <section>
                 <div className="flex items-center gap-2 mb-4">
@@ -258,17 +270,16 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                     PROFESSIONAL EXPERIENCE
                   </h2>
                 </div>
-                
+
                 <div className="space-y-6">
                   {data.experience.map((exp, index) => (
                     <div key={index} className="group relative pl-8">
-                      {/* Timeline dot */}
                       <div className="absolute left-0 top-1.5">
                         <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                           <div className="w-2 h-2 bg-white rounded-full"></div>
                         </div>
                       </div>
-                      
+
                       <div className="bg-white rounded-xl p-5 border border-gray-200 hover:shadow-md transition-shadow">
                         <div className="flex justify-between items-start mb-3">
                           <div>
@@ -276,12 +287,16 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                             <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                               <span className="font-medium">{exp.company}</span>
                               <span className="text-gray-400">•</span>
-                              <span>{exp.startDate} - {exp.endDate}</span>
+                              <span>
+                                {exp.startDate} - {exp.endDate}
+                              </span>
                             </div>
                           </div>
-                          <div className="text-xs bg-purple-100 text-purple-800 font-semibold px-3 py-1 rounded-full">
-                            Full-time
-                          </div>
+                          {!isFresher && (
+                            <div className="text-xs bg-purple-100 text-purple-800 font-semibold px-3 py-1 rounded-full">
+                              Full-time
+                            </div>
+                          )}
                         </div>
                         <p className="text-gray-700 text-sm leading-relaxed pl-4 border-l-2 border-purple-200">
                           {exp.description}
@@ -293,20 +308,19 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
               </section>
             )}
 
-            {/* Projects - Creative Showcase */}
             {data.projects.length > 0 && (
               <section>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-8 h-1 bg-amber-500 rounded"></div>
                   <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                     <Target size={20} className="text-amber-500" />
-                    FEATURED PROJECTS
+                    {isFresher ? "FEATURED PROJECTS" : "PROJECTS & ACHIEVEMENTS"}
                   </h2>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   {data.projects.map((project, index) => (
-                    <div 
+                    <div
                       key={index}
                       className="group bg-white rounded-xl p-4 border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
                     >
@@ -316,13 +330,11 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                           Project #{index + 1}
                         </div>
                       </div>
-                      <p className="text-gray-700 text-sm mb-4 line-clamp-3">
-                        {project.description}
-                      </p>
+                      <p className="text-gray-700 text-sm mb-4 line-clamp-3">{project.description}</p>
                       {project.technologies.length > 0 && (
                         <div className="flex flex-wrap gap-1.5">
                           {project.technologies.slice(0, 3).map((tech, techIndex) => (
-                            <span 
+                            <span
                               key={techIndex}
                               className="text-xs bg-gradient-to-r from-amber-50 to-orange-50 text-amber-800 font-medium px-2 py-1 rounded-full border border-amber-200"
                             >
@@ -342,9 +354,7 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
               </section>
             )}
 
-            {/* Education & Certifications */}
             <div className="grid grid-cols-2 gap-6">
-              {/* Education */}
               {data.education.length > 0 && (
                 <section>
                   <div className="flex items-center gap-2 mb-4">
@@ -354,10 +364,10 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                       EDUCATION
                     </h2>
                   </div>
-                  
+
                   <div className="space-y-4">
                     {data.education.map((edu, index) => (
-                      <div 
+                      <div
                         key={index}
                         className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-4 border border-blue-100"
                       >
@@ -381,7 +391,6 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                 </section>
               )}
 
-              {/* Certifications */}
               {data.certifications && data.certifications.length > 0 && (
                 <section>
                   <div className="flex items-center gap-2 mb-4">
@@ -391,10 +400,10 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                       CERTIFICATIONS
                     </h2>
                   </div>
-                  
+
                   <div className="space-y-3">
                     {data.certifications.map((cert, index) => (
-                      <div 
+                      <div
                         key={index}
                         className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-lg p-3 border border-emerald-100"
                       >
@@ -409,10 +418,61 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                 </section>
               )}
             </div>
+
+            {data.achievements && data.achievements.length > 0 && (
+              <section>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-6 h-1 bg-pink-500 rounded"></div>
+                  <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <Award size={18} className="text-pink-500" />
+                    ACHIEVEMENTS
+                  </h2>
+                </div>
+
+                <div className="space-y-2">
+                  {data.achievements.map((achievement, index) => (
+                    <div key={index} className="text-sm text-gray-700 flex items-start gap-2">
+                      <span className="text-pink-500 mt-1">•</span>
+                      <span>{achievement}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {data.customSections && data.customSections.length > 0 && (
+              <div className="grid grid-cols-2 gap-6">
+                {data.customSections.map((section, index) => (
+                  <section key={index}>
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-6 h-1 bg-blue-500 rounded"></div>
+                      <h2 className="text-lg font-bold text-gray-900">
+                        {section.title.toUpperCase()}
+                      </h2>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-4 border border-gray-200">
+                      {section.description && (
+                        <p className="text-sm text-gray-700 mb-3">{section.description}</p>
+                      )}
+                      {section.items && section.items.length > 0 && (
+                        <div className="space-y-2">
+                          {section.items.map((item, itemIndex) => (
+                            <div key={itemIndex} className="text-sm text-gray-700 flex items-start gap-2">
+                              <span className="text-blue-500 mt-1">•</span>
+                              <span>{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Footer */}
         <div className="mt-12 pt-8 border-t border-gray-300">
           <div className="text-center">
             <div className="flex items-center justify-center gap-6 mb-3">

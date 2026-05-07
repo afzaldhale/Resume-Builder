@@ -1,5 +1,6 @@
 import React from "react";
 import { ResumeData } from "./types";
+import { getSummaryConfig } from "./templatePolicy";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 interface Template8Props {
@@ -7,7 +8,7 @@ interface Template8Props {
 }
 
 const Template8: React.FC<Template8Props> = ({ data }) => {
-  const isFresher = data.candidateType === "fresher" || data.experience.length === 0;
+  const { isFresher, summaryText, summaryTitle } = getSummaryConfig(data);
 
   return (
     <div className="w-[794px] mx-auto bg-slate-50 text-gray-900 font-sans border border-gray-300">
@@ -62,15 +63,13 @@ const Template8: React.FC<Template8Props> = ({ data }) => {
         </header>
 
         {/* SUMMARY / OBJECTIVE */}
-        {(data.summary || data.careerObjective) && (
+        {summaryText && (
           <section>
             <h2 className="section-title">
-              {isFresher ? "CAREER OBJECTIVE" : "PROFESSIONAL SUMMARY"}
+              {summaryTitle.toUpperCase()}
             </h2>
             <p className="text-sm leading-relaxed mt-2">
-              {isFresher
-                ? data.careerObjective || data.summary
-                : data.summary || data.careerObjective}
+              {summaryText}
             </p>
           </section>
         )}

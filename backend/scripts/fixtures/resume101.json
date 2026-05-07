@@ -1,0 +1,93 @@
+{
+  "fullName": "John Doe",
+  "role": "Senior Software Engineer",
+  "email": "john.doe@example.com",
+  "phone": "+1 234 567 8900",
+  "address": "New York, NY",
+  "summary": "Experienced software engineer with 5+ years in full-stack development. Passionate about creating scalable web applications and mentoring junior developers.",
+  "skills": [
+    "JavaScript",
+    "TypeScript",
+    "React",
+    "Node.js",
+    "Python",
+    "AWS",
+    "Docker",
+    "MongoDB",
+    "PostgreSQL"
+  ],
+  "projects": [
+    {
+      "name": "E-commerce Platform",
+      "description": "Built a full-stack e-commerce platform with React and Node.js",
+      "technologies": ["React", "Node.js", "MongoDB", "Stripe API"]
+    },
+    {
+      "name": "Task Management App",
+      "description": "Developed a collaborative task management application",
+      "technologies": ["TypeScript", "Next.js", "Prisma", "PostgreSQL"]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Bachelor of Computer Science",
+      "school": "MIT",
+      "startYear": "",
+      "endYear": ""
+    },
+    {
+      "degree": "Master of Computer Science",
+      "school": "Stanford",
+      "startYear": "",
+      "endYear": ""
+    }
+  ],
+  "certifications": [
+    {
+      "name": "AWS Certified Solutions Architect",
+      "issuer": "Amazon",
+      "year": ""
+    },
+    {
+      "name": "React Advanced Certification",
+      "issuer": "Meta",
+      "year": ""
+    },
+    {
+      "name": "Google Cloud Professional",
+      "issuer": "Google",
+      "year": ""
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "level": "Native"
+    },
+    {
+      "language": "Hindi",
+      "level": "Fluent"
+    },
+    {
+      "language": "Spanish",
+      "level": "Intermediate"
+    }
+  ],
+  "hobbies": ["Open source"],
+  "strengths": ["Hardworking"],
+  "socialLinks": [
+    {
+      "platform": "LinkedIn",
+      "url": "linkedin.com/in/johndoe"
+    },
+    {
+      "platform": "GitHub",
+      "url": "github.com/johndoe"
+    },
+    {
+      "platform": "Portfolio",
+      "url": "johndoeportfolio.com"
+    }
+  ],
+  "candidateType": "experienced"
+}

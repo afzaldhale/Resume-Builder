@@ -1,3 +1,5 @@
+import { renderSupplementarySections, sharedTemplateStyles } from "./templateShared.js";
+
 // template8.js - ONE PAGE VERSION (STRICT A4)
 export function template8HTML(data) {
   const safeData = {
@@ -8,16 +10,23 @@ export function template8HTML(data) {
     address: data.address || "",
     summary: data.summary || "",
     careerObjective: data.careerObjective || "",
-    skills: Array.isArray(data.skills) ? data.skills.slice(0, 8) : [],
-    experience: Array.isArray(data.experience) ? data.experience.slice(0, 2) : [],
-    education: Array.isArray(data.education) ? data.education.slice(0, 2) : [],
-    projects: Array.isArray(data.projects) ? data.projects.slice(0, 2) : [],
-    certifications: Array.isArray(data.certifications) ? data.certifications.slice(0, 3) : [],
-    strengths: Array.isArray(data.strengths) ? data.strengths.slice(0, 4) : [],
-    hobbies: Array.isArray(data.hobbies) ? data.hobbies.slice(0, 3) : [],
-    socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks.slice(0, 2) : [],
+    skills: Array.isArray(data.skills) ? data.skills : [],
+    experience: Array.isArray(data.experience) ? data.experience : [],
+    education: Array.isArray(data.education) ? data.education : [],
+    projects: Array.isArray(data.projects) ? data.projects : [],
+    certifications: Array.isArray(data.certifications) ? data.certifications : [],
+    languages: Array.isArray(data.languages) ? data.languages : [],
+    strengths: Array.isArray(data.strengths) ? data.strengths : [],
+    hobbies: Array.isArray(data.hobbies) ? data.hobbies : [],
+    socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : [],
+    achievements: Array.isArray(data.achievements) ? data.achievements : [],
+    references: Array.isArray(data.references) ? data.references : [],
+    customSections: Array.isArray(data.customSections) ? data.customSections : [],
     candidateType: data.candidateType || "experienced"
   };
+  const supplementarySections = renderSupplementarySections(safeData, {
+    include: ["achievements", "references", "customSections"],
+  });
 
   const isFresher = data.candidateType === "fresher" || safeData.experience.length === 0;
 
@@ -206,10 +215,13 @@ export function template8HTML(data) {
       margin: 0;
     }
   }
+
+  ${sharedTemplateStyles}
 </style>
 </head>
 
 <body>
+<div class="page">
 <div class="container">
 
 <header class="header">
@@ -271,6 +283,16 @@ ${safeData.languages.length ? `
   </ul>
 </section>` : ""}
 
+${safeData.certifications.length ? `
+<section class="section">
+  <h2 class="section-title">CERTIFICATIONS</h2>
+  ${safeData.certifications.map(cert => `
+    <div class="item-container">
+      <div class="item-title">${cert.name}</div>
+      <div class="item-subtitle">${cert.issuer || ""}${cert.year ? ` • ${cert.year}` : ""}</div>
+    </div>`).join("")}
+</section>` : ""}
+
 ${safeData.experience.length ? `
 <section class="section">
   <h2 class="section-title">WORK EXPERIENCE</h2>
@@ -291,7 +313,7 @@ ${safeData.projects.length ? `
     <div class="project-item">
       <div class="project-name">${p.name}</div>
       <div class="project-description">${p.description}</div>
-      ${p.technologies?.length ? `<div class="project-tech">Tech: ${p.technologies.slice(0,3).join(", ")}</div>` : ""}
+      ${p.technologies?.length ? `<div class="project-tech">Tech: ${p.technologies.join(", ")}</div>` : ""}
     </div>`).join("")}
 </section>` : ""}
 
@@ -309,10 +331,9 @@ ${safeData.hobbies.length ? `
   <div class="hobbies-content">${safeData.hobbies.join(", ")}</div>
 </section>` : ""}
 
-<footer class="footer">
-  ${safeData.fullName || "Your Name"} • Resume
-</footer>
+${supplementarySections}
 
+</div>
 </div>
 </body>
 </html>

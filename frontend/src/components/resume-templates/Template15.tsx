@@ -1,5 +1,6 @@
 import React from "react";
 import { ResumeData } from "./types";
+import { getSummaryConfig } from "./templatePolicy";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 interface Template15Props {
@@ -7,7 +8,7 @@ interface Template15Props {
 }
 
 const Template15: React.FC<Template15Props> = ({ data }) => {
-  const isFresher = data.candidateType === "fresher" || data.experience.length === 0;
+  const { summaryText, summaryTitle } = getSummaryConfig(data);
 
   return (
     <div className="w-[794px] min-h-[1123px] mx-auto bg-white border border-gray-300 font-sans text-gray-900">
@@ -42,6 +43,20 @@ const Template15: React.FC<Template15Props> = ({ data }) => {
               </div>
             )}
           </div>
+
+          {data.socialLinks && data.socialLinks.length > 0 && (
+            <div className="mt-6">
+              <h2 className="left-title">SOCIAL LINKS</h2>
+              <div className="mt-2 space-y-1 text-sm text-gray-700">
+                {data.socialLinks.map((link, i) => (
+                  <div key={i}>
+                    <span className="font-medium">{link.platform}:</span>{" "}
+                    <span className="break-all">{link.url}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* SKILLS */}
           {data.skills.length > 0 && (
@@ -94,16 +109,10 @@ const Template15: React.FC<Template15Props> = ({ data }) => {
         <main className="col-span-2 p-10 space-y-8">
 
           {/* SUMMARY */}
-          {(data.summary || data.careerObjective) && (
+          {summaryText && (
             <section>
-              <h2 className="section-title">
-                {isFresher ? "CAREER OBJECTIVE" : "PROFESSIONAL SUMMARY"}
-              </h2>
-              <p className="text-sm mt-2 leading-relaxed">
-                {isFresher
-                  ? data.careerObjective || data.summary
-                  : data.summary || data.careerObjective}
-              </p>
+              <h2 className="section-title">{summaryTitle.toUpperCase()}</h2>
+              <p className="text-sm mt-2 leading-relaxed">{summaryText}</p>
             </section>
           )}
 
@@ -157,6 +166,53 @@ const Template15: React.FC<Template15Props> = ({ data }) => {
                 ))}
               </div>
             </section>
+          )}
+
+          {data.certifications && data.certifications.length > 0 && (
+            <section>
+              <h2 className="section-title">CERTIFICATIONS</h2>
+              <div className="mt-3 space-y-3">
+                {data.certifications.map((cert, i) => (
+                  <div key={i}>
+                    <p className="font-semibold text-sm">{cert.name}</p>
+                    <p className="text-xs text-gray-600">
+                      {cert.issuer} | {cert.year}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {data.achievements && data.achievements.length > 0 && (
+            <section>
+              <h2 className="section-title">ACHIEVEMENTS</h2>
+              <ul className="mt-3 space-y-1 text-sm">
+                {data.achievements.map((achievement, i) => (
+                  <li key={i}>• {achievement}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {data.customSections && data.customSections.length > 0 && (
+            <>
+              {data.customSections.map((section, i) => (
+                <section key={i}>
+                  <h2 className="section-title">{section.title.toUpperCase()}</h2>
+                  {section.description && (
+                    <p className="text-sm mt-2">{section.description}</p>
+                  )}
+                  {section.items && section.items.length > 0 && (
+                    <ul className="mt-2 space-y-1 text-sm">
+                      {section.items.map((item, itemIndex) => (
+                        <li key={itemIndex}>• {item}</li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              ))}
+            </>
           )}
         </main>
       </div>

@@ -1,3 +1,5 @@
+import { renderSupplementarySections, sharedTemplateStyles } from "./templateShared.js";
+
 // template11.js
 export function template11HTML(data) {
   const safe = {
@@ -17,8 +19,12 @@ export function template11HTML(data) {
     socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : [],
     hobbies: Array.isArray(data.hobbies) ? data.hobbies : [],
     strengths: Array.isArray(data.strengths) ? data.strengths : [],
+    achievements: Array.isArray(data.achievements) ? data.achievements : [],
+    references: Array.isArray(data.references) ? data.references : [],
+    customSections: Array.isArray(data.customSections) ? data.customSections : [],
     candidateType: data.candidateType || "experienced"
   };
+  const supplementarySections = renderSupplementarySections(safe);
 
   const isFresher = data.candidateType === "fresher" || safe.experience.length === 0;
 
@@ -116,10 +122,13 @@ export function template11HTML(data) {
     margin-bottom: 4px;
   }
 
+  ${sharedTemplateStyles}
+
 </style>
 </head>
 
 <body>
+  <div class="page">
   <div class="wrapper">
 
     <div class="sidebar">
@@ -130,6 +139,7 @@ export function template11HTML(data) {
         ${safe.email ? `<p>✉ ${safe.email}</p>` : ""}
         ${safe.phone ? `<p>📞 ${safe.phone}</p>` : ""}
         ${safe.address ? `<p>📍 ${safe.address}</p>` : ""}
+        ${safe.socialLinks.length > 0 ? safe.socialLinks.map(link => `<p>${link.platform}: ${link.url}</p>`).join("") : ""}
       </div>
 
       ${safe.skills.length > 0 ? `
@@ -176,6 +186,34 @@ export function template11HTML(data) {
         `).join("")}
       </div>` : ""}
 
+      ${safe.projects.length > 0 ? `
+      <div class="section">
+        <div class="section-title">PROJECTS</div>
+        ${safe.projects.map(project => `
+          <p><strong>${project.name}</strong></p>
+          <p>${project.description}</p>
+        `).join("")}
+      </div>` : ""}
+
+      ${safe.certifications.length > 0 ? `
+      <div class="section">
+        <div class="section-title">CERTIFICATIONS</div>
+        ${safe.certifications.map(cert => `
+          <p><strong>${cert.name}</strong><br/>
+          <span style="font-size:12px;color:#4b5563">${cert.issuer || ""}${cert.year ? ` | ${cert.year}` : ""}</span></p>
+        `).join("")}
+      </div>` : ""}
+
+      ${safe.languages.length > 0 ? `
+      <div class="section">
+        <div class="section-title">LANGUAGES</div>
+        <ul style="list-style: none; padding: 0;">
+          ${safe.languages.map(lang => `
+            <li style="margin-bottom: 4px;">• ${lang.language}${lang.level ? ` (${lang.level})` : ""}</li>
+          `).join("")}
+        </ul>
+      </div>` : ""}
+
       ${safe.strengths.length > 0 ? `
       <div class="section">
         <div class="section-title">STRENGTHS</div>
@@ -192,7 +230,10 @@ export function template11HTML(data) {
         <p>${safe.hobbies.join(", ")}</p>
       </div>` : ""}
 
+      ${supplementarySections}
+
     </div>
+  </div>
   </div>
 </body>
 </html>

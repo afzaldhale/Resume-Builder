@@ -1,10 +1,11 @@
+import { getSummaryConfig, renderSupplementarySections, sharedTemplateStyles } from "./templateShared.js";
+
 // template3.js
 export function template3HTML(data) {
-  const isFresher = data.candidateType === "fresher";
-  const summaryText = isFresher
-    ? data.careerObjective || data.summary
-    : data.summary || data.careerObjective;
-  const summaryTitle = isFresher ? "Career Objective" : "Professional Summary";
+  const { summaryText, summaryTitle } = getSummaryConfig(data);
+  const supplementarySections = renderSupplementarySections(data, {
+    include: ["strengths", "achievements", "references", "customSections"],
+  });
 
   return `
 <!DOCTYPE html>
@@ -138,6 +139,8 @@ export function template3HTML(data) {
     height: 100%;
     background: #10b981;
   }
+
+  ${sharedTemplateStyles}
 </style>
 </head>
 
@@ -227,7 +230,7 @@ export function template3HTML(data) {
       ${data.projects?.length ? `
       <section class="section">
         <h2>Projects</h2>
-        ${data.projects.slice(0, 2).map(project => `
+        ${data.projects.map(project => `
           <div class="project-card">
             <h3>${project.name}</h3>
             <p>${project.description}</p>
@@ -252,7 +255,7 @@ export function template3HTML(data) {
     <div style="flex: 1;">
       <h2>Certifications</h2>
       <ul>
-        ${data.certifications.slice(0, 3).map(cert => `
+        ${data.certifications.map(cert => `
           <li>${cert.name}${cert.issuer ? ` – ${cert.issuer}` : ""}${cert.year ? ` (${cert.year})` : ""}</li>
         `).join("")}
       </ul>
@@ -288,13 +291,7 @@ export function template3HTML(data) {
   </section>
   ` : ""}
 
-  <!-- FOOTER -->
-  <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #d1d5db; font-size: 11px; color: #6b7280;">
-    <div style="display: flex; justify-content: space-between;">
-      <span>Template 3 - Modern Layout</span>
-      <span>Generated on ${new Date().toLocaleDateString()}</span>
-    </div>
-  </div>
+  ${supplementarySections}
 
 </div>
 </body>

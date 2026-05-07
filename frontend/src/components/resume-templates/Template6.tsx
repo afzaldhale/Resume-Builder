@@ -1,5 +1,6 @@
 import React from "react";
 import { ResumeData } from "./types";
+import { getSummaryConfig } from "./templatePolicy";
 import { 
   Mail, Phone, MapPin, Briefcase, GraduationCap, 
   Code, Award, Languages, User, ChevronRight
@@ -10,8 +11,7 @@ interface Template6Props {
 }
 
 const Template6: React.FC<Template6Props> = ({ data }) => {
-  // Check if this is a fresher resume
-  const isFresher = data.candidateType === "fresher" || !data.experience || data.experience.length === 0;
+  const { isFresher, summaryText, summaryTitle } = getSummaryConfig(data);
 
   return (
     <div className="bg-gradient-to-br from-blue-50 to-gray-50 text-gray-800 w-[794px] min-h-[1123px] mx-auto relative overflow-hidden font-sans">
@@ -67,36 +67,36 @@ const Template6: React.FC<Template6Props> = ({ data }) => {
         {/* ATS Optimized Content */}
         <div className="space-y-8">
           {/* Career Objective (for freshers) */}
-          {isFresher && data.careerObjective && (
+          {isFresher && summaryText && (
             <section>
               <div className="flex items-center mb-3">
                 <div className="w-10 h-1 bg-blue-600 rounded"></div>
                 <h2 className="text-xl font-bold text-gray-900 ml-3 flex items-center gap-2">
                   <User size={18} />
-                  CAREER OBJECTIVE
+                  {summaryTitle.toUpperCase()}
                 </h2>
               </div>
               <div className="pl-4 border-l-2 border-blue-200">
                 <p className="text-gray-700 leading-relaxed">
-                  {data.careerObjective}
+                  {summaryText}
                 </p>
               </div>
             </section>
           )}
 
           {/* Professional Summary (for experienced) */}
-          {!isFresher && data.summary && (
+          {!isFresher && summaryText && (
             <section>
               <div className="flex items-center mb-3">
                 <div className="w-10 h-1 bg-blue-600 rounded"></div>
                 <h2 className="text-xl font-bold text-gray-900 ml-3 flex items-center gap-2">
                   <Briefcase size={18} />
-                  PROFESSIONAL SUMMARY
+                  {summaryTitle.toUpperCase()}
                 </h2>
               </div>
               <div className="pl-4 border-l-2 border-blue-200">
                 <p className="text-gray-700 leading-relaxed">
-                  {data.summary}
+                  {summaryText}
                 </p>
               </div>
             </section>
@@ -303,6 +303,21 @@ const Template6: React.FC<Template6Props> = ({ data }) => {
 
           {/* Footer */}
           <div className="pt-8 mt-8 border-t border-gray-300">
+            {data.socialLinks && data.socialLinks.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-4 mb-4 text-sm text-blue-700">
+                {data.socialLinks.map((link, index) => (
+                  <a
+                    key={index}
+                    href={link.url.startsWith("http") ? link.url : `https://${link.url}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline"
+                  >
+                    {link.platform}
+                  </a>
+                ))}
+              </div>
+            )}
             <div className="text-center text-xs text-gray-500">
               <div className="flex items-center justify-center gap-4">
                 <span>Template 6 • ATS Optimized</span>

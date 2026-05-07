@@ -1,5 +1,6 @@
 import React from "react";
 import { ResumeData } from "./types";
+import { getSummaryConfig } from "./templatePolicy";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 interface Template13Props {
@@ -7,7 +8,7 @@ interface Template13Props {
 }
 
 const Template13: React.FC<Template13Props> = ({ data }) => {
-  const isFresher = data.candidateType === "fresher" || data.experience.length === 0;
+  const { summaryText, summaryTitle } = getSummaryConfig(data);
 
   return (
     <div className="w-[794px] mx-auto min-h-[1123px] bg-purple-50 font-sans text-gray-900 border border-gray-300">
@@ -48,19 +49,23 @@ const Template13: React.FC<Template13Props> = ({ data }) => {
                 </span>
               )}
             </div>
+
+            {data.socialLinks && data.socialLinks.length > 0 && (
+              <div className="flex flex-wrap gap-4 text-sm text-purple-700 mt-2">
+                {data.socialLinks.map((link, i) => (
+                  <span key={i}>
+                    {link.platform}: {link.url}
+                  </span>
+                ))}
+              </div>
+            )}
           </header>
 
           {/* SUMMARY */}
-          {(data.summary || data.careerObjective) && (
+          {summaryText && (
             <section>
-              <h2 className="section-title">
-                {isFresher ? "CAREER OBJECTIVE" : "PROFESSIONAL SUMMARY"}
-              </h2>
-              <p className="text-sm mt-2 leading-relaxed">
-                {isFresher
-                  ? data.careerObjective || data.summary
-                  : data.summary || data.careerObjective}
-              </p>
+              <h2 className="section-title">{summaryTitle.toUpperCase()}</h2>
+              <p className="text-sm mt-2 leading-relaxed">{summaryText}</p>
             </section>
           )}
 
@@ -135,6 +140,22 @@ const Template13: React.FC<Template13Props> = ({ data }) => {
             </section>
           )}
 
+          {data.certifications && data.certifications.length > 0 && (
+            <section>
+              <h2 className="section-title">CERTIFICATIONS</h2>
+              <div className="space-y-3 mt-2">
+                {data.certifications.map((cert, i) => (
+                  <div key={i}>
+                    <p className="font-semibold text-sm">{cert.name}</p>
+                    <p className="text-xs text-gray-600">
+                      {cert.issuer} | {cert.year}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* LANGUAGES */}
           {data.languages && data.languages.length > 0 && (
             <section>
@@ -175,6 +196,37 @@ const Template13: React.FC<Template13Props> = ({ data }) => {
                 {data.hobbies.join(", ")}
               </div>
             </section>
+          )}
+
+          {data.achievements && data.achievements.length > 0 && (
+            <section>
+              <h2 className="section-title">ACHIEVEMENTS</h2>
+              <ul className="text-sm mt-2 space-y-1">
+                {data.achievements.map((achievement, i) => (
+                  <li key={i}>• {achievement}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {data.customSections && data.customSections.length > 0 && (
+            <>
+              {data.customSections.map((section, i) => (
+                <section key={i}>
+                  <h2 className="section-title">{section.title.toUpperCase()}</h2>
+                  {section.description && (
+                    <p className="text-sm mt-2">{section.description}</p>
+                  )}
+                  {section.items && section.items.length > 0 && (
+                    <ul className="text-sm mt-2 space-y-1">
+                      {section.items.map((item, itemIndex) => (
+                        <li key={itemIndex}>• {item}</li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              ))}
+            </>
           )}
 
         </div>

@@ -14,6 +14,7 @@ import { Badge } from "../../ui/badge";
 import { CheckCircle, XCircle, FileText } from "lucide-react";
 import { toast } from "sonner";
 import api from "../../../api/axios";
+import { API_BASE_URL } from "../../../lib/apiBaseUrl";
 
 /* =======================
    TYPES
@@ -117,8 +118,7 @@ const AdminRequests = () => {
   };
 
   const handleViewPdf = (id: number) => {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
-    window.open(`${apiBaseUrl}/api/admin/requests/${id}/pdf`, "_blank");
+    window.open(`${API_BASE_URL}/api/admin/requests/${id}/pdf`, "_blank");
   };
 
   /* =======================

@@ -1,5 +1,6 @@
 import React from "react";
 import { ResumeData } from "./types";
+import { getSummaryConfig } from "./templatePolicy";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 interface Template12Props {
@@ -7,7 +8,7 @@ interface Template12Props {
 }
 
 const Template12: React.FC<Template12Props> = ({ data }) => {
-  const isFresher = data.candidateType === "fresher" || data.experience.length === 0;
+  const { summaryText, summaryTitle } = getSummaryConfig(data);
 
   return (
     <div className="w-[794px] mx-auto bg-slate-100 text-gray-900 font-sans border border-gray-300">
@@ -42,6 +43,16 @@ const Template12: React.FC<Template12Props> = ({ data }) => {
               </span>
             )}
           </div>
+
+          {data.socialLinks && data.socialLinks.length > 0 && (
+            <div className="flex flex-wrap gap-4 text-sm mt-3 text-teal-100">
+              {data.socialLinks.map((link, i) => (
+                <span key={i}>
+                  {link.platform}: {link.url}
+                </span>
+              ))}
+            </div>
+          )}
         </header>
 
         {/* BODY */}
@@ -113,16 +124,10 @@ const Template12: React.FC<Template12Props> = ({ data }) => {
           {/* RIGHT COLUMN */}
           <main className="col-span-2 space-y-8">
 
-            {(data.summary || data.careerObjective) && (
+            {summaryText && (
               <section>
-                <h2 className="section-title">
-                  {isFresher ? "CAREER OBJECTIVE" : "PROFESSIONAL SUMMARY"}
-                </h2>
-                <p className="text-sm mt-2 leading-relaxed">
-                  {isFresher
-                    ? data.careerObjective || data.summary
-                    : data.summary || data.careerObjective}
-                </p>
+                <h2 className="section-title">{summaryTitle.toUpperCase()}</h2>
+                <p className="text-sm mt-2 leading-relaxed">{summaryText}</p>
               </section>
             )}
 
@@ -159,6 +164,53 @@ const Template12: React.FC<Template12Props> = ({ data }) => {
                   ))}
                 </div>
               </section>
+            )}
+
+            {data.certifications && data.certifications.length > 0 && (
+              <section>
+                <h2 className="section-title">CERTIFICATIONS</h2>
+                <div className="space-y-3 mt-2">
+                  {data.certifications.map((cert, i) => (
+                    <div key={i}>
+                      <p className="font-semibold text-sm">{cert.name}</p>
+                      <p className="text-xs text-gray-600">
+                        {cert.issuer} | {cert.year}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {data.achievements && data.achievements.length > 0 && (
+              <section>
+                <h2 className="section-title">ACHIEVEMENTS</h2>
+                <ul className="text-sm mt-2 space-y-1">
+                  {data.achievements.map((achievement, i) => (
+                    <li key={i}>• {achievement}</li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {data.customSections && data.customSections.length > 0 && (
+              <>
+                {data.customSections.map((section, i) => (
+                  <section key={i}>
+                    <h2 className="section-title">{section.title.toUpperCase()}</h2>
+                    {section.description && (
+                      <p className="text-sm mt-2">{section.description}</p>
+                    )}
+                    {section.items && section.items.length > 0 && (
+                      <ul className="text-sm mt-2 space-y-1">
+                        {section.items.map((item, itemIndex) => (
+                          <li key={itemIndex}>• {item}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                ))}
+              </>
             )}
 
           </main>

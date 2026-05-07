@@ -12,6 +12,27 @@ dotenv.config();
 
 const app = express();
 const authAttemptStore = new Map();
+const envAllowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const localhostOriginPattern =
+  /^https?:\/\/(localhost|127(?:\.\d{1,3}){3})(:\d+)?$/i;
+const lanOriginPattern =
+  /^https?:\/\/((192\.168(?:\.\d{1,3}){2})|(10(?:\.\d{1,3}){3})|(172\.(1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2}))(:\d+)?$/i;
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) {
+    return true;
+  }
+
+  return (
+    envAllowedOrigins.includes(origin) ||
+    localhostOriginPattern.test(origin) ||
+    lanOriginPattern.test(origin)
+  );
+};
 
 const parseCookies = (cookieHeader = "") =>
   cookieHeader
@@ -52,26 +73,21 @@ const authRateLimiter = (req, res, next) => {
   return next();
 };
 
-/* ======================================================
-   CORS CONFIGURATION (FIXED)
-====================================================== */
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173", // ✅ Vite default
-      "http://localhost:8080", // Frontend port
-      "http://localhost:8081", // Alternative frontend port
-      "http://localhost:3000", // Common dev port
-    ],
+    origin(origin, callback) {
+      if (isAllowedOrigin(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`Origin not allowed by CORS: ${origin}`));
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-/* ======================================================
-   GLOBAL MIDDLEWARES
-====================================================== */
 app.use((req, _res, next) => {
   req.cookies = parseCookies(req.headers.cookie);
   next();
@@ -90,42 +106,11 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use("/auth", authRateLimiter);
 
-/* ======================================================
-   ROUTES
-====================================================== */
-
-/**
- * Auth Routes
- * POST /auth/login
- * POST /auth/register
- */
 app.use("/auth", authRoutes);
-
-/**
- * Resume Routes
- * GET  /api/resumes/my-resumes/:userId
- * GET  /api/resumes/:id/pdf
- * POST /api/resumes
- */
 app.use("/api/resumes", resumeRoutes);
-
-/**
- * Admin Routes
- * GET /api/admin/users
- * GET /api/admin/requests
- * PUT /api/admin/requests/:id
- */
 app.use("/api/admin", adminRoutes);
-
-/**
- * Dashboard Route (🚀 SINGLE API CALL)
- * GET /api/dashboard/:userId
- */
 app.use("/api/dashboard", dashboardRoutes);
 
-/* ======================================================
-   HEALTH CHECK
-====================================================== */
 app.get("/health", (_req, res) => {
   res.status(200).json({
     success: true,
@@ -135,11 +120,8 @@ app.get("/health", (_req, res) => {
   });
 });
 
-/* ======================================================
-   GLOBAL ERROR HANDLER
-====================================================== */
 app.use((err, _req, res, _next) => {
-  console.error("❌ Server Error:", err);
+  console.error("Server Error:", err);
 
   res.status(err.status || 500).json({
     success: false,
@@ -147,18 +129,15 @@ app.use((err, _req, res, _next) => {
   });
 });
 
-/* ======================================================
-   SERVER START
-====================================================== */
 const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, async () => {
   try {
     await db.query("SELECT 1");
-    console.log("✅ Database connected");
+    console.log("Database connected");
   } catch (err) {
-    console.error("❌ Database connection failed:", err);
+    console.error("Database connection failed:", err);
   }
 
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

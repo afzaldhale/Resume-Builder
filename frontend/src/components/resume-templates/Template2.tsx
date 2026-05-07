@@ -1,5 +1,6 @@
 import React from "react";
 import { ResumeData } from "./types";
+import { getSummaryConfig } from "./templatePolicy";
 import { 
   Mail, Phone, MapPin, Linkedin, Github, Globe, 
   Briefcase, GraduationCap, Award, Languages, Star,
@@ -47,30 +48,27 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
     }
   };
 
-  const summaryText = data.candidateType === "fresher"
-    ? data.careerObjective || data.summary
-    : data.summary || data.careerObjective;
-  const summaryTitle = data.candidateType === "fresher" ? "Career Objective" : "Profile Summary";
+  const { summaryText, summaryTitle, isFresher } = getSummaryConfig(data);
 
   return (
-    <div className="bg-white text-gray-800 w-[794px] min-h-[1123px] shadow-2xl mx-auto relative overflow-hidden font-sans">
+    <div className="bg-white text-gray-800 w-[794px] h-[1123px] shadow-2xl mx-auto overflow-hidden font-sans flex flex-col">
       {/* Modern Two-Column Layout */}
-      <div className="flex min-h-[1123px]">
+      <div className="flex flex-1 min-h-0">
         {/* Left Sidebar - Dark Theme */}
-        <div className="w-2/5 bg-gradient-to-b from-gray-900 to-gray-800 text-white p-8">
+        <div className="w-2/5 bg-gradient-to-b from-gray-900 to-gray-800 text-white px-7 py-6 flex flex-col min-h-0">
           {/* Profile Header */}
-          <div className="mb-10">
+          <div className="mb-7">
             <h1 className="text-3xl font-bold mb-2 tracking-tight">
               {data.fullName || "Your Name"}
             </h1>
             {data.role && (
-              <div className="text-lg text-gray-300 mb-6">
+              <div className="text-lg text-gray-300 mb-5">
                 {data.role}
               </div>
             )}
             
             {/* Contact Info */}
-            <div className="space-y-4 mb-8">
+            <div className="space-y-3 mb-6">
               {data.email && (
                 <div className="flex items-center gap-3">
                   <Mail size={18} className="text-gray-400" />
@@ -96,12 +94,12 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
 
           {/* Skills Section */}
           {data.skills.length > 0 && (
-            <section className="mb-8">
-              <div className="flex items-center mb-4">
+            <section className="mb-6">
+              <div className="flex items-center mb-3">
                 <Star size={18} className="mr-3 text-blue-400" />
                 <h2 className="text-xl font-bold">SKILLS</h2>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {data.skills.map((skill, index) => (
                   <div key={index} className="group">
                     <div className="flex justify-between items-center mb-1">
@@ -122,14 +120,33 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
             </section>
           )}
 
+          {data.strengths && data.strengths.length > 0 && (
+            <section className="mb-6">
+              <div className="flex items-center mb-3">
+                <Star size={18} className="mr-3 text-emerald-400" />
+                <h2 className="text-xl font-bold">STRENGTHS</h2>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {data.strengths.map((strength, index) => (
+                  <span
+                    key={index}
+                    className="text-xs bg-emerald-900/30 text-emerald-200 px-3 py-1.5 rounded-full border border-emerald-800/40"
+                  >
+                    {strength}
+                  </span>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Education Section */}
           {data.education.length > 0 && (
-            <section className="mb-8">
-              <div className="flex items-center mb-4">
+            <section className="mb-6">
+              <div className="flex items-center mb-3">
                 <GraduationCap size={18} className="mr-3 text-green-400" />
                 <h2 className="text-xl font-bold">EDUCATION</h2>
               </div>
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {data.education.map((edu, index) => (
                   <div key={index} className="relative pl-6">
                     <div className="absolute left-0 top-1 w-2 h-2 bg-green-500 rounded-full"></div>
@@ -155,12 +172,12 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
 
           {/* Languages Section */}
           {data.languages && data.languages.length > 0 && (
-            <section className="mb-8">
-              <div className="flex items-center mb-4">
+            <section className="mb-6">
+              <div className="flex items-center mb-3">
                 <Languages size={18} className="mr-3 text-purple-400" />
                 <h2 className="text-xl font-bold">LANGUAGES</h2>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {data.languages.map((lang, index) => (
                   <div key={index} className="group">
                     <div className="flex justify-between items-center mb-1">
@@ -183,8 +200,8 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
 
           {/* Social Links */}
           {data.socialLinks && data.socialLinks.length > 0 && (
-            <section>
-              <div className="flex items-center mb-4">
+            <section className="mt-auto pt-2">
+              <div className="flex items-center mb-3">
                 <Globe size={18} className="mr-3 text-amber-400" />
                 <h2 className="text-xl font-bold">CONNECT</h2>
               </div>
@@ -204,11 +221,11 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
         </div>
 
         {/* Right Content - Light Theme */}
-        <div className="w-3/5 p-8">
+        <div className="w-3/5 px-7 py-6 min-h-0 overflow-hidden">
           {/* Summary / Career Objective */}
           {summaryText && (
-            <section className="mb-10">
-              <div className="flex items-center mb-4">
+            <section className="mb-8">
+              <div className="flex items-center mb-3">
                 <div className="w-10 h-1 bg-blue-600 rounded"></div>
                 <h2 className="text-2xl font-bold text-gray-800 ml-3">{summaryTitle}</h2>
               </div>
@@ -222,12 +239,12 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
 
           {/* Work Experience */}
           {data.experience.length > 0 && (
-            <section className="mb-10">
-              <div className="flex items-center mb-6">
+            <section className="mb-8">
+              <div className="flex items-center mb-5">
                 <Briefcase size={20} className="text-blue-600 mr-3" />
                 <h2 className="text-2xl font-bold text-gray-800">WORK EXPERIENCE</h2>
               </div>
-              <div className="space-y-8">
+              <div className="space-y-6">
                 {data.experience.map((exp, index) => (
                   <div key={index} className="relative pl-10">
                     {/* Timeline Dot */}
@@ -240,7 +257,7 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
                       )}
                     </div>
                     
-                    <div className="p-5 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
+                    <div className="p-4 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <h3 className="font-bold text-xl text-gray-800">{exp.role}</h3>
@@ -252,9 +269,11 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
                             </div>
                           </div>
                         </div>
-                        <span className="text-xs bg-blue-100 text-blue-800 font-semibold px-3 py-1.5 rounded-full">
-                          Full-time
-                        </span>
+                        {!isFresher && (
+                          <span className="text-xs bg-blue-100 text-blue-800 font-semibold px-3 py-1.5 rounded-full">
+                            Full-time
+                          </span>
+                        )}
                       </div>
                       <p className="text-gray-700 text-sm leading-relaxed pl-4 border-l-2 border-blue-200">
                         {exp.description}
@@ -268,10 +287,12 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
 
           {/* Projects & Achievements */}
           {data.projects.length > 0 && (
-            <section className="mb-10">
-              <div className="flex items-center mb-6">
+            <section className="mb-8">
+              <div className="flex items-center mb-5">
                 <Award size={20} className="text-green-600 mr-3" />
-                <h2 className="text-2xl font-bold text-gray-800">PROJECTS & ACHIEVEMENTS</h2>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {isFresher ? "PROJECTS" : "PROJECTS & ACHIEVEMENTS"}
+                </h2>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {data.projects.map((project, index) => (
@@ -308,8 +329,8 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
 
           {/* Certifications */}
           {data.certifications && data.certifications.length > 0 && (
-            <section className="mb-8">
-              <div className="flex items-center mb-4">
+            <section className="mb-6">
+              <div className="flex items-center mb-3">
                 <div className="w-10 h-1 bg-purple-600 rounded"></div>
                 <h2 className="text-2xl font-bold text-gray-800 ml-3">CERTIFICATIONS</h2>
               </div>
@@ -331,7 +352,7 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
           {/* Hobbies or Additional Info */}
           {data.hobbies && data.hobbies.length > 0 && (
             <section>
-              <div className="flex items-center mb-4">
+              <div className="flex items-center mb-3">
                 <div className="w-10 h-1 bg-amber-600 rounded"></div>
                 <h2 className="text-2xl font-bold text-gray-800 ml-3">HOBBIES & INTERESTS</h2>
               </div>
@@ -351,7 +372,7 @@ const Template2: React.FC<Template2Props> = ({ data }) => {
       </div>
 
       {/* Modern Footer */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-gray-900 to-gray-800 text-white p-3">
+      <div className="shrink-0 bg-gradient-to-r from-gray-900 to-gray-800 text-white p-3">
         <div className="flex justify-between items-center text-xs">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1">

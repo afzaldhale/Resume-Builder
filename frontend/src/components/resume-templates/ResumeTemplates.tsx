@@ -1,4 +1,4 @@
-import { LazyTemplateRenderer } from "./TemplateRegistry";
+import ResumeDocument from "./ResumeDocument";
 import { ResumeData } from "./types";
 
 interface Props {
@@ -11,11 +11,6 @@ export default function ResumePreview({
   resumeData,
 }: Props) {
   return (
-    <div
-      id="resume-preview"
-      className="bg-white w-[794px] min-h-[1123px] mx-auto"
-    >
-      <LazyTemplateRenderer templateId={selectedTemplate} data={resumeData} />
-    </div>
+    <ResumeDocument templateId={selectedTemplate} data={resumeData} />
   );
 }

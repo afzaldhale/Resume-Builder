@@ -1,85 +1,12 @@
-// template5.js
+import { getSummaryConfig, renderSupplementarySections, sharedTemplateStyles } from "./templateShared.js";
+
 export function template5HTML(data) {
-  // Helper function to get timeline color
-  const getTimelineColor = (section) => {
-    const colors = {
-      summary: "#3b82f6", // blue-500
-      experience: "#10b981", // green-500
-      education: "#8b5cf6", // purple-500
-      skills: "#f59e0b", // amber-500
-      projects: "#ef4444", // red-500
-      certifications: "#14b8a6", // teal-500
-      languages: "#6366f1", // indigo-500
-      social: "#ec4899" // pink-500
-    };
-    return colors[section] || "#3b82f6";
-  };
+  const { summaryText, summaryTitle } = getSummaryConfig(data);
+  const supplementarySections = renderSupplementarySections(data, {
+    include: ["achievements", "references", "customSections"],
+  });
 
-  const isFresher = data.candidateType === "fresher";
-  const summaryText = isFresher
-    ? data.careerObjective || data.summary
-    : data.summary || data.careerObjective;
-  const summaryTitle = isFresher ? "Career Objective" : "Professional Summary";
-
-  // Helper function to get background color
-  const getBackgroundColor = (section) => {
-    const colors = {
-      summary: "#dbeafe", // blue-50
-      experience: "#d1fae5", // green-50
-      education: "#f3e8ff", // purple-50
-      skills: "#fef3c7", // amber-50
-      projects: "#fee2e2", // red-50
-      certifications: "#ccfbf1", // teal-50
-      languages: "#e0e7ff", // indigo-50
-      social: "#fce7f3" // pink-50
-    };
-    return colors[section] || "#dbeafe";
-  };
-
-  // Helper function to get border color
-  const getBorderColor = (section) => {
-    const colors = {
-      summary: "#bfdbfe", // blue-100
-      experience: "#a7f3d0", // green-100
-      education: "#e9d5ff", // purple-100
-      skills: "#fde68a", // amber-100
-      projects: "#fecaca", // red-100
-      certifications: "#99f6e4", // teal-100
-      languages: "#c7d2fe", // indigo-100
-      social: "#fbcfe8" // pink-100
-    };
-    return colors[section] || "#bfdbfe";
-  };
-
-  // Helper function to get text color
-  const getTextColor = (section) => {
-    const colors = {
-      summary: "#1e40af", // blue-800
-      experience: "#065f46", // green-800
-      education: "#5b21b6", // purple-800
-      skills: "#92400e", // amber-800
-      projects: "#991b1b", // red-800
-      certifications: "#0f766e", // teal-800
-      languages: "#3730a3", // indigo-800
-      social: "#9d174d" // pink-800
-    };
-    return colors[section] || "#1e40af";
-  };
-
-  // Helper function to get section icon
-  const getSectionIcon = (section) => {
-    const icons = {
-      summary: "💼",
-      experience: "📅",
-      education: "🎓",
-      skills: "⭐",
-      projects: "🚀",
-      certifications: "🏆",
-      languages: "🗣️",
-      social: "🔗"
-    };
-    return icons[section] || "📌";
-  };
+  const socialLinks = Array.isArray(data.socialLinks) ? data.socialLinks : [];
 
   return `
 <!DOCTYPE html>
@@ -91,578 +18,390 @@ export function template5HTML(data) {
   body {
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     background: #ffffff;
-    color: #111827;
-    line-height: 1.5;
+    color: #0f172a;
   }
 
   .page {
     width: 794px;
-    height: 1123px;
-    margin: auto;
-    padding: 48px 36px 36px 48px;
+    min-height: 1123px;
+    padding: 24px 26px 20px 34px;
     box-sizing: border-box;
     position: relative;
-    overflow: hidden;
+    background: #ffffff;
   }
 
-  /* Left Blue Border */
-  .blue-border {
+  .page::before {
+    content: "";
     position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 8px;
-    background: linear-gradient(to bottom, #3b82f6, #60a5fa);
+    left: 18px;
+    top: 24px;
+    bottom: 20px;
+    width: 5px;
+    background: linear-gradient(180deg, #2563eb 0%, #0ea5e9 100%);
+    border-radius: 999px;
   }
 
-  /* Header */
-  h1 {
-    font-size: 36px;
-    font-weight: 800;
-    color: #111827;
-    margin: 0 0 8px 0;
+  .header {
+    margin-left: 8px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #dbe4ee;
   }
 
-  .role {
-    font-size: 20px;
-    font-weight: 500;
-    color: #4b5563;
-    margin-bottom: 24px;
-  }
-
-  /* Contact Info */
-  .contact-info {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 24px;
-    margin-bottom: 32px;
-  }
-
-  .contact-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: #4b5563;
-  }
-
-  /* Timeline Container */
-  .timeline-container {
-    position: relative;
-    padding-left: 40px;
-  }
-
-  /* Timeline Section */
-  .timeline-section {
-    position: relative;
-    margin-bottom: 40px;
-  }
-
-  /* Timeline Dot */
-  .timeline-dot {
-    position: absolute;
-    left: -36px;
-    top: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 14px;
-    z-index: 2;
-  }
-
-  /* Timeline Line */
-  .timeline-line {
-    position: absolute;
-    left: -20px;
-    top: 32px;
-    bottom: -40px;
-    width: 2px;
-    background: linear-gradient(to bottom, #d1d5db, transparent);
-  }
-
-  /* Section Title */
-  .section-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #111827;
-    margin: 0 0 16px 0;
-  }
-
-  /* Content Box */
-  .content-box {
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 16px;
-    border-width: 1px;
-  }
-
-  /* Experience Item */
-  .experience-item {
-    margin-bottom: 24px;
-  }
-
-  .experience-header {
+  .header-row {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 8px;
-  }
-
-  .job-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #111827;
-  }
-
-  .company-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: #6b7280;
-    margin: 4px 0 8px;
-  }
-
-  .date-badge {
-    font-size: 12px;
-    font-weight: 600;
-    padding: 4px 12px;
-    border-radius: 20px;
-    color: white;
-    background: #3b82f6;
-  }
-
-  /* Education Card */
-  .education-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
-  }
-
-  .gpa-badge {
-    font-size: 12px;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 6px;
-    color: white;
-    background: #8b5cf6;
-  }
-
-  /* Skills */
-  .skills-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .skill-tag {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #92400e;
-    background: #fef3c7;
-    border: 1px solid #fde68a;
-  }
-
-  /* Projects */
-  .project-card {
-    margin-bottom: 16px;
-  }
-
-  .project-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: #111827;
-    margin-bottom: 4px;
-  }
-
-  .tech-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
-  }
-
-  .tech-tag {
-    font-size: 12px;
-    padding: 4px 10px;
-    border-radius: 16px;
-    background: #fee2e2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
-  }
-
-  /* Certifications */
-  .certification-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-
-  /* Languages */
-  .language-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-  }
-
-  .progress-bar {
-    width: 80px;
-    height: 6px;
-    background: #e5e7eb;
-    border-radius: 3px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    border-radius: 3px;
-  }
-
-  /* Social Links */
-  .social-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 8px;
-  }
-
-  .social-link {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    text-decoration: none;
-    color: #374151;
-    font-size: 13px;
-    background: white;
-  }
-
-  /* Footer */
-  .footer {
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid #e5e7eb;
-    text-align: center;
-    font-size: 12px;
-    color: #6b7280;
-  }
-
-  .footer-content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     gap: 16px;
   }
 
-  /* Utility Classes */
-  .text-sm {
-    font-size: 13px;
+  h1 {
+    margin: 0;
+    font-size: 27px;
+    line-height: 1.08;
+    font-weight: 800;
+    letter-spacing: -0.5px;
   }
 
-  .text-xs {
-    font-size: 12px;
-  }
-
-  .font-medium {
-    font-weight: 500;
-  }
-
-  .font-semibold {
+  .role {
+    margin-top: 4px;
+    font-size: 14px;
+    color: #475569;
     font-weight: 600;
   }
 
-  .mb-2 {
-    margin-bottom: 8px;
+  .header-summary {
+    max-width: 345px;
+    font-size: 11.2px;
+    line-height: 1.45;
+    color: #475569;
+    text-align: right;
   }
 
-  .mb-4 {
-    margin-bottom: 16px;
+  .contact-row {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    font-size: 10.8px;
+    color: #475569;
   }
 
-  .mt-2 {
-    margin-top: 8px;
+  .contact-row span:not(:last-child)::after {
+    content: "•";
+    margin-left: 12px;
+    color: #94a3b8;
   }
 
-  .mt-4 {
-    margin-top: 16px;
+  .main-grid {
+    display: grid;
+    grid-template-columns: 214px 1fr;
+    gap: 16px;
+    margin-top: 14px;
+    margin-left: 8px;
   }
 
-  .pl-4 {
-    padding-left: 16px;
+  .section {
+    margin-bottom: 12px;
   }
+
+  .section-title {
+    margin: 0 0 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #0f172a;
+  }
+
+  .rail-card {
+    background: #f8fafc;
+    border: 1px solid #dbe4ee;
+    border-radius: 10px;
+    padding: 9px 10px;
+  }
+
+  .main-card {
+    border: 1px solid #dbe4ee;
+    border-radius: 10px;
+    padding: 10px 11px;
+    background: #ffffff;
+  }
+
+  .summary-card {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+  }
+
+  .chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .chip {
+    padding: 4px 7px;
+    border-radius: 999px;
+    font-size: 10.2px;
+    font-weight: 600;
+    line-height: 1.15;
+    color: #1e293b;
+  }
+
+  .chip-skill { background: #fef3c7; color: #92400e; }
+  .chip-strength { background: #e0f2fe; color: #0369a1; }
+  .chip-interest { background: #fce7f3; color: #9d174d; }
+
+  .stack > * + * {
+    margin-top: 7px;
+  }
+
+  .item-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+  }
+
+  .item-sub {
+    margin-top: 2px;
+    font-size: 10.6px;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .item-text {
+    margin-top: 5px;
+    font-size: 10.9px;
+    line-height: 1.42;
+    color: #334155;
+  }
+
+  .timeline-block {
+    position: relative;
+    padding-left: 14px;
+  }
+
+  .timeline-block::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 2px;
+    bottom: 2px;
+    width: 2px;
+    background: linear-gradient(180deg, #2563eb 0%, #10b981 100%);
+    border-radius: 999px;
+  }
+
+  .timeline-date {
+    float: right;
+    margin-left: 10px;
+    font-size: 10px;
+    color: #475569;
+    font-weight: 700;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    margin-top: 4px;
+    font-size: 10.4px;
+    color: #64748b;
+  }
+
+  .meta-row span:not(:last-child)::after {
+    content: "•";
+    margin-left: 10px;
+    color: #94a3b8;
+  }
+
+  .project-tech {
+    margin-top: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .project-tech span {
+    font-size: 9.6px;
+    padding: 3px 6px;
+    border-radius: 999px;
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .split-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .mini-list {
+    display: grid;
+    gap: 6px;
+    font-size: 10.8px;
+    color: #334155;
+  }
+
+  .mini-list strong {
+    color: #0f172a;
+  }
+
+  .link-list {
+    display: grid;
+    gap: 5px;
+    font-size: 10.6px;
+    color: #334155;
+  }
+
+  ${sharedTemplateStyles}
 </style>
 </head>
 <body>
 <div class="page">
-  <!-- Left Blue Border -->
-  <div class="blue-border"></div>
-
-  <!-- Header -->
-  <div class="mb-8">
-    <h1>${data.fullName || "Your Name"}</h1>
-    ${data.role ? `<div class="role">${data.role}</div>` : ""}
-    
-    <div class="contact-info">
-      ${data.email ? `
-        <div class="contact-item">
-          <span>📧</span>
-          <span>${data.email}</span>
-        </div>
-      ` : ""}
-      
-      ${data.phone ? `
-        <div class="contact-item">
-          <span>📱</span>
-          <span>${data.phone}</span>
-        </div>
-      ` : ""}
-      
-      ${data.address ? `
-        <div class="contact-item">
-          <span>📍</span>
-          <span>${data.address}</span>
-        </div>
-      ` : ""}
+  <header class="header">
+    <div class="header-row">
+      <div>
+        <h1>${data.fullName || "Your Name"}</h1>
+        ${data.role ? `<div class="role">${data.role}</div>` : ""}
+      </div>
+      ${summaryText ? `<div class="header-summary">${summaryText}</div>` : ""}
     </div>
-  </div>
 
-  <!-- Timeline Sections -->
-  <div class="timeline-container">
-    <!-- Professional Summary -->
-    ${summaryText ? `
-    <div class="timeline-section">
-      <div class="timeline-dot" style="background: ${getTimelineColor('summary')};">
-        ${getSectionIcon('summary')}
-      </div>
-      <div class="timeline-line"></div>
-      
-      <h2 class="section-title">${summaryTitle}</h2>
-      <div class="content-box" style="background: ${getBackgroundColor('summary')}; border-color: ${getBorderColor('summary')};">
-        <p class="text-sm">${summaryText}</p>
-    ` : ""}
+    <div class="contact-row">
+      ${data.email ? `<span>Email: ${data.email}</span>` : ""}
+      ${data.phone ? `<span>Phone: ${data.phone}</span>` : ""}
+      ${data.address ? `<span>Location: ${data.address}</span>` : ""}
+      ${socialLinks.map((link) => `<span>${link.platform}: ${link.url}</span>`).join("")}
+    </div>
+  </header>
 
-    <!-- Work Experience -->
-    ${data.experience.length > 0 ? `
-    <div class="timeline-section">
-      <div class="timeline-dot" style="background: ${getTimelineColor('experience')};">
-        ${getSectionIcon('experience')}
-      </div>
-      <div class="timeline-line"></div>
-      
-      <h2 class="section-title">WORK EXPERIENCE</h2>
-      <div class="content-box" style="background: ${getBackgroundColor('experience')}; border-color: ${getBorderColor('experience')};">
-        ${data.experience.map(exp => `
-          <div class="experience-item">
-            <div class="experience-header">
-              <div class="job-title">${exp.role}</div>
-              <div class="date-badge">${exp.startDate || ""}${exp.endDate ? ` - ${exp.endDate}` : ""}</div>
-            </div>
-            <div class="company-info">
-              <span class="font-semibold">${exp.company || ""}</span>
-              <span style="color: #d1d5db">•</span>
-              <span>Full-time</span>
-            </div>
-            <p class="text-sm pl-4" style="border-left: 2px solid #d1d5db; padding-left: 12px;">
-              ${exp.description || ""}
-            </p>
+  <div class="main-grid">
+    <aside>
+      ${summaryText ? `
+      <section class="section">
+        <h2 class="section-title">${summaryTitle}</h2>
+        <div class="rail-card summary-card" style="font-size:10.9px; line-height:1.45; color:#334155;">
+          ${summaryText}
+        </div>
+      </section>` : ""}
+
+      ${data.skills?.length ? `
+      <section class="section">
+        <h2 class="section-title">Skills</h2>
+        <div class="rail-card">
+          <div class="chip-list">
+            ${data.skills.map((skill) => `<span class="chip chip-skill">${skill}</span>`).join("")}
           </div>
-        `).join("")}
-      </div>
-    </div>
-    ` : ""}
+        </div>
+      </section>` : ""}
 
-    <!-- Education -->
-    ${data.education.length > 0 ? `
-    <div class="timeline-section">
-      <div class="timeline-dot" style="background: ${getTimelineColor('education')};">
-        ${getSectionIcon('education')}
-      </div>
-      <div class="timeline-line"></div>
-      
-      <h2 class="section-title">EDUCATION</h2>
-      <div class="content-box" style="background: ${getBackgroundColor('education')}; border-color: ${getBorderColor('education')};">
-        ${data.education.map(edu => `
-          <div class="education-card">
+      ${data.certifications?.length ? `
+      <section class="section">
+        <h2 class="section-title">Certifications</h2>
+        <div class="rail-card stack">
+          ${data.certifications.map((cert) => `
             <div>
-              <div class="font-semibold">${edu.degree}</div>
-              <div class="text-sm" style="color: #6b7280;">${edu.school}</div>
-              <div class="text-xs" style="color: #9ca3af; margin-top: 4px;">
-                ${edu.startYear || ""}${edu.endYear ? ` - ${edu.endYear}` : ""}
-              </div>
+              <div class="item-title" style="font-size:11px;">${cert.name}</div>
+              ${(cert.issuer || cert.year) ? `<div class="item-sub">${[cert.issuer, cert.year].filter(Boolean).join(" • ")}</div>` : ""}
             </div>
-            ${edu.gpa ? `<div class="gpa-badge">GPA: ${edu.gpa}</div>` : ""}
-          </div>
-        `).join("")}
-      </div>
-    </div>
-    ` : ""}
-
-    <!-- Skills -->
-    ${data.skills.length > 0 ? `
-    <div class="timeline-section">
-      <div class="timeline-dot" style="background: ${getTimelineColor('skills')};">
-        ${getSectionIcon('skills')}
-      </div>
-      <div class="timeline-line"></div>
-      
-      <h2 class="section-title">SKILLS</h2>
-      <div class="content-box" style="background: ${getBackgroundColor('skills')}; border-color: ${getBorderColor('skills')};">
-        <div class="skills-container">
-          ${data.skills.map(skill => `
-            <div class="skill-tag">${skill}</div>
           `).join("")}
         </div>
-      </div>
-    </div>
-    ` : ""}
+      </section>` : ""}
 
-    <!-- Projects -->
-    ${data.projects.length > 0 ? `
-    <div class="timeline-section">
-      <div class="timeline-dot" style="background: ${getTimelineColor('projects')};">
-        ${getSectionIcon('projects')}
-      </div>
-      <div class="timeline-line"></div>
-      
-      <h2 class="section-title">PROJECTS & ACHIEVEMENTS</h2>
-      <div class="content-box" style="background: ${getBackgroundColor('projects')}; border-color: ${getBorderColor('projects')};">
-        ${data.projects.map(project => `
-          <div class="project-card">
-            <div class="project-title">${project.name}</div>
-            <p class="text-sm">${project.description || ""}</p>
-            ${project.technologies.length > 0 ? `
-              <div class="tech-tags">
-                ${project.technologies.map(tech => `
-                  <div class="tech-tag">${tech}</div>
-                `).join("")}
-              </div>
-            ` : ""}
-          </div>
-        `).join("")}
-      </div>
-    </div>
-    ` : ""}
+      ${data.languages?.length ? `
+      <section class="section">
+        <h2 class="section-title">Languages</h2>
+        <div class="rail-card mini-list">
+          ${data.languages.map((lang) => `<div><strong>${lang.language}</strong>${lang.level ? ` <span style="color:#64748b;">(${lang.level})</span>` : ""}</div>`).join("")}
+        </div>
+      </section>` : ""}
 
-    <!-- Certifications & Languages Grid -->
-    <div style="display: flex; gap: 24px; margin-bottom: 40px;">
-      <!-- Certifications -->
-      ${data.certifications && data.certifications.length > 0 ? `
-      <div style="flex: 1;">
-        <div class="timeline-section">
-          <div class="timeline-dot" style="background: ${getTimelineColor('certifications')};">
-            ${getSectionIcon('certifications')}
+      ${data.strengths?.length ? `
+      <section class="section">
+        <h2 class="section-title">Strengths</h2>
+        <div class="rail-card">
+          <div class="chip-list">
+            ${data.strengths.map((item) => `<span class="chip chip-strength">${item}</span>`).join("")}
           </div>
-          <div class="timeline-line"></div>
-          
-          <h2 class="section-title">CERTIFICATIONS</h2>
-          <div class="content-box" style="background: ${getBackgroundColor('certifications')}; border-color: ${getBorderColor('certifications')};">
-            ${data.certifications.map(cert => `
-              <div class="certification-card">
-                <div class="font-semibold" style="font-size: 13px;">${cert.name}</div>
-                ${cert.year ? `<div class="text-xs" style="color: #6b7280;">${cert.year}</div>` : ""}
+        </div>
+      </section>` : ""}
+
+      ${data.hobbies?.length ? `
+      <section class="section">
+        <h2 class="section-title">Interests</h2>
+        <div class="rail-card">
+          <div class="chip-list">
+            ${data.hobbies.map((item) => `<span class="chip chip-interest">${item}</span>`).join("")}
+          </div>
+        </div>
+      </section>` : ""}
+    </aside>
+
+    <main>
+      ${data.experience?.length ? `
+      <section class="section">
+        <h2 class="section-title">Professional Experience</h2>
+        <div class="main-card stack">
+          ${data.experience.map((exp) => `
+            <div class="timeline-block">
+              <div class="timeline-date">${[exp.startDate, exp.endDate].filter(Boolean).join(" - ")}</div>
+              <div class="item-title">${exp.role}</div>
+              ${exp.company ? `<div class="item-sub">${exp.company}</div>` : ""}
+              ${exp.description ? `<div class="item-text">${exp.description}</div>` : ""}
+            </div>
+          `).join("")}
+        </div>
+      </section>` : ""}
+
+      <div class="split-grid">
+        ${data.projects?.length ? `
+        <section class="section" style="margin-bottom:0;">
+          <h2 class="section-title">Projects</h2>
+          <div class="main-card stack">
+            ${data.projects.map((project) => `
+              <div>
+                <div class="item-title">${project.name}</div>
+                ${project.description ? `<div class="item-text">${project.description}</div>` : ""}
+                ${project.technologies?.length ? `<div class="project-tech">${project.technologies.map((tech) => `<span>${tech}</span>`).join("")}</div>` : ""}
               </div>
-              ${cert.issuer ? `<div class="text-xs" style="color: #4b5563;">${cert.issuer}</div>` : ""}
             `).join("")}
           </div>
-        </div>
-      </div>
-      ` : ""}
+        </section>` : `<div></div>`}
 
-      <!-- Languages -->
-      ${data.languages && data.languages.length > 0 ? `
-      <div style="flex: 1;">
-        <div class="timeline-section">
-          <div class="timeline-dot" style="background: ${getTimelineColor('languages')};">
-            ${getSectionIcon('languages')}
-          </div>
-          <div class="timeline-line"></div>
-          
-          <h2 class="section-title">LANGUAGES</h2>
-          <div class="content-box" style="background: ${getBackgroundColor('languages')}; border-color: ${getBorderColor('languages')};">
-            ${data.languages.map(lang => {
-              const levelColor = lang.level === "Native" ? "#6366f1" :
-                                lang.level === "Fluent" ? "#4f46e5" :
-                                lang.level === "Intermediate" ? "#8b5cf6" : "#a78bfa";
-              
-              const levelWidth = lang.level === "Native" ? "100%" :
-                                lang.level === "Fluent" ? "90%" :
-                                lang.level === "Intermediate" ? "70%" : "40%";
-              
-              return `
-                <div class="language-item">
-                  <div class="font-semibold" style="font-size: 13px;">${lang.language}</div>
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <div class="progress-bar">
-                      <div class="progress-fill" style="width: ${levelWidth}; background: ${levelColor};"></div>
-                    </div>
-                    <div class="text-xs" style="color: #6b7280;">${lang.level}</div>
-                  </div>
+        <section class="section" style="margin-bottom:0;">
+          ${data.education?.length ? `
+          <div style="margin-bottom:10px;">
+            <h2 class="section-title">Education</h2>
+            <div class="main-card stack">
+              ${data.education.map((edu) => `
+                <div>
+                  <div class="item-title">${edu.degree}</div>
+                  ${edu.school ? `<div class="item-sub">${edu.school}</div>` : ""}
+                  ${(edu.startYear || edu.endYear || edu.gpa) ? `
+                  <div class="meta-row">
+                    ${edu.startYear || edu.endYear ? `<span>${[edu.startYear, edu.endYear].filter(Boolean).join(" - ")}</span>` : ""}
+                    ${edu.gpa ? `<span>GPA: ${edu.gpa}</span>` : ""}
+                  </div>` : ""}
                 </div>
-              `;
-            }).join("")}
-          </div>
-        </div>
-      </div>
-      ` : ""}
-    </div>
+              `).join("")}
+            </div>
+          </div>` : ""}
 
-    <!-- Social Links -->
-    ${data.socialLinks && data.socialLinks.length > 0 ? `
-    <div class="timeline-section">
-      <div class="timeline-dot" style="background: ${getTimelineColor('social')};">
-        ${getSectionIcon('social')}
-      </div>
-      
-      <h2 class="section-title">CONNECT</h2>
-      <div class="content-box" style="background: ${getBackgroundColor('social')}; border-color: ${getBorderColor('social')};">
-        <div class="social-links">
-          ${data.socialLinks.map(link => `
-            <a href="${link.url}" class="social-link" target="_blank">
-              <span>${link.platform}</span>
-              <span style="font-size: 10px;">↗</span>
-            </a>
-          `).join("")}
-        </div>
-      </div>
-    </div>
-    ` : ""}
+          ${socialLinks.length ? `
+          <div style="margin-bottom:10px;">
+            <h2 class="section-title">Links</h2>
+            <div class="main-card link-list">
+              ${socialLinks.map((link) => `<div>${link.platform}: ${link.url}</div>`).join("")}
+            </div>
+          </div>` : ""}
 
-    ${data.hobbies && data.hobbies.length > 0 ? `
-    <div class="timeline-section">
-      <div class="timeline-dot" style="background: ${getTimelineColor('social')};">
-        🎯
+          ${supplementarySections}
+        </section>
       </div>
-
-      <h2 class="section-title">HOBBIES</h2>
-      <div class="content-box" style="background: ${getBackgroundColor('social')}; border-color: ${getBorderColor('social')};">
-        <p>${data.hobbies.join(', ')}</p>
-      </div>
-    </div>
-    ` : ""}
-  </div>
-
-  <!-- Footer -->
-  <div class="footer">
-    <div class="footer-content">
-      <span>Timeline Template • Professional Design</span>
-      <span style="color: #d1d5db">•</span>
-      <span>All Rights Reserved</span>
-      <span style="color: #d1d5db">•</span>
-      <span>${new Date().getFullYear()}</span>
-    </div>
+    </main>
   </div>
 </div>
 </body>
