@@ -1,5 +1,6 @@
 // utils/resumeDataConverter.ts
 import { ResumeData, LanguageItem, CertificationItem, SocialLink, ExperienceItem } from "@/components/resume-templates/types";
+import { isFresherResume } from "@/components/resume-templates/resumeSections";
 
 export type CandidateType = "experienced" | "fresher";
 
@@ -101,11 +102,7 @@ export const convertFromTemplateData = (
   socialLinks: SocialLink[];
   candidateType: CandidateType;
 } => {
-  const candidateType: CandidateType =
-    resumeData.candidateType ||
-    (resumeData.careerObjective || resumeData.strengths?.length || resumeData.hobbies?.length
-      ? "fresher"
-      : "experienced");
+  const candidateType: CandidateType = isFresherResume(resumeData) ? "fresher" : "experienced";
 
   const formData: FormData = {
     fullName: resumeData.fullName || "",
@@ -187,25 +184,44 @@ const parseExperience = (experienceStr: string, candidateType: CandidateType): E
     .filter(block => block.trim() !== '')
     .map(block => {
       const lines = block.split('\n').filter(line => line.trim() !== '');
+      const parseDateRange = (value?: string) => {
+        const dateLine = (value || "").trim();
+
+        if (!dateLine) {
+          return { startDate: "", endDate: "" };
+        }
+
+        const rangeMatch = dateLine.match(/^(.+?)\s[-–—]\s(.+)$/);
+        if (rangeMatch) {
+          return {
+            startDate: rangeMatch[1].trim(),
+            endDate: rangeMatch[2].trim(),
+          };
+        }
+
+        return { startDate: dateLine, endDate: "" };
+      };
       
       // Different parsing for freshers vs experienced
       if (candidateType === "fresher") {
+        const { startDate, endDate } = parseDateRange(lines[2]);
         return {
           role: lines[0]?.trim() || "",
           company: lines[1]?.trim() || "",
-          startDate: lines[2]?.split('-')[0]?.trim() || "",
-          endDate: lines[2]?.split('-')[1]?.trim() || "",
+          startDate,
+          endDate,
           description: lines.slice(3).join('\n').trim() || "",
         };
       } else {
         const firstLine = lines[0] || "";
         const atIndex = firstLine.toLowerCase().indexOf(' at ');
+        const { startDate, endDate } = parseDateRange(lines[1]);
         
         return {
           role: atIndex !== -1 ? firstLine.substring(0, atIndex).trim() : firstLine,
           company: atIndex !== -1 ? firstLine.substring(atIndex + 4).trim() : "",
-          startDate: lines[1]?.split('-')[0]?.trim() || "",
-          endDate: lines[1]?.split('-')[1]?.trim() || "",
+          startDate,
+          endDate,
           description: lines.slice(2).join('\n').trim() || "",
         };
       }

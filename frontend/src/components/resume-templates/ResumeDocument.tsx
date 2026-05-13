@@ -1,13 +1,9 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { memo, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { fitResumeData } from "@/utils/fitResumeData";
 import type { ResumeData } from "./types";
 import { getCompactMode, resolveResumeMode } from "./templatePolicy";
-import {
-  A4_HEIGHT_PX,
-  A4_WIDTH_PX,
-  getSafeTemplateId,
-  getTemplateComponent,
-} from "./TemplateRegistry";
+import { A4_HEIGHT_PX, A4_WIDTH_PX, getSafeTemplateId } from "./TemplateRegistry";
+import ThemedResumeTemplate from "./ThemedResumeTemplate";
 
 interface ResumeDocumentProps {
   templateId: number;
@@ -44,7 +40,7 @@ const normalizeResumeData = (data: ResumeData): ResumeData => ({
       : "experienced"),
 });
 
-export const ResumeDocument = ({
+const ResumeDocumentComponent = ({
   templateId,
   data,
   scale = 1,
@@ -52,8 +48,10 @@ export const ResumeDocument = ({
   fitToOnePage = true,
 }: ResumeDocumentProps) => {
   const safeTemplateId = getSafeTemplateId(templateId);
-  const TemplateComponent = getTemplateComponent(safeTemplateId);
-  const fittedData = fitResumeData(normalizeResumeData(data));
+  const fittedData = useMemo(
+    () => fitResumeData(normalizeResumeData(data)),
+    [data]
+  );
   const resumeMode = resolveResumeMode(fittedData);
   const compactMode = getCompactMode(fittedData);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -66,38 +64,19 @@ export const ResumeDocument = ({
       return;
     }
 
+    let frameId = 0;
     const measure = () => {
       const page = contentRef.current;
       if (!page) {
         return;
       }
 
-      const currentScale = effectiveScale || 1;
-      const pageRect = page.getBoundingClientRect();
-      const descendants = page.querySelectorAll("*");
-      let contentBottom = Math.max(pageRect.height / currentScale, A4_HEIGHT_PX);
-
-      descendants.forEach((node) => {
-        const element = node as HTMLElement;
-        const style = window.getComputedStyle(element);
-
-        if (style.display === "none" || style.visibility === "hidden" || style.position === "fixed") {
-          return;
-        }
-
-        const rect = element.getBoundingClientRect();
-        if (!rect.width && !rect.height) {
-          return;
-        }
-
-        const marginBottom = Number.parseFloat(style.marginBottom || "0") || 0;
-        const scaledBottom = rect.bottom - pageRect.top + marginBottom;
-        const naturalBottom = scaledBottom / currentScale;
-
-        if (naturalBottom > contentBottom) {
-          contentBottom = naturalBottom;
-        }
-      });
+      const contentBottom = Math.max(
+        page.scrollHeight,
+        page.offsetHeight,
+        page.clientHeight,
+        A4_HEIGHT_PX
+      );
 
       const nextFitScale =
         contentBottom > A4_HEIGHT_PX
@@ -116,13 +95,17 @@ export const ResumeDocument = ({
       document.fonts.ready.then(measure);
     }
 
-    const resizeObserver = new ResizeObserver(() => measure());
+    const resizeObserver = new ResizeObserver(() => {
+      window.cancelAnimationFrame(frameId);
+      frameId = window.requestAnimationFrame(measure);
+    });
     resizeObserver.observe(contentRef.current);
 
     return () => {
+      window.cancelAnimationFrame(frameId);
       resizeObserver.disconnect();
     };
-  }, [effectiveScale, fitToOnePage, fittedData]);
+  }, [fitToOnePage, compactMode, resumeMode, effectiveScale, fittedData]);
 
   return (
     <div
@@ -146,10 +129,12 @@ export const ResumeDocument = ({
           transformOrigin: "top left",
         }}
       >
-        <TemplateComponent data={fittedData} />
+        <ThemedResumeTemplate templateId={safeTemplateId} data={fittedData} />
       </div>
     </div>
   );
 };
+
+export const ResumeDocument = memo(ResumeDocumentComponent);
 
 export default ResumeDocument;

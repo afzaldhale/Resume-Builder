@@ -1,0 +1,167 @@
+[
+  {
+    "templateId": 1,
+    "screenshot": "D:\\VtechOffical\\Resume_builder\\artifacts\\template-qa\\template-1.png",
+    "fitScale": 0.8753,
+    "compactMode": "true",
+    "resumeMode": "experienced",
+    "shellHeight": 1283.375,
+    "contentHeight": 1283,
+    "bodyHeight": 1283,
+    "overflowRisk": true
+  },
+  {
+    "templateId": 2,
+    "screenshot": "D:\\VtechOffical\\Resume_builder\\artifacts\\template-qa\\template-2.png",
+    "fitScale": 0.8227,
+    "compactMode": "true",
+    "resumeMode": "experienced",
+    "shellHeight": 1365.40625,
+    "contentHeight": 1365,
+    "bodyHeight": 1365,
+    "overflowRisk": true
+  },
+  {
+    "templateId": 3,
+    "screenshot": "D:\\VtechOffical\\Resume_builder\\artifacts\\template-qa\\template-3.png",
+    "fitScale": 0.8566,
+    "compactMode": "true",
+    "resumeMode": "experienced",
+    "shellHeight": 1311.375,
+    "contentHeight": 1311,
+    "bodyHeight": 1311,
+    "overflowRisk": true
+  },
+  {
+    "templateId": 4,
+    "screenshot": "D:\\VtechOffical\\Resume_builder\\artifacts\\template-qa\\template-4.png",
+    "fitScale": 0.91,
+    "compactMode": "true",
+    "resumeMode": "experienced",
+    "shellHeight": 1234.375,
+    "contentHeight": 1234,
+    "bodyHeight": 1234,
+    "overflowRisk": true
+  },
+  {
+    "templateId": 5,
+    "screenshot": "D:\\VtechOffical\\Resume_builder\\artifacts\\template-qa\\template-5.png",
+    "fitScale": 0.8488,
+    "compactMode": "true",
+    "resumeMode": "experienced",
+    "shellHeight": 1323.28125,
+    "contentHeight": 1323,
+    "bodyHeight": 1323,
+    "overflowRisk": true
+  },
+  {
+    "templateId": 6,
+    "screenshot": "D:\\VtechOffical\\Resume_builder\\artifacts\\template-qa\\template-6.png",
+    "fitScale": 0.8475,
+    "compactMode": "true",
+    "resumeMode": "experienced",
+    "shellHeight": 1325.40625,
+    "contentHeight": 1325,
+    "bodyHeight": 1325,
+    "overflowRisk": true
+  },
+  {
+    "templateId": 7,
+    "screenshot": "D:\\VtechOffical\\Resume_builder\\artifacts\\template-qa\\template-7.png",
+    "fitScale": 0.8692,
+    "compactMode": "true",
+    "resumeMode": "experienced",
+    "shellHeight": 1292.375,
+    "contentHeight": 1292,
+    "bodyHeight": 1292,
+    "overflowRisk": true
+  },
+  {
+    "templateId": 8,
+    "screenshot": "D:\\VtechOffical\\Resume_builder\\artifacts\\template-qa\\template-8.png",
+    "fitScale": 0.8773,
+    "compactMode": "true",
+    "resumeMode": "experienced",
+    "shellHeight": 1280.25,
+    "contentHeight": 1280,
+    "bodyHeight": 1280,
+    "overflowRisk": true
+  },
+  {
+    "templateId": 9,
+    "screenshot": "D:\\VtechOffical\\Resume_builder\\artifacts\\template-qa\\template-9.png",
+    "fitScale": 0.8998,
+    "compactMode": "true",
+    "resumeMode": "experienced",
+    "shellHeight": 1248.40625,
+    "contentHeight": 1248,
+    "bodyHeight": 1248,
+    "overflowRisk": true
+  },
+  {
+    "templateId": 10,
+    "screenshot": "D:\\VtechOffical\\Resume_builder\\artifacts\\template-qa\\template-10.png",
+    "fitScale": 0.8573,
+    "compactMode": "true",
+    "resumeMode": "experienced",
+    "shellHeight": 1309.8125,
+    "contentHeight": 1310,
+    "bodyHeight": 1310,
+    "overflowRisk": true
+  },
+  {
+    "templateId": 11,
+    "screenshot": "D:\\VtechOffical\\Resume_builder\\artifacts\\template-qa\\template-11.png",
+    "fitScale": 0.8444,
+    "compactMode": "true",
+    "resumeMode": "experienced",
+    "shellHeight": 1330.28125,
+    "contentHeight": 1330,
+    "bodyHeight": 1330,
+    "overflowRisk": true
+  },
+  {
+    "templateId": 12,
+    "screenshot": "D:\\VtechOffical\\Resume_builder\\artifacts\\template-qa\\template-12.png",
+    "fitScale": 0.8573,
+    "compactMode": "true",
+    "resumeMode": "experienced",
+    "shellHeight": 1309.8125,
+    "contentHeight": 1310,
+    "bodyHeight": 1310,
+    "overflowRisk": true
+  },
+  {
+    "templateId": 13,
+    "screenshot": "D:\\VtechOffical\\Resume_builder\\artifacts\\template-qa\\template-13.png",
+    "fitScale": 0.8475,
+    "compactMode": "true",
+    "resumeMode": "experienced",
+    "shellHeight": 1325.40625,
+    "contentHeight": 1325,
+    "bodyHeight": 1325,
+    "overflowRisk": true
+  },
+  {
+    "templateId": 14,
+    "screenshot": "D:\\VtechOffical\\Resume_builder\\artifacts\\template-qa\\template-14.png",
+    "fitScale": 0.9108,
+    "compactMode": "true",
+    "resumeMode": "experienced",
+    "shellHeight": 1232.8125,
+    "contentHeight": 1233,
+    "bodyHeight": 1233,
+    "overflowRisk": true
+  },
+  {
+    "templateId": 15,
+    "screenshot": "D:\\VtechOffical\\Resume_builder\\artifacts\\template-qa\\template-15.png",
+    "fitScale": 0.8658,
+    "compactMode": "true",
+    "resumeMode": "experienced",
+    "shellHeight": 1297.40625,
+    "contentHeight": 1297,
+    "bodyHeight": 1297,
+    "overflowRisk": true
+  }
+]

@@ -1,5 +1,5 @@
 // components/ResumeBuilder.tsx
-import { useEffect, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import { resumeService } from "@/services/resumeService";
 import UserSidebar from "@/components/UserSidebar";
@@ -21,6 +21,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { TemplateSelector } from "@/components/resume-templates/TemplateSelector";
 import ResumeDocument from "@/components/resume-templates/ResumeDocument";
 import EmptyTemplate from "@/components/resume-templates/EmptyTemplate";
+import { A4_WIDTH_PX } from "@/components/resume-templates/TemplateRegistry";
 import { LanguageItem, CertificationItem, SocialLink } from "@/components/resume-templates/types";
 import {
   convertFromTemplateData,
@@ -31,6 +32,26 @@ import {
   CandidateType,
 } from "../../types/resumeDataConverter";
 
+const PREVIEW_SCALE = 0.75;
+
+const templateColors = {
+  1: "bg-blue-100 text-blue-800 border-blue-200",
+  2: "bg-gray-100 text-gray-800 border-gray-200",
+  3: "bg-green-100 text-green-800 border-green-200",
+  4: "bg-indigo-100 text-indigo-800 border-indigo-200",
+  5: "bg-red-100 text-red-800 border-red-200",
+  6: "bg-purple-100 text-purple-800 border-purple-200",
+  7: "bg-amber-100 text-amber-800 border-amber-200",
+  8: "bg-slate-100 text-slate-800 border-slate-200",
+  9: "bg-gray-900 text-gray-100 border-gray-700",
+  10: "bg-gradient-to-r from-blue-100 to-emerald-100 text-emerald-800 border-emerald-200",
+  11: "bg-indigo-50 text-indigo-900 border-indigo-200",
+  12: "bg-emerald-50 text-emerald-900 border-emerald-200",
+  13: "bg-fuchsia-50 text-fuchsia-900 border-fuchsia-200",
+  14: "bg-white text-slate-900 border-slate-300",
+  15: "bg-slate-50 text-slate-900 border-slate-300",
+} as const;
+
 const ResumeBuilder = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
@@ -40,7 +61,6 @@ const ResumeBuilder = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingResume, setIsLoadingResume] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
-  const resumeRef = useRef<HTMLDivElement>(null);
 
   // Candidate type toggle
   const [candidateType, setCandidateType] = useState<CandidateType>("experienced");
@@ -291,16 +311,19 @@ const ResumeBuilder = () => {
   };
 
   // Template rendering
-  const templateData = convertToTemplateData(
+  const templateData = useMemo(() => convertToTemplateData(
     formData,
     languages,
     certifications,
     socialLinks,
     candidateType
-  );
+  ), [candidateType, certifications, formData, languages, socialLinks]);
 
-  // Template color schemes
-  const templateColors = {
+  const deferredTemplateData = useDeferredValue(templateData);
+  const deferredSelectedTemplate = useDeferredValue(selectedTemplate);
+  const previewWidth = A4_WIDTH_PX * PREVIEW_SCALE;
+
+  /* removed local template colors
     1: "bg-blue-100 text-blue-800 border-blue-200",
     2: "bg-gray-100 text-gray-800 border-gray-200",
     3: "bg-green-100 text-green-800 border-green-200",
@@ -318,7 +341,7 @@ const ResumeBuilder = () => {
     13: "bg-fuchsia-50 text-fuchsia-900 border-fuchsia-200",
     14: "bg-white text-slate-900 border-slate-300",
     15: "bg-slate-50 text-slate-900 border-slate-300",
-  };
+  }; */
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -512,13 +535,13 @@ const ResumeBuilder = () => {
                     onChange={(e) => handleInputChange("education", e.target.value)}
                     placeholder={
                       candidateType === "experienced"
-                        ? "Bachelor of Computer Science | MIT | 2015 | 2019 | 3.8"
-                        : "Bachelor of Computer Science | ABC University | 2020 | 2024 | 3.9"
+                        ? "Bachelor of Computer Science | MIT | 06-2015 | 05-2019 | 3.8"
+                        : "Bachelor of Computer Science | ABC University | 08-2020 | 05-2024 | 3.9"
                     }
                     rows={3}
                   />
                   <p className="text-xs text-gray-500">
-                    Format: Degree | School | Start Year | End Year | GPA (optional)<br />
+                    Format: Degree | School | Start Date (MM-YYYY) | End Date (MM-YYYY) | GPA (optional)<br />
                     Add multiple entries on separate lines
                   </p>
                 </div>
@@ -533,15 +556,15 @@ const ResumeBuilder = () => {
                     onChange={(e) => handleInputChange("experience", e.target.value)}
                     placeholder={
                       candidateType === "experienced"
-                        ? "Senior Developer at TechCorp&#10;2021 - Present&#10;Led development of web applications..."
-                        : "Summer Intern at TechCorp&#10;Jun 2023 - Aug 2023&#10;Assisted in frontend development..."
+                        ? "Senior Developer at TechCorp&#10;06-2021 - Present&#10;Led development of web applications..."
+                        : "Summer Intern&#10;TechCorp&#10;06-2023 - 08-2023&#10;Assisted in frontend development..."
                     }
                     rows={4}
                   />
                   <p className="text-xs text-gray-500">
                     {candidateType === "experienced"
-                      ? "Format: Role at Company<br />Dates: Start - End<br />Description<br />Separate experiences with an empty line"
-                      : "Include internships, industrial training, academic projects with real-world impact"}
+                      ? "Format: Role at Company<br />Dates: Start Date (MM-YYYY) - End Date (MM-YYYY or Present)<br />Description<br />Separate experiences with an empty line"
+                      : "Format: Role<br />Company<br />Dates: Start Date (MM-YYYY) - End Date (MM-YYYY)<br />Description<br />Separate experiences with an empty line"}
                   </p>
                 </div>
 
@@ -668,7 +691,7 @@ const ResumeBuilder = () => {
                       onChange={(e) => setNewCertification(prev => ({ ...prev, issuer: e.target.value }))}
                     />
                     <Input
-                      placeholder="Year"
+                      placeholder="Certificate Date (MM-YYYY)"
                       value={newCertification.year}
                       onChange={(e) => setNewCertification(prev => ({ ...prev, year: e.target.value }))}
                     />
@@ -820,11 +843,14 @@ const ResumeBuilder = () => {
 
               <div className="bg-gray-50 p-4 rounded-lg border min-h-[800px] overflow-auto">
                 {formData.fullName ? (
-                  <div ref={resumeRef} className="w-full max-w-md mx-auto">
+                  <div
+                    className="mx-auto"
+                    style={{ width: `${previewWidth}px`, maxWidth: "100%" }}
+                  >
                     <ResumeDocument
-                      templateId={selectedTemplate}
-                      data={templateData}
-                      scale={0.75}
+                      templateId={deferredSelectedTemplate}
+                      data={deferredTemplateData}
+                      scale={PREVIEW_SCALE}
                     />
                   </div>
                 ) : (
@@ -842,78 +868,78 @@ const ResumeBuilder = () => {
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                    <span>#1: Classic Blue</span>
+                    <span>#1: Clean Single Column</span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-gray-500"></div>
-                    <span>#2: Modern Gray</span>
+                    <div className="w-3 h-3 rounded-full bg-blue-700"></div>
+                    <span>#2: Corporate Sidebar Blue</span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    <span>#3: Creative Green</span>
+                    <div className="w-3 h-3 rounded-full bg-blue-400"></div>
+                    <span>#3: Colored Heading Corporate</span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
-                    <span>#4: Professional Indigo</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <span>#5: Bold Red</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                    <span>#6: Elegant Purple</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                    <span>#7: Warm Amber</span>
+                    <div className="w-3 h-3 rounded-full bg-teal-700"></div>
+                    <span>#4: Left Accent Teal</span>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-slate-500"></div>
-                    <span>#8: Clean Slate</span>
+                    <span>#5: Premium Gray Sidebar</span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-gray-900"></div>
-                    <span>#9: Dark Professional</span>
+                    <div className="w-3 h-3 rounded-full bg-teal-800"></div>
+                    <span>#6: Professional Sidebar Teal</span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                    <span>#10: Modern Gradient</span>
+                    <div className="w-3 h-3 rounded-full bg-rose-500"></div>
+                    <span>#7: Muted Coral Corporate</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-slate-500"></div>
+                    <span>#8: Compact ATS Single</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-slate-700"></div>
+                    <span>#9: Premium Charcoal Sidebar</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-blue-700"></div>
+                    <span>#10: Blue Heading Corporate</span>
                   </div>
 
                   {/* New templates */}
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-indigo-400"></div>
-                    <span>#11: Soft Indigo</span>
+                    <div className="w-3 h-3 rounded-full bg-stone-600"></div>
+                    <span>#11: Classic Two Column</span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
-                    <span>#12: Fresh Emerald</span>
+                    <div className="w-3 h-3 rounded-full bg-emerald-700"></div>
+                    <span>#12: Soft Green Corporate</span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-fuchsia-400"></div>
-                    <span>#13: Modern Fuchsia</span>
+                    <div className="w-3 h-3 rounded-full bg-rose-400"></div>
+                    <span>#13: Rose Sidebar Corporate</span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-slate-300"></div>
-                    <span>#14: Minimal White</span>
+                    <div className="w-3 h-3 rounded-full bg-amber-600"></div>
+                    <span>#14: Minimal Left Accent</span>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-slate-400"></div>
-                    <span>#15: Clean Professional</span>
+                    <span>#15: Corporate Clean</span>
                   </div>
                 </div>
               </div>

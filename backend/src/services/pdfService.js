@@ -8,20 +8,20 @@ const FRONTEND_RENDER_URL =
   "http://127.0.0.1:8080";
 
 const TEMPLATE_NAMES = {
-  1: "Teal Sidebar",
-  2: "Blue Professional",
-  3: "Orange Creative",
-  4: "Sky Blue Header",
-  5: "Gray Modern",
-  6: "Orange Two-Column",
-  7: "Rose Elegant",
-  8: "Clean Minimalist",
-  9: "Dark Theme",
-  10: "Modern Gradient",
+  1: "Clean Single Column",
+  2: "Corporate Sidebar Blue",
+  3: "Colored Heading Corporate",
+  4: "Left Accent Teal",
+  5: "Premium Gray Sidebar",
+  6: "Professional Sidebar Teal",
+  7: "Muted Coral Corporate",
+  8: "Compact ATS Single",
+  9: "Premium Charcoal Sidebar",
+  10: "Blue Heading Corporate",
   11: "Classic Two Column",
-  12: "Soft Green",
-  13: "Creative Blocks",
-  14: "Minimal Professional",
+  12: "Soft Green Corporate",
+  13: "Rose Sidebar Corporate",
+  14: "Minimal Left Accent",
   15: "Corporate Clean",
 };
 

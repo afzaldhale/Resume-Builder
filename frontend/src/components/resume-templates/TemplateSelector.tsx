@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Check } from "lucide-react";
@@ -8,26 +9,108 @@ interface TemplateSelectorProps {
 }
 
 const templates = [
-  { id: 1, name: "Teal Sidebar", color: "bg-teal-500", preview: "bg-white" },
-  { id: 2, name: "Blue Professional", color: "bg-slate-700", preview: "bg-slate-100" },
-  { id: 3, name: "Orange Creative", color: "bg-orange-500", preview: "bg-orange-50" },
-  { id: 4, name: "Sky Blue Header", color: "bg-sky-200", preview: "bg-sky-50" },
-  { id: 5, name: "Gray Modern", color: "bg-slate-500", preview: "bg-slate-50" },
-  { id: 6, name: "Orange Two-Column", color: "bg-orange-400", preview: "bg-orange-50" },
-  { id: 7, name: "Rose Elegant", color: "bg-rose-400", preview: "bg-rose-50" },
-  { id: 8, name: "Clean Minimalist", color: "bg-blue-500", preview: "bg-blue-50" },
-  { id: 9, name: "Dark Theme", color: "bg-gray-800", preview: "bg-gray-900" },
-  { id: 10, name: "Modern Gradient", color: "bg-gradient-to-r from-blue-400 to-emerald-400", preview: "bg-gradient-to-br from-blue-50 via-white to-emerald-50" },
-
-  // 🔹 NEW TEMPLATES
-  { id: 11, name: "Classic Two Column", color: "bg-indigo-600", preview: "bg-indigo-50" },
-  { id: 12, name: "Soft Green", color: "bg-emerald-500", preview: "bg-emerald-50" },
-  { id: 13, name: "Creative Blocks", color: "bg-fuchsia-500", preview: "bg-fuchsia-50" },
-  { id: 14, name: "Minimal Professional", color: "bg-slate-800", preview: "bg-white" },
-  { id: 15, name: "Corporate Clean", color: "bg-slate-800", preview: "bg-slate-100" },
+  { id: 1, name: "Clean Single Column", color: "bg-blue-700", preview: "single" },
+  { id: 2, name: "Corporate Sidebar Blue", color: "bg-blue-700", preview: "sidebar-dark" },
+  { id: 3, name: "Colored Heading Corporate", color: "bg-blue-500", preview: "bar-top" },
+  { id: 4, name: "Left Accent Teal", color: "bg-teal-700", preview: "left-accent" },
+  { id: 5, name: "Premium Gray Sidebar", color: "bg-slate-500", preview: "sidebar-light" },
+  { id: 6, name: "Professional Sidebar Teal", color: "bg-teal-700", preview: "sidebar-dark" },
+  { id: 7, name: "Muted Coral Corporate", color: "bg-rose-500", preview: "bar-top" },
+  { id: 8, name: "Compact ATS Single", color: "bg-slate-700", preview: "single-compact" },
+  { id: 9, name: "Premium Charcoal Sidebar", color: "bg-slate-700", preview: "sidebar-dark" },
+  { id: 10, name: "Blue Heading Corporate", color: "bg-blue-700", preview: "bar-top" },
+  { id: 11, name: "Classic Two Column", color: "bg-stone-600", preview: "sidebar-light" },
+  { id: 12, name: "Soft Green Corporate", color: "bg-emerald-700", preview: "single" },
+  { id: 13, name: "Rose Sidebar Corporate", color: "bg-rose-500", preview: "sidebar-light" },
+  { id: 14, name: "Minimal Left Accent", color: "bg-amber-600", preview: "left-accent" },
+  { id: 15, name: "Corporate Clean", color: "bg-slate-700", preview: "sidebar-light" },
 ];
 
-export const TemplateSelector = ({ selectedTemplate, onSelectTemplate }: TemplateSelectorProps) => {
+const MiniPreview = ({ preview, color }: { preview: string; color: string }) => {
+  if (preview === "sidebar-dark") {
+    return (
+      <div className="flex w-full h-full bg-white">
+        <div className={`w-8 ${color}`} />
+        <div className="flex-1 p-1.5">
+          <div className="h-1.5 w-10 bg-gray-400 rounded mb-1" />
+          <div className={`h-2 w-14 ${color} mb-2`} />
+          <div className="h-1 w-full bg-gray-200 rounded mb-1" />
+          <div className="h-1 w-5/6 bg-gray-100 rounded" />
+        </div>
+      </div>
+    );
+  }
+
+  if (preview === "sidebar-light") {
+    return (
+      <div className="flex w-full h-full bg-white">
+        <div className="w-8 bg-gray-100 border-r" />
+        <div className="flex-1 p-1.5">
+          <div className="h-1.5 w-10 bg-gray-400 rounded mb-1" />
+          <div className="h-0.5 w-full bg-gray-300 mb-2" />
+          <div className="h-1 w-full bg-gray-200 rounded mb-1" />
+          <div className="h-1 w-4/5 bg-gray-100 rounded" />
+        </div>
+      </div>
+    );
+  }
+
+  if (preview === "left-accent") {
+    return (
+      <div className="flex w-full h-full bg-white">
+        <div className={`w-1.5 ${color}`} />
+        <div className="flex-1 p-1.5">
+          <div className="h-1.5 w-10 bg-gray-400 rounded mb-1" />
+          <div className="pl-2 border-l-2 border-gray-300 mb-2">
+            <div className="h-1 w-8 bg-gray-300 rounded" />
+          </div>
+          <div className="h-1 w-full bg-gray-200 rounded mb-1" />
+          <div className="h-1 w-5/6 bg-gray-100 rounded" />
+        </div>
+      </div>
+    );
+  }
+
+  if (preview === "bar-top") {
+    return (
+      <div className="flex flex-col w-full h-full bg-white">
+        <div className={`h-2 ${color}`} />
+        <div className="p-1.5">
+          <div className="h-1.5 w-10 bg-gray-400 rounded mb-1" />
+          <div className={`h-2 w-14 ${color} mb-2`} />
+          <div className="h-1 w-full bg-gray-200 rounded mb-1" />
+          <div className="h-1 w-4/5 bg-gray-100 rounded" />
+        </div>
+      </div>
+    );
+  }
+
+  if (preview === "single-compact") {
+    return (
+      <div className="w-full h-full bg-white p-1.5">
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="h-1.5 w-10 bg-gray-400 rounded" />
+          <div className="h-1 w-8 bg-gray-200 rounded" />
+        </div>
+        <div className="h-0.5 w-full bg-gray-300 mb-2" />
+        <div className="h-1 w-full bg-gray-200 rounded mb-1" />
+        <div className="h-1 w-5/6 bg-gray-100 rounded" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full h-full bg-white p-1.5">
+      <div className="h-1.5 w-10 bg-gray-400 rounded mb-1" />
+      <div className="h-0.5 w-full bg-gray-300 mb-2" />
+      <div className="h-1 w-full bg-gray-200 rounded mb-1" />
+      <div className="h-1 w-5/6 bg-gray-100 rounded mb-1" />
+      <div className="h-1 w-2/3 bg-gray-100 rounded" />
+    </div>
+  );
+};
+
+export const TemplateSelector = memo(({ selectedTemplate, onSelectTemplate }: TemplateSelectorProps) => {
   return (
     <div className="space-y-3">
       <h3 className="font-semibold text-sm">Choose Template</h3>
@@ -42,96 +125,21 @@ export const TemplateSelector = ({ selectedTemplate, onSelectTemplate }: Templat
               }`}
               onClick={() => onSelectTemplate(template.id)}
             >
-              <div className={`h-16 rounded ${template.preview} mb-2 flex overflow-hidden border`}>
-
-                {/* Shared mini preview patterns */}
-                {(template.id === 1 || template.id === 8 || template.id === 11) && (
-                  <div className="flex w-full">
-                    <div className={`w-8 ${template.color}`} />
-                    <div className="flex-1 p-1">
-                      <div className="h-1 w-8 bg-gray-300 rounded mb-1" />
-                      <div className="h-1 w-6 bg-gray-200 rounded" />
-                    </div>
-                  </div>
-                )}
-
-                {(template.id === 2 || template.id === 14 || template.id === 15) && (
-                  <div className="flex w-full">
-                    <div className={`w-6 ${template.color}`} />
-                    <div className="flex-1 p-1 text-center">
-                      <div className="h-1.5 w-10 bg-gray-300 rounded mx-auto mb-1" />
-                      <div className="h-0.5 w-6 bg-gray-400 mx-auto" />
-                    </div>
-                  </div>
-                )}
-
-                {(template.id === 3 || template.id === 12) && (
-                  <div className="flex w-full">
-                    <div className={`w-8 ${template.color}`} />
-                    <div className="flex-1 p-1">
-                      <div className="h-1 w-10 bg-gray-300 rounded mb-1" />
-                      <div className="h-1 w-8 bg-gray-200 rounded" />
-                    </div>
-                  </div>
-                )}
-
-                {(template.id === 4 || template.id === 13) && (
-                  <div className="flex flex-col w-full">
-                    <div className={`h-4 ${template.color}`} />
-                    <div className="flex-1 p-1">
-                      <div className="h-1 w-10 bg-gray-300 rounded mb-1 border-l-2 border-current pl-1" />
-                    </div>
-                  </div>
-                )}
-
-                {(template.id === 5 || template.id === 6 || template.id === 7) && (
-                  <div className="flex w-full">
-                    <div className="flex-1 flex flex-col">
-                      <div className={`h-4 ${template.color}`} />
-                      <div className="p-1">
-                        <div className="h-1 w-8 bg-gray-300 rounded" />
-                      </div>
-                    </div>
-                    <div className={`w-6 ${template.color}`} />
-                  </div>
-                )}
-
-                {template.id === 9 && (
-                  <div className="w-full bg-gray-900 p-1">
-                    <div className="h-1 w-8 bg-gray-300 rounded mb-1" />
-                    <div className="h-1 w-6 bg-gray-400 rounded mb-1" />
-                    <div className="flex items-center">
-                      <div className="w-2 h-2 bg-gray-700 rounded-full mr-1" />
-                      <div className="h-0.5 w-4 bg-gray-500 rounded" />
-                    </div>
-                  </div>
-                )}
-
-                {template.id === 10 && (
-                  <div className="w-full p-1">
-                    <div className="h-1.5 w-10 bg-blue-300 rounded mb-1 mx-auto" />
-                    <div className="flex justify-center gap-1 mb-1">
-                      <div className={`h-1 w-6 ${template.color}`} />
-                      <div className={`h-1 w-6 ${template.color}`} />
-                    </div>
-                    <div className="flex justify-center">
-                      <div className="h-0.5 w-3 bg-emerald-300 rounded" />
-                    </div>
-                  </div>
-                )}
+              <div className="h-16 rounded mb-2 flex overflow-hidden border bg-white">
+                <MiniPreview preview={template.preview} color={template.color} />
               </div>
 
               <p className="text-xs font-medium truncate">{template.name}</p>
 
-              {selectedTemplate === template.id && (
+              {selectedTemplate === template.id ? (
                 <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
                   <Check className="h-3 w-3" />
                 </div>
-              )}
+              ) : null}
             </Card>
           ))}
         </div>
       </ScrollArea>
     </div>
   );
-};
+});

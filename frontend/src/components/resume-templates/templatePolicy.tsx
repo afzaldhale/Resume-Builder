@@ -1,55 +1,28 @@
 import type { ResumeData } from "./types";
+import { getResumeSectionOrder, isFresherResume } from "./resumeSections";
 
 export type ResumeMode = "fresher" | "experienced";
 
-export const FRESHER_SECTION_PRIORITY = [
-  "personalDetails",
-  "careerObjective",
-  "education",
-  "skills",
-  "strengths",
-  "projects",
-  "certifications",
-  "achievements",
-  "languages",
-  "hobbies",
-  "contactDetails",
-  "socialLinks",
-  "customSections",
-] as const;
+export const FRESHER_SECTION_PRIORITY = getResumeSectionOrder("fresher");
 
 export const EXPERIENCED_SECTION_PRIORITY = [
-  "personalDetails",
-  "professionalSummary",
-  "workExperience",
+  "header",
+  "summary",
+  "experience",
   "skills",
   "projects",
   "education",
   "certifications",
   "achievements",
   "languages",
-  "contactDetails",
-  "socialLinks",
-  "customSections",
+  "references",
+  "custom",
   "strengths",
   "hobbies",
 ] as const;
 
-export const resolveResumeMode = (data: ResumeData): ResumeMode => {
-  if (data.candidateType === "fresher" || data.candidateType === "experienced") {
-    return data.candidateType;
-  }
-
-  if ((data.careerObjective || "").trim().length > 0) {
-    return "fresher";
-  }
-
-  if ((data.strengths?.length || 0) > 0 || (data.hobbies?.length || 0) > 0) {
-    return "fresher";
-  }
-
-  return (data.experience?.length || 0) > 0 ? "experienced" : "fresher";
-};
+export const resolveResumeMode = (data: ResumeData): ResumeMode =>
+  isFresherResume(data) ? "fresher" : "experienced";
 
 export const getSummaryConfig = (data: ResumeData) => {
   const mode = resolveResumeMode(data);
