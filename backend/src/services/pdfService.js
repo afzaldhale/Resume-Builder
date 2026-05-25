@@ -49,6 +49,7 @@ const normalizeResumeData = (resumeData = {}) => ({
   references: Array.isArray(resumeData.references) ? resumeData.references : [],
   customSections: Array.isArray(resumeData.customSections) ? resumeData.customSections : [],
   socialLinks: Array.isArray(resumeData.socialLinks) ? resumeData.socialLinks : [],
+  theme: resumeData.theme || undefined,
 });
 
 const getSafeTemplateId = (templateId) => {
@@ -56,7 +57,7 @@ const getSafeTemplateId = (templateId) => {
   return Number.isInteger(id) && TEMPLATE_NAMES[id] ? id : 1;
 };
 
-const getPrintRenderUrl = () => `${FRONTEND_RENDER_URL.replace(/\/$/, "")}/print/resume`;
+const getPrintRenderUrl = () => `${FRONTEND_RENDER_URL.replace(/\/$/, "")}/print/resume?mode=pdf`;
 
 export const generateResumePDF = async (resumeData, templateId, options = {}) => {
   let browser;
@@ -134,7 +135,12 @@ export const generateResumePDF = async (resumeData, templateId, options = {}) =>
       timeout: 30000,
     });
 
-    await page.evaluate(() => document.fonts?.ready ?? Promise.resolve());
+    await page.waitForSelector(".resume-page", {
+      timeout: 30000,
+    });
+
+    const fontsReadyHandle = await page.evaluateHandle("document.fonts.ready");
+    await fontsReadyHandle.jsonValue();
 
     console.log("   Generating PDF...");
     const pdfBuffer = await page.pdf({

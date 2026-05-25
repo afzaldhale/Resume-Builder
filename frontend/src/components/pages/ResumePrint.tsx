@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ResumeDocument from "@/components/resume-templates/ResumeDocument";
 import type { ResumeData } from "@/components/resume-templates/types";
 import {
   getSafeTemplateId,
   isValidTemplateId,
 } from "@/components/resume-templates/TemplateRegistry";
+import { useSearchParams } from "react-router-dom";
 
 declare global {
   interface Window {
@@ -22,11 +23,19 @@ interface PrintPayload {
 }
 
 const ResumePrint = () => {
+  const [searchParams] = useSearchParams();
   const [payload, setPayload] = useState<PrintPayload | null>(null);
+  const renderMode = useMemo(
+    () => (searchParams.get("mode") === "pdf" ? "pdf" : "preview"),
+    [searchParams]
+  );
 
   useEffect(() => {
     document.body.classList.add("resume-print-mode");
     document.documentElement.classList.add("resume-pdf-mode");
+    if (renderMode === "pdf") {
+      document.documentElement.classList.add("pdf-render-mode");
+    }
     document.documentElement.classList.remove("resume-print-ready");
     document.documentElement.removeAttribute("data-resume-print-ready");
     window.__RESUME_PRINT_READY__ = false;
@@ -58,9 +67,10 @@ const ResumePrint = () => {
     return () => {
       document.body.classList.remove("resume-print-mode");
       document.documentElement.classList.remove("resume-pdf-mode");
+      document.documentElement.classList.remove("pdf-render-mode");
       window.removeEventListener("resume-print-payload", applyPayload);
     };
-  }, []);
+  }, [renderMode]);
 
   useEffect(() => {
     if (!payload) {
@@ -93,7 +103,7 @@ const ResumePrint = () => {
 
   return (
     <main className="resume-print-root">
-      <ResumeDocument templateId={payload.templateId} data={payload.resumeData} />
+      <ResumeDocument templateId={payload.templateId} data={payload.resumeData} renderMode="pdf" />
     </main>
   );
 };

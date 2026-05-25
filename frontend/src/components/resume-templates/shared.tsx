@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { getCompactMode, getSummaryConfig } from "./templatePolicy";
+import { getCompactMode, getDensityMode, getSummaryConfig } from "./templatePolicy";
 import {
   formatMonthYear,
   getResumeSectionOrder,
@@ -25,6 +25,11 @@ interface Palette {
   accentSoft: string;
   accentText: string;
   border: string;
+  nameText?: string;
+  titleText?: string;
+  headingText?: string;
+  accentBorder?: string;
+  divider?: string;
   sidebarBg?: string;
   sidebarText?: string;
   sidebarMutedText?: string;
@@ -54,6 +59,11 @@ export interface ResumeTemplateTheme {
   topAccentBar?: boolean;
   leftAccentLine?: boolean;
   summaryInHeader?: boolean;
+  summaryStyle?: "boxed" | "plain";
+  sidebarMode?: "profile" | "contact-only";
+  sidebarHeading?: string;
+  fresherMainSections?: SectionKey[];
+  showHeaderContact?: boolean;
 }
 
 interface ContactItem {
@@ -165,9 +175,72 @@ const getSectionLabel = (key: SectionKey, summaryTitle: string) => {
   }
 };
 
+export const ResumeSidebarContactCard = ({
+  data,
+  theme,
+  compactMode = false,
+}: {
+  data: ResumeData;
+  theme: ResumeTemplateTheme;
+  compactMode?: boolean;
+}) => {
+  const items = getContactItems(data);
+
+  if (items.length === 0) return null;
+
+  return (
+    <section className="break-inside-avoid">
+      <h2
+        className="resume-heading"
+        style={{
+          color: theme.palette.sidebarText || theme.palette.text,
+          fontSize: compactMode ? "13px" : "14px",
+          marginBottom: "10px",
+        }}
+      >
+        {theme.sidebarHeading || "Contact"}
+      </h2>
+      <div
+        style={{
+          width: "100%",
+          height: "1px",
+          background: theme.palette.divider || theme.palette.sidebarBorder || "rgba(255,255,255,0.28)",
+          marginBottom: "12px",
+        }}
+      />
+      <div className="space-y-3">
+        {items.map((item, index) => (
+          <div key={`${item.label}-${item.value}-${index}`} className="space-y-1">
+            <p
+              style={{
+                fontSize: compactMode ? "9.6px" : "10.1px",
+                lineHeight: 1.2,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText,
+              }}
+            >
+              {item.label}
+            </p>
+            <p
+              style={{
+                fontSize: compactMode ? "10px" : "10.8px",
+                lineHeight: 1.35,
+                color: theme.palette.sidebarText || theme.palette.text,
+                wordBreak: "break-word",
+              }}
+            >
+              {item.value}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
 const buildSectionMap = (data: ResumeData) => {
   const { summaryText, summaryTitle } = getSummaryConfig(data);
-  const fresherResume = isFresherResume(data);
   const experience = sortExperienceReverseChronological(data.experience || []);
   const education = sortEducationReverseChronological(data.education || []);
   const certifications = sortCertificationsReverseChronological(data.certifications || []);
@@ -193,8 +266,6 @@ const buildSectionMap = (data: ResumeData) => {
             </ResumeMetaBlock>
           ))}
         </div>
-      ) : fresherResume ? (
-        <p className="resume-body-copy">Fresher</p>
       ) : null,
     education:
       education.length > 0 ? (
@@ -290,10 +361,10 @@ export const ResumePage = ({
   style?: CSSProperties;
 }) => (
   <div
-    className="resume-theme-root"
+    className="resume-theme-root resume-page"
     style={{
       width: "794px",
-      minHeight: "1123px",
+      height: "1123px",
       background: theme.palette.page,
       color: theme.palette.text,
       position: "relative",
@@ -312,42 +383,73 @@ export const ResumeContactRow = ({
   align = "left",
   color,
   compactMode = false,
+  densityMode = "comfortable",
 }: {
   items: ContactItem[];
   align?: "left" | "right";
   color: string;
   compactMode?: boolean;
-}) => (
-  <div
-    className="flex flex-wrap gap-x-3 gap-y-1.5"
-    style={{
-      justifyContent: align === "right" ? "flex-end" : "flex-start",
-      maxWidth: align === "right" ? "390px" : "100%",
-    }}
-  >
-    {items.map((item, index) => (
-      <span
-        key={`${item.label}-${item.value}-${index}`}
-        className="resume-contact-item"
-        style={{ color, fontSize: compactMode ? "9.6px" : "10.4px" }}
-      >
-        {item.value}
-      </span>
-    ))}
-  </div>
-);
+  densityMode?: "comfortable" | "compact" | "ultra-compact";
+}) => {
+  const baseSize = compactMode ? 10.6 : 11;
+  const densityScale = densityMode === "compact" ? 0.94 : densityMode === "ultra-compact" ? 0.88 : 1;
+  const gapX = densityMode === "ultra-compact" ? 10 : densityMode === "compact" ? 12 : 14;
+  const gapY = densityMode === "ultra-compact" ? 4 : densityMode === "compact" ? 6 : 8;
+
+  return (
+    <div
+      className="flex flex-wrap"
+      style={{
+        justifyContent: align === "right" ? "flex-end" : "flex-start",
+        maxWidth: align === "right" ? "390px" : "100%",
+        gap: `${gapY}px ${gapX}px`,
+      }}
+    >
+      {items.map((item, index) => (
+        <span
+          key={`${item.label}-${item.value}-${index}`}
+          className="resume-contact-item"
+          style={{
+            color,
+            fontSize: `${Math.max(compactMode ? 9.5 : 10.5, Math.round(baseSize * densityScale * 10) / 10)}px`,
+          }}
+        >
+          {item.value}
+        </span>
+      ))}
+    </div>
+  );
+};
 
 export const ResumeHeader = ({
   data,
   theme,
   compactMode = false,
+  densityMode = "comfortable",
 }: {
   data: ResumeData;
   theme: ResumeTemplateTheme;
   compactMode?: boolean;
+  densityMode?: "comfortable" | "compact" | "ultra-compact";
 }) => {
   const { summaryText } = getSummaryConfig(data);
   const contactItems = getContactItems(data);
+
+  const titleSize = compactMode
+    ? densityMode === "ultra-compact"
+      ? "26px"
+      : "28px"
+    : densityMode === "ultra-compact"
+    ? "30px"
+    : "32px";
+
+  const roleSize = compactMode
+    ? densityMode === "ultra-compact"
+      ? "12.5px"
+      : "13px"
+    : densityMode === "ultra-compact"
+    ? "13.5px"
+    : "14px";
 
   return (
     <header
@@ -365,9 +467,9 @@ export const ResumeHeader = ({
           <h1
             className="font-bold tracking-[0.02em] uppercase"
             style={{
-              fontSize: compactMode ? "28px" : "32px",
+              fontSize: titleSize,
               lineHeight: 1.05,
-              color: theme.palette.text,
+              color: theme.palette.nameText || theme.palette.text,
             }}
           >
             {data.fullName}
@@ -376,9 +478,9 @@ export const ResumeHeader = ({
             <p
               className="mt-2 font-medium uppercase"
               style={{
-                fontSize: compactMode ? "12px" : "14px",
+                fontSize: roleSize,
                 lineHeight: 1.35,
-                color: theme.palette.mutedText,
+                color: theme.palette.titleText || theme.palette.mutedText,
                 letterSpacing: "0.08em",
               }}
             >
@@ -387,21 +489,26 @@ export const ResumeHeader = ({
           ) : null}
         </div>
 
-        {contactItems.length > 0 ? (
+        {theme.showHeaderContact !== false && contactItems.length > 0 ? (
           <ResumeContactRow
             items={contactItems}
             align={theme.headerLayout === "split" ? "right" : "left"}
             color={theme.palette.mutedText}
             compactMode={compactMode}
+            densityMode={densityMode}
           />
         ) : null}
       </div>
 
       {theme.summaryInHeader && hasText(summaryText) ? (
         <div className="mt-4">
-          <div className="resume-summary-box">
+          {theme.summaryStyle === "plain" ? (
             <p className="resume-body-copy">{summaryText}</p>
-          </div>
+          ) : (
+            <div className="resume-summary-box">
+              <p className="resume-body-copy">{summaryText}</p>
+            </div>
+          )}
         </div>
       ) : null}
     </header>
@@ -418,6 +525,9 @@ export const ResumeHeadingBar = ({
   sidebar?: boolean;
 }) => {
   const paletteText = sidebar ? theme.palette.sidebarText || theme.palette.text : theme.palette.text;
+  const headingColor = sidebar
+    ? theme.palette.headingText || theme.palette.sidebarText || theme.palette.text
+    : theme.palette.headingText || theme.palette.text;
   const paletteMuted = sidebar ? theme.palette.sidebarBorder || theme.palette.border : theme.palette.border;
 
   if (theme.headingStyle === "bar") {
@@ -426,7 +536,7 @@ export const ResumeHeadingBar = ({
         className="inline-block px-3 py-1.5"
         style={{
           background: sidebar ? theme.palette.sidebarAccentSoft || theme.palette.accent : theme.palette.accent,
-          color: "#ffffff",
+          color: theme.palette.accentText,
         }}
       >
         <h2 className="resume-heading">{title}</h2>
@@ -436,8 +546,11 @@ export const ResumeHeadingBar = ({
 
   if (theme.headingStyle === "accent") {
     return (
-      <div className="border-l-[4px] pl-3" style={{ borderColor: theme.palette.accent }}>
-        <h2 className="resume-heading" style={{ color: paletteText }}>
+      <div
+        className="border-l-[4px] pl-3"
+        style={{ borderColor: theme.palette.accentBorder || theme.palette.accent }}
+      >
+        <h2 className="resume-heading" style={{ color: headingColor }}>
           {title}
         </h2>
       </div>
@@ -446,7 +559,7 @@ export const ResumeHeadingBar = ({
 
   return (
     <div className="pb-1.5" style={{ borderBottom: `1px solid ${paletteMuted}` }}>
-      <h2 className="resume-heading" style={{ color: paletteText }}>
+      <h2 className="resume-heading" style={{ color: headingColor }}>
         {title}
       </h2>
     </div>
@@ -457,22 +570,30 @@ export const ResumeSection = ({
   title,
   theme,
   sidebar = false,
+  summaryTitle,
   children,
 }: {
   title: string;
   theme: ResumeTemplateTheme;
   sidebar?: boolean;
+  summaryTitle?: string;
   children: ReactNode;
 }) => {
   if (!children) return null;
 
   return (
     <section
-      className="break-inside-avoid space-y-3"
+      className="resume-section break-inside-avoid space-y-3"
       style={{ color: sidebar ? theme.palette.sidebarText || theme.palette.text : theme.palette.text }}
     >
       <ResumeHeadingBar title={title} theme={theme} sidebar={sidebar} />
-      <div>{children}</div>
+      <div
+        className={`resume-section-content ${
+          theme.summaryStyle === "plain" && title === summaryTitle ? "resume-section-summary-plain" : ""
+        }`.trim()}
+      >
+        {children}
+      </div>
     </section>
   );
 };
@@ -487,6 +608,7 @@ export const ResumeSidebar = ({
   compactMode?: boolean;
 }) => (
   <aside
+    className="h-full min-h-full self-stretch"
     style={{
       background: theme.palette.sidebarBg || theme.palette.accentSoft,
       color: theme.palette.sidebarText || theme.palette.text,
@@ -548,7 +670,7 @@ export const ResumeTagList = ({
   const filteredItems = uniqueItems(items.filter(Boolean));
   if (filteredItems.length === 0) return null;
 
-  return <p className="resume-body-copy">{filteredItems.join(", ")}</p>;
+  return <p className="resume-body-copy resume-skills">{filteredItems.join(", ")}</p>;
 };
 
 export const ResumeMetaBlock = ({
@@ -583,9 +705,13 @@ export const ResumeTwoColumnLayout = ({
   const mainWidth = `calc(100% - ${sidebarWidth})`;
 
   return (
-    <div className="flex min-h-0 flex-1">
-      <div style={{ width: sidebarWidth }}>{sidebar}</div>
-      <main style={{ width: mainWidth }}>{main}</main>
+    <div className="resume-two-column-layout flex h-full items-stretch">
+      <div className="resume-sidebar" style={{ width: sidebarWidth, flex: `0 0 ${sidebarWidth}` }}>
+        {sidebar}
+      </div>
+      <main className="resume-main" style={{ width: mainWidth }}>
+        {main}
+      </main>
     </div>
   );
 };
@@ -595,6 +721,36 @@ const ResumePageStyles = () => (
     .resume-theme-root {
       background: var(--resume-page-bg);
       color: var(--resume-page-text);
+      height: 1123px;
+    }
+
+    .resume-page,
+    .resume-page * {
+      box-sizing: border-box;
+    }
+
+    .resume-page {
+      width: 794px;
+      height: 1123px;
+      overflow: hidden;
+    }
+
+    .resume-page p,
+    .resume-page div,
+    .resume-page span,
+    .resume-page li {
+      white-space: normal;
+      overflow-wrap: break-word;
+      word-break: normal;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .resume-page a,
+    .resume-contact-item,
+    .resume-long-text {
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .resume-heading {
@@ -607,7 +763,7 @@ const ResumePageStyles = () => (
 
     .resume-body-copy {
       font-size: var(--resume-body-size);
-      line-height: 1.55;
+      line-height: 1.34;
     }
 
     .resume-item-title {
@@ -618,13 +774,13 @@ const ResumePageStyles = () => (
 
     .resume-item-subtitle {
       font-size: var(--resume-item-subtitle-size);
-      line-height: 1.45;
+      line-height: 1.32;
       color: var(--resume-page-text);
     }
 
     .resume-item-meta {
       font-size: var(--resume-item-meta-size);
-      line-height: 1.45;
+      line-height: 1.3;
       color: var(--resume-muted-text);
     }
 
@@ -632,7 +788,7 @@ const ResumePageStyles = () => (
       margin: 0;
       padding-left: 18px;
       font-size: var(--resume-list-size);
-      line-height: 1.55;
+      line-height: 1.34;
     }
 
     .resume-bullet-list li + li {
@@ -645,11 +801,17 @@ const ResumePageStyles = () => (
       padding: 12px 14px;
     }
 
+    .resume-section-summary-plain .resume-summary-box {
+      border-left: none;
+      background: transparent;
+      padding: 0;
+    }
+
     .resume-contact-item {
       display: inline-flex;
       align-items: center;
       line-height: 1.35;
-      white-space: nowrap;
+      min-width: 0;
     }
 
     .resume-contact-item:not(:last-child)::after {
@@ -665,6 +827,25 @@ const ResumePageStyles = () => (
     .break-inside-avoid {
       break-inside: avoid;
       page-break-inside: avoid;
+    }
+
+    .resume-two-column-layout {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .resume-sidebar {
+      min-width: 0;
+    }
+
+    .resume-main,
+    .resume-section,
+    .resume-section-content,
+    .resume-summary-box,
+    .resume-skills,
+    .resume-meta-block {
+      min-width: 0;
+      max-width: 100%;
     }
   `}</style>
 );
@@ -692,6 +873,7 @@ const renderSections = ({
         title={getSectionLabel(key, summaryTitle)}
         theme={theme}
         sidebar={sidebar}
+        summaryTitle={summaryTitle}
       >
         {content}
       </ResumeSection>
@@ -702,18 +884,28 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
   const { sections, summaryTitle } = buildSectionMap(data);
   const fresherResume = isFresherResume(data);
   const compactMode = getCompactMode(data);
-  const spacingFactor = compactMode ? 0.82 : 1;
-  const sectionGap = Math.max(16, Math.round((theme.sectionSpacing || 22) * spacingFactor));
+  const densityMode = getDensityMode(data);
+  const densityFactor =
+    densityMode === "comfortable"
+      ? 1
+      : densityMode === "compact"
+      ? 0.88
+      : 0.82;
+  const baseSpacingFactor = compactMode ? 0.92 : 1;
+  const sectionGap = Math.max(
+    14,
+    Math.round((theme.sectionSpacing || 22) * densityFactor * baseSpacingFactor)
+  );
 
   const pageStyle: CSSProperties = {
     padding:
       theme.layout === "single"
-        ? scalePxString(theme.pagePadding || "28px 34px", spacingFactor)
+        ? scalePxString(theme.pagePadding || "28px 34px", densityFactor * baseSpacingFactor)
         : "0",
   };
 
   const mainStyle: CSSProperties = {
-    padding: scalePxString(theme.mainPadding || theme.contentPadding || "28px 30px", spacingFactor),
+    padding: scalePxString(theme.mainPadding || theme.contentPadding || "28px 30px", densityFactor * baseSpacingFactor),
   };
 
   const sidebarIntro = (
@@ -733,7 +925,11 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
           style={{
             fontSize: compactMode ? "11.5px" : "13px",
             lineHeight: 1.4,
-            color: theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText,
+            color:
+              theme.palette.titleText ||
+              theme.palette.sidebarMutedText ||
+              theme.palette.sidebarText ||
+              theme.palette.mutedText,
             letterSpacing: "0.07em",
             textTransform: "uppercase",
           }}
@@ -746,6 +942,7 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
           items={getContactItems(data)}
           color={theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText}
           compactMode={compactMode}
+          densityMode={densityMode}
         />
       ) : null}
     </div>
@@ -762,10 +959,22 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
   const fresherSidebarKeys = (theme.sidebarSections || DEFAULT_FRESHER_SIDEBAR).filter((key) =>
     fresherSectionKeys.includes(key)
   );
-  const fresherMainKeys = DEFAULT_FRESHER_MAIN.filter((key) => hasSectionData(key, data));
+  const fresherMainKeys = (theme.fresherMainSections || DEFAULT_FRESHER_MAIN).filter((key) =>
+    hasSectionData(key, data)
+  );
 
   const experiencedSidebarKeys = theme.sidebarSections || DEFAULT_EXPERIENCED_SIDEBAR;
   const experiencedMainKeys = theme.mainSections || DEFAULT_EXPERIENCED_MAIN;
+
+  const densityScale =
+    densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.95 : 0.92;
+
+  const headingSize = compactMode ? 12 : 13;
+  const bodySize = compactMode ? 10.8 : 11.4;
+  const titleSize = compactMode ? 11.1 : 11.8;
+  const subtitleSize = compactMode ? 10.6 : 11.1;
+  const metaSize = compactMode ? 10.1 : 10.6;
+  const listSize = compactMode ? 10.8 : 11.3;
 
   return (
     <ResumePage
@@ -780,14 +989,15 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
           "--resume-accent": theme.palette.accent,
           "--resume-accent-soft": theme.palette.accentSoft,
           "--resume-accent-text": theme.palette.accentText,
-          "--resume-heading-size": compactMode ? "11px" : "12px",
-          "--resume-body-size": compactMode ? "9.7px" : "10.4px",
-          "--resume-item-title-size": compactMode ? "10.6px" : "11.2px",
-          "--resume-item-subtitle-size": compactMode ? "9.8px" : "10.3px",
-          "--resume-item-meta-size": compactMode ? "9.1px" : "9.7px",
-          "--resume-list-size": compactMode ? "9.5px" : "10.2px",
+          "--resume-heading-size": `${Math.max(11, headingSize * densityScale).toFixed(2)}px`,
+          "--resume-body-size": `${Math.max(compactMode ? 10 : 10.5, bodySize * densityScale).toFixed(2)}px`,
+          "--resume-item-title-size": `${Math.max(11, titleSize * densityScale).toFixed(2)}px`,
+          "--resume-item-subtitle-size": `${Math.max(10.2, subtitleSize * densityScale).toFixed(2)}px`,
+          "--resume-item-meta-size": `${Math.max(9.5, metaSize * densityScale).toFixed(2)}px`,
+          "--resume-list-size": `${Math.max(compactMode ? 10 : 10.8, listSize * densityScale).toFixed(2)}px`,
         } as CSSProperties),
       }}
+      data-density-mode={densityMode}
     >
       <ResumePageStyles />
 
@@ -818,14 +1028,20 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
           sidebar={
             <ResumeSidebar theme={theme} compactMode={compactMode}>
               <div className="flex flex-col" style={{ gap: `${sectionGap}px` }}>
-                {sidebarIntro}
-                {renderSections({
-                  keys: fresherResume ? fresherSidebarKeys : experiencedSidebarKeys,
-                  sections,
-                  summaryTitle,
-                  theme,
-                  sidebar: true,
-                })}
+                {theme.sidebarMode === "contact-only" ? (
+                  <ResumeSidebarContactCard data={data} theme={theme} compactMode={compactMode} />
+                ) : (
+                  <>
+                    {sidebarIntro}
+                    {renderSections({
+                      keys: fresherResume ? fresherSidebarKeys : experiencedSidebarKeys,
+                      sections,
+                      summaryTitle,
+                      theme,
+                      sidebar: true,
+                    })}
+                  </>
+                )}
               </div>
             </ResumeSidebar>
           }
@@ -833,7 +1049,7 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
             <div style={mainStyle}>
               <div className="flex flex-col" style={{ gap: `${sectionGap}px` }}>
                 {theme.summaryInHeader ? null : (
-                  <ResumeHeader data={data} theme={theme} compactMode={compactMode} />
+                  <ResumeHeader data={data} theme={theme} compactMode={compactMode} densityMode={densityMode} />
                 )}
                 {renderSections({
                   keys: fresherResume ? fresherMainKeys : experiencedMainKeys,

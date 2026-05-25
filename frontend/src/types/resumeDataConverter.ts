@@ -1,5 +1,12 @@
 // utils/resumeDataConverter.ts
-import { ResumeData, LanguageItem, CertificationItem, SocialLink, ExperienceItem } from "@/components/resume-templates/types";
+import {
+  ResumeData,
+  LanguageItem,
+  CertificationItem,
+  SocialLink,
+  ExperienceItem,
+  ResumeThemeConfigData,
+} from "@/components/resume-templates/types";
 import { isFresherResume } from "@/components/resume-templates/resumeSections";
 
 export type CandidateType = "experienced" | "fresher";
@@ -27,7 +34,8 @@ export const convertToTemplateData = (
   languages: LanguageItem[],
   certifications: CertificationItem[],
   socialLinks: SocialLink[],
-  candidateType: CandidateType = "experienced"
+  candidateType: CandidateType = "experienced",
+  theme?: ResumeThemeConfigData
 ): ResumeData => {
   // Parse skills from comma-separated string to array
   const skillsArray = formData.skills
@@ -77,6 +85,7 @@ export const convertToTemplateData = (
     strengths: strengthsArray.length > 0 ? strengthsArray : undefined,
     hobbies: hobbiesArray.length > 0 ? hobbiesArray : undefined,
     candidateType,
+    theme,
   };
 
   // Add summary or careerObjective based on candidate type
@@ -101,6 +110,7 @@ export const convertFromTemplateData = (
   certifications: CertificationItem[];
   socialLinks: SocialLink[];
   candidateType: CandidateType;
+  theme?: ResumeThemeConfigData;
 } => {
   const candidateType: CandidateType = isFresherResume(resumeData) ? "fresher" : "experienced";
 
@@ -150,6 +160,7 @@ export const convertFromTemplateData = (
     certifications: resumeData.certifications || [],
     socialLinks: resumeData.socialLinks || [],
     candidateType,
+    theme: resumeData.theme,
   };
 };
 

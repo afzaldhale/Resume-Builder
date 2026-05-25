@@ -9,6 +9,7 @@ import Landing from "./components/pages/Landing";
 import Login from "./components/pages/Login";
 import Dashboard from "./components/pages/Dashboard";
 import ResumeBuilder from "./components/pages/ResumeBuilder";
+import TemplateSelectionPage from "./components/pages/TemplateSelectionPage";
 import Requests from "./components/pages/Requests";
 import MyResumes from "./components/pages/MyResumes";
 import ResumePrint from "./components/pages/ResumePrint";
@@ -49,6 +50,22 @@ const App = () => (
           />
           <Route
             path="/builder"
+            element={
+              <ProtectedRoute>
+                <TemplateSelectionPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/builder/editor"
+            element={
+              <ProtectedRoute>
+                <ResumeBuilder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/builder/editor/:id"
             element={
               <ProtectedRoute>
                 <ResumeBuilder />

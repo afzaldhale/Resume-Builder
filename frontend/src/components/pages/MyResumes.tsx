@@ -133,7 +133,7 @@ const MyResumes = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate(`/builder/${resume.id}`)}
+                        onClick={() => navigate(`/builder/editor/${resume.id}`)}
                       >
                         <Edit className="h-4 w-4 mr-1" />
                         Edit

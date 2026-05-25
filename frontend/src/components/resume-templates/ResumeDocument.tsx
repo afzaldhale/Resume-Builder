@@ -1,5 +1,5 @@
-import { memo, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { fitResumeData } from "@/utils/fitResumeData";
+import { memo, useMemo } from "react";
+import { fitResumeData, type FitRenderMode } from "@/utils/fitResumeData";
 import type { ResumeData } from "./types";
 import { getCompactMode, resolveResumeMode } from "./templatePolicy";
 import { A4_HEIGHT_PX, A4_WIDTH_PX, getSafeTemplateId } from "./TemplateRegistry";
@@ -8,9 +8,8 @@ import ThemedResumeTemplate from "./ThemedResumeTemplate";
 interface ResumeDocumentProps {
   templateId: number;
   data: ResumeData;
-  scale?: number;
   className?: string;
-  fitToOnePage?: boolean;
+  renderMode?: FitRenderMode;
 }
 
 const normalizeResumeData = (data: ResumeData): ResumeData => ({
@@ -38,74 +37,23 @@ const normalizeResumeData = (data: ResumeData): ResumeData => ({
     ((Array.isArray(data.experience) ? data.experience : []).length === 0
       ? "fresher"
       : "experienced"),
+  theme: data.theme,
 });
 
 const ResumeDocumentComponent = ({
   templateId,
   data,
-  scale = 1,
   className = "",
-  fitToOnePage = true,
+  renderMode = "editor-preview",
 }: ResumeDocumentProps) => {
   const safeTemplateId = getSafeTemplateId(templateId);
+  const normalizedData = useMemo(() => normalizeResumeData(data), [data]);
   const fittedData = useMemo(
-    () => fitResumeData(normalizeResumeData(data)),
-    [data]
+    () => fitResumeData(normalizedData, { renderMode }),
+    [normalizedData, renderMode]
   );
   const resumeMode = resolveResumeMode(fittedData);
-  const compactMode = getCompactMode(fittedData);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [fitScale, setFitScale] = useState(1);
-  const effectiveScale = scale * fitScale;
-
-  useLayoutEffect(() => {
-    if (!fitToOnePage || !contentRef.current) {
-      setFitScale(1);
-      return;
-    }
-
-    let frameId = 0;
-    const measure = () => {
-      const page = contentRef.current;
-      if (!page) {
-        return;
-      }
-
-      const contentBottom = Math.max(
-        page.scrollHeight,
-        page.offsetHeight,
-        page.clientHeight,
-        A4_HEIGHT_PX
-      );
-
-      const nextFitScale =
-        contentBottom > A4_HEIGHT_PX
-          ? Math.max(
-              compactMode && resumeMode === "fresher" ? 0.74 : 0.76,
-              Math.min(1, A4_HEIGHT_PX / contentBottom)
-            )
-          : 1;
-
-      setFitScale((prev) => (Math.abs(prev - nextFitScale) > 0.005 ? nextFitScale : prev));
-    };
-
-    measure();
-
-    if (document.fonts?.ready) {
-      document.fonts.ready.then(measure);
-    }
-
-    const resizeObserver = new ResizeObserver(() => {
-      window.cancelAnimationFrame(frameId);
-      frameId = window.requestAnimationFrame(measure);
-    });
-    resizeObserver.observe(contentRef.current);
-
-    return () => {
-      window.cancelAnimationFrame(frameId);
-      resizeObserver.disconnect();
-    };
-  }, [fitToOnePage, compactMode, resumeMode, effectiveScale, fittedData]);
+  const compactMode = renderMode === "pdf" ? getCompactMode(fittedData) : false;
 
   return (
     <div
@@ -113,22 +61,13 @@ const ResumeDocumentComponent = ({
       data-template-id={safeTemplateId}
       data-resume-mode={resumeMode}
       data-compact-mode={compactMode ? "true" : "false"}
-      data-fit-scale={fitScale.toFixed(4)}
+      data-render-mode={renderMode}
       style={{
-        width: `${A4_WIDTH_PX * effectiveScale}px`,
-        minHeight: `${A4_HEIGHT_PX * effectiveScale}px`,
+        width: `${A4_WIDTH_PX}px`,
+        minHeight: `${A4_HEIGHT_PX}px`,
       }}
     >
-      <div
-        ref={contentRef}
-        className="resume-document-scale"
-        style={{
-          width: `${A4_WIDTH_PX}px`,
-          minHeight: `${A4_HEIGHT_PX}px`,
-          transform: `scale(${effectiveScale})`,
-          transformOrigin: "top left",
-        }}
-      >
+      <div className="resume-document-scale" style={{ width: `${A4_WIDTH_PX}px`, minHeight: `${A4_HEIGHT_PX}px` }}>
         <ThemedResumeTemplate templateId={safeTemplateId} data={fittedData} />
       </div>
     </div>

@@ -1,6 +1,6 @@
 import type { ResumeData } from "./types";
 import { renderTemplate } from "./shared";
-import { templateThemes } from "./templateThemes";
+import { resolveTemplateTheme } from "./themeConfig";
 
 interface ThemedResumeTemplateProps {
   templateId: number;
@@ -8,6 +8,6 @@ interface ThemedResumeTemplateProps {
 }
 
 const ThemedResumeTemplate = ({ templateId, data }: ThemedResumeTemplateProps) =>
-  renderTemplate(data, templateThemes[templateId] || templateThemes[1]);
+  renderTemplate(data, resolveTemplateTheme(templateId, data));
 
 export default ThemedResumeTemplate;

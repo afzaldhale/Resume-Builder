@@ -53,6 +53,11 @@ export interface CustomSectionItem {
   items?: string[];
 }
 
+export interface ResumeThemeConfigData {
+  templateId?: number;
+  colors?: Record<string, string>;
+}
+
 // =========================
 // MAIN RESUME DATA INTERFACE
 // =========================
@@ -88,6 +93,7 @@ export interface ResumeData {
   hobbies?: string[];
   achievements?: string[];
   candidateType?: "experienced" | "fresher";
+  theme?: ResumeThemeConfigData;
 
   /**
    * Extra flexibility

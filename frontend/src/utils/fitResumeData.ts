@@ -1,6 +1,12 @@
 import type { ResumeData } from "@/components/resume-templates/types";
 import { getCompactMode, resolveResumeMode } from "@/components/resume-templates/templatePolicy";
 
+export type FitRenderMode = "editor-preview" | "pdf" | "thumbnail";
+
+interface FitResumeDataOptions {
+  renderMode?: FitRenderMode;
+}
+
 const BASE_MAX_ENTRIES = {
   education: 3,
   experience: 4,
@@ -121,7 +127,25 @@ const fitSimpleList = (items: string[] = [], max: number, maxLength: number) => 
   return fitted;
 };
 
-export const fitResumeData = (resumeData: ResumeData): ResumeData => {
+export const fitResumeData = (
+  resumeData: ResumeData,
+  options: FitResumeDataOptions = {}
+): ResumeData => {
+  const { renderMode = "editor-preview" } = options;
+
+  if (renderMode !== "thumbnail") {
+    return {
+      ...resumeData,
+      strengths: resumeData.strengths || [],
+      hobbies: resumeData.hobbies || [],
+      achievements: resumeData.achievements || [],
+      references: resumeData.references || [],
+      customSections: resumeData.customSections || [],
+      socialLinks: resumeData.socialLinks || [],
+      theme: resumeData.theme,
+    };
+  }
+
   const limits = buildEntryLimits(resumeData);
 
   const education = resumeData.education.slice(0, limits.education).map((item, index, list) => ({
@@ -176,5 +200,6 @@ export const fitResumeData = (resumeData: ResumeData): ResumeData => {
     references: (resumeData.references || []).slice(0, limits.references),
     customSections: resumeData.customSections || [],
     socialLinks: resumeData.socialLinks,
+    theme: resumeData.theme,
   };
 };
