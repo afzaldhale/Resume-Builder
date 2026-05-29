@@ -1,3 +1,15 @@
+/**
+ * ⚠️ DEPRECATED: Backend templates are no longer used for PDF generation
+ * 
+ * This file is kept for legacy/reference purposes only.
+ * React ResumeDocument (frontend) is the single source of truth for all template rendering.
+ * 
+ * PDF generation now routes through: frontend /print/resume endpoint → puppeteer capture
+ * 
+ * This file will be removed in a future cleanup commit.
+ * Do not import or use in new code.
+ */
+
 import { getSummaryConfig, renderSupplementarySections, sharedTemplateStyles } from "./templateShared.js";
 
 // template3.js

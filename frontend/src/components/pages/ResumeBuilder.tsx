@@ -18,7 +18,7 @@ import { API_BASE_URL } from "@/lib/apiBaseUrl";
 import UserSidebar from "@/components/UserSidebar";
 import EmptyTemplate from "@/components/resume-templates/EmptyTemplate";
 import ResumeDocument from "@/components/resume-templates/ResumeDocument";
-import { A4_HEIGHT_PX, A4_WIDTH_PX } from "@/components/resume-templates/TemplateRegistry";
+import { A4_HEIGHT_PX, A4_WIDTH_PX } from "@/constants/resumeDesignSystem";
 import {
   CertificationItem,
   LanguageItem,

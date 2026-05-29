@@ -11,6 +11,8 @@ import {
   type ResumeSectionKey,
 } from "./resumeSections";
 import type { ResumeData } from "./types";
+import { ResumeSection } from "@/components/resume/ResumeSection";
+import { ResumeTypography } from "@/constants/resumeDesignSystem";
 
 type HeadingStyle = "bar" | "underline" | "accent";
 type HeaderLayout = "stacked" | "split";
@@ -54,6 +56,10 @@ export interface ResumeTemplateTheme {
   contentPadding?: string;
   sidebarPadding?: string;
   mainPadding?: string;
+  layoutType?: "single-column" | "sidebar";
+  headingVariant?: "full-width-bar" | "label-bar" | "underline" | "plain";
+  typographyScale?: number;
+  spacingScale?: number;
   headerDivider?: boolean;
   headerBand?: boolean;
   topAccentBar?: boolean;
@@ -194,7 +200,6 @@ export const ResumeSidebarContactCard = ({
         className="resume-heading"
         style={{
           color: theme.palette.sidebarText || theme.palette.text,
-          fontSize: compactMode ? "13px" : "14px",
           marginBottom: "10px",
         }}
       >
@@ -213,8 +218,8 @@ export const ResumeSidebarContactCard = ({
           <div key={`${item.label}-${item.value}-${index}`} className="space-y-1">
             <p
               style={{
-                fontSize: compactMode ? "9.6px" : "10.1px",
-                lineHeight: 1.2,
+                fontSize: "var(--resume-item-meta-size)",
+                lineHeight: "var(--resume-line-height)",
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
                 color: theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText,
@@ -224,8 +229,8 @@ export const ResumeSidebarContactCard = ({
             </p>
             <p
               style={{
-                fontSize: compactMode ? "10px" : "10.8px",
-                lineHeight: 1.35,
+                fontSize: "var(--resume-body-size)",
+                lineHeight: "var(--resume-line-height)",
                 color: theme.palette.sidebarText || theme.palette.text,
                 wordBreak: "break-word",
               }}
@@ -361,7 +366,7 @@ export const ResumePage = ({
   style?: CSSProperties;
 }) => (
   <div
-    className="resume-theme-root resume-page"
+    className={`resume-theme-root resume-page ${theme.layout === "single" ? "single-column" : "sidebar-layout"}`}
     style={{
       width: "794px",
       height: "1123px",
@@ -370,7 +375,8 @@ export const ResumePage = ({
       position: "relative",
       overflow: "hidden",
       border: `1px solid ${theme.palette.border}`,
-      fontFamily: theme.fontFamily || "Inter, 'Open Sans', sans-serif",
+      fontFamily: theme.fontFamily || "var(--resume-font-family, Inter, Arial, Helvetica, sans-serif)",
+      margin: "0 auto",
       ...style,
     }}
   >
@@ -411,7 +417,8 @@ export const ResumeContactRow = ({
           className="resume-contact-item"
           style={{
             color,
-            fontSize: `${Math.max(compactMode ? 9.5 : 10.5, Math.round(baseSize * densityScale * 10) / 10)}px`,
+            fontSize: "var(--resume-item-meta-size)",
+            lineHeight: "var(--resume-line-height)",
           }}
         >
           {item.value}
@@ -435,21 +442,9 @@ export const ResumeHeader = ({
   const { summaryText } = getSummaryConfig(data);
   const contactItems = getContactItems(data);
 
-  const titleSize = compactMode
-    ? densityMode === "ultra-compact"
-      ? "26px"
-      : "28px"
-    : densityMode === "ultra-compact"
-    ? "30px"
-    : "32px";
-
-  const roleSize = compactMode
-    ? densityMode === "ultra-compact"
-      ? "12.5px"
-      : "13px"
-    : densityMode === "ultra-compact"
-    ? "13.5px"
-    : "14px";
+  // sizes come from the shared CSS variables which honor typographyScale
+  const titleSize = "var(--resume-name-size)";
+  const roleSize = "var(--resume-role-size)";
 
   return (
     <header
@@ -468,7 +463,7 @@ export const ResumeHeader = ({
             className="font-bold tracking-[0.02em] uppercase"
             style={{
               fontSize: titleSize,
-              lineHeight: 1.05,
+              lineHeight: "var(--resume-line-height)",
               color: theme.palette.nameText || theme.palette.text,
             }}
           >
@@ -479,7 +474,7 @@ export const ResumeHeader = ({
               className="mt-2 font-medium uppercase"
               style={{
                 fontSize: roleSize,
-                lineHeight: 1.35,
+                lineHeight: "var(--resume-line-height)",
                 color: theme.palette.titleText || theme.palette.mutedText,
                 letterSpacing: "0.08em",
               }}
@@ -512,89 +507,6 @@ export const ResumeHeader = ({
         </div>
       ) : null}
     </header>
-  );
-};
-
-export const ResumeHeadingBar = ({
-  title,
-  theme,
-  sidebar = false,
-}: {
-  title: string;
-  theme: ResumeTemplateTheme;
-  sidebar?: boolean;
-}) => {
-  const paletteText = sidebar ? theme.palette.sidebarText || theme.palette.text : theme.palette.text;
-  const headingColor = sidebar
-    ? theme.palette.headingText || theme.palette.sidebarText || theme.palette.text
-    : theme.palette.headingText || theme.palette.text;
-  const paletteMuted = sidebar ? theme.palette.sidebarBorder || theme.palette.border : theme.palette.border;
-
-  if (theme.headingStyle === "bar") {
-    return (
-      <div
-        className="inline-block px-3 py-1.5"
-        style={{
-          background: sidebar ? theme.palette.sidebarAccentSoft || theme.palette.accent : theme.palette.accent,
-          color: theme.palette.accentText,
-        }}
-      >
-        <h2 className="resume-heading">{title}</h2>
-      </div>
-    );
-  }
-
-  if (theme.headingStyle === "accent") {
-    return (
-      <div
-        className="border-l-[4px] pl-3"
-        style={{ borderColor: theme.palette.accentBorder || theme.palette.accent }}
-      >
-        <h2 className="resume-heading" style={{ color: headingColor }}>
-          {title}
-        </h2>
-      </div>
-    );
-  }
-
-  return (
-    <div className="pb-1.5" style={{ borderBottom: `1px solid ${paletteMuted}` }}>
-      <h2 className="resume-heading" style={{ color: headingColor }}>
-        {title}
-      </h2>
-    </div>
-  );
-};
-
-export const ResumeSection = ({
-  title,
-  theme,
-  sidebar = false,
-  summaryTitle,
-  children,
-}: {
-  title: string;
-  theme: ResumeTemplateTheme;
-  sidebar?: boolean;
-  summaryTitle?: string;
-  children: ReactNode;
-}) => {
-  if (!children) return null;
-
-  return (
-    <section
-      className="resume-section break-inside-avoid space-y-3"
-      style={{ color: sidebar ? theme.palette.sidebarText || theme.palette.text : theme.palette.text }}
-    >
-      <ResumeHeadingBar title={title} theme={theme} sidebar={sidebar} />
-      <div
-        className={`resume-section-content ${
-          theme.summaryStyle === "plain" && title === summaryTitle ? "resume-section-summary-plain" : ""
-        }`.trim()}
-      >
-        {children}
-      </div>
-    </section>
   );
 };
 
@@ -730,9 +642,16 @@ const ResumePageStyles = () => (
     }
 
     .resume-page {
-      width: 794px;
-      height: 1123px;
+      width: var(--resume-page-width);
+      height: var(--resume-page-height);
       overflow: hidden;
+      font-family: var(--resume-font-family, Inter, Arial, Helvetica, sans-serif);
+    }
+    .resume-page.single-column {
+      padding: var(--resume-page-padding-y) var(--resume-page-padding-x);
+    }
+    .resume-page.sidebar-layout {
+      padding: 0;
     }
 
     .resume-page p,
@@ -894,18 +813,20 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
   const baseSpacingFactor = compactMode ? 0.92 : 1;
   const sectionGap = Math.max(
     14,
-    Math.round((theme.sectionSpacing || 22) * densityFactor * baseSpacingFactor)
+    Math.round(
+      (theme.sectionSpacing || 22) * densityFactor * baseSpacingFactor * (theme.spacingScale || 1)
+    )
   );
 
   const pageStyle: CSSProperties = {
     padding:
       theme.layout === "single"
-        ? scalePxString(theme.pagePadding || "28px 34px", densityFactor * baseSpacingFactor)
+        ? scalePxString(theme.pagePadding || "52px 48px", densityFactor * baseSpacingFactor)
         : "0",
   };
 
   const mainStyle: CSSProperties = {
-    padding: scalePxString(theme.mainPadding || theme.contentPadding || "28px 30px", densityFactor * baseSpacingFactor),
+    padding: scalePxString(theme.mainPadding || theme.contentPadding || "44px 42px", densityFactor * baseSpacingFactor),
   };
 
   const sidebarIntro = (
@@ -913,8 +834,8 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
       <h1
         className="font-bold tracking-[0.02em] uppercase"
         style={{
-          fontSize: compactMode ? "24px" : "30px",
-          lineHeight: 1.06,
+          fontSize: "var(--resume-name-size)",
+          lineHeight: "var(--resume-line-height)",
           color: theme.palette.sidebarText || theme.palette.text,
         }}
       >
@@ -923,8 +844,8 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
       {hasText(data.role) ? (
         <p
           style={{
-            fontSize: compactMode ? "11.5px" : "13px",
-            lineHeight: 1.4,
+            fontSize: "var(--resume-role-size)",
+            lineHeight: "var(--resume-line-height)",
             color:
               theme.palette.titleText ||
               theme.palette.sidebarMutedText ||
@@ -969,12 +890,24 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
   const densityScale =
     densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.95 : 0.92;
 
-  const headingSize = compactMode ? 12 : 13;
-  const bodySize = compactMode ? 10.8 : 11.4;
-  const titleSize = compactMode ? 11.1 : 11.8;
-  const subtitleSize = compactMode ? 10.6 : 11.1;
-  const metaSize = compactMode ? 10.1 : 10.6;
-  const listSize = compactMode ? 10.8 : 11.3;
+  const typScale = theme.typographyScale || 1;
+
+  const nameBase = ResumeTypography.name * typScale;
+  const roleBase = ResumeTypography.role * typScale;
+  const headingBase = ResumeTypography.heading * typScale;
+  const bodyBase = ResumeTypography.body * typScale;
+  const smallBase = ResumeTypography.small * typScale;
+  const lineHeight = ResumeTypography.lineHeight || 1.4;
+
+  // Adjust sizes by density scale; body must not go below 10.5px
+  const nameSize = nameBase * densityScale;
+  const roleSize = roleBase * densityScale;
+  const headingSize = headingBase * densityScale;
+  const bodySize = Math.max(10.5, bodyBase * densityScale);
+  const titleSize = Math.max(11, (ResumeTypography.role || 15) * typScale * densityScale);
+  const subtitleSize = Math.max(10.2, (ResumeTypography.body || 12) * typScale * densityScale);
+  const metaSize = Math.max(10.5, smallBase * densityScale);
+  const listSize = Math.max(10, (ResumeTypography.body || 12) * typScale * densityScale);
 
   return (
     <ResumePage
@@ -989,12 +922,16 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
           "--resume-accent": theme.palette.accent,
           "--resume-accent-soft": theme.palette.accentSoft,
           "--resume-accent-text": theme.palette.accentText,
-          "--resume-heading-size": `${Math.max(11, headingSize * densityScale).toFixed(2)}px`,
-          "--resume-body-size": `${Math.max(compactMode ? 10 : 10.5, bodySize * densityScale).toFixed(2)}px`,
-          "--resume-item-title-size": `${Math.max(11, titleSize * densityScale).toFixed(2)}px`,
-          "--resume-item-subtitle-size": `${Math.max(10.2, subtitleSize * densityScale).toFixed(2)}px`,
-          "--resume-item-meta-size": `${Math.max(9.5, metaSize * densityScale).toFixed(2)}px`,
-          "--resume-list-size": `${Math.max(compactMode ? 10 : 10.8, listSize * densityScale).toFixed(2)}px`,
+          "--resume-heading-size": `${headingSize.toFixed(2)}px`,
+          "--resume-body-size": `${bodySize.toFixed(2)}px`,
+          "--resume-item-title-size": `${titleSize.toFixed(2)}px`,
+          "--resume-item-subtitle-size": `${subtitleSize.toFixed(2)}px`,
+          "--resume-item-meta-size": `${metaSize.toFixed(2)}px`,
+          "--resume-list-size": `${listSize.toFixed(2)}px`,
+          "--resume-name-size": `${Math.round(nameSize * 100) / 100}px`,
+          "--resume-role-size": `${Math.round(roleSize * 100) / 100}px`,
+          "--resume-line-height": `${lineHeight}`,
+          "--resume-font-family": theme.fontFamily || "Inter, Arial, Helvetica, sans-serif",
         } as CSSProperties),
       }}
       data-density-mode={densityMode}

@@ -38,55 +38,127 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
   };
 
   return (
-    <div className="bg-white text-gray-800 w-[794px] min-h-[1123px] shadow-2xl mx-auto relative overflow-hidden font-sans">
-      {/* Minimalist Header */}
-      <header className="pt-12 px-12 pb-8 border-b border-gray-200">
-        <div className="text-center mb-6">
-          <h1 className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
-            {data.fullName || "Your Name"}
-          </h1>
-          {data.role && (
-            <div className="text-xl text-gray-600 font-medium">
-              {data.role}
-            </div>
-          )}
-        </div>
+    <>
+      <style>{`
+        .template-3-page {
+          width: 794px;
+          min-height: 1123px;
+          padding: 52px 48px 42px 48px;
+          box-sizing: border-box;
+          background: #ffffff;
+          overflow: hidden;
+        }
 
-        {/* Contact Info - Minimal Grid */}
-        <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
-          {data.email && (
-            <div className="flex items-center gap-2">
-              <Mail size={16} className="text-gray-500" />
-              <span>{data.email}</span>
-            </div>
-          )}
-          
-          {data.phone && (
-            <div className="flex items-center gap-2">
-              <Phone size={16} className="text-gray-500" />
-              <span>{data.phone}</span>
-            </div>
-          )}
-          
-          {data.address && (
-            <div className="flex items-center gap-2">
-              <MapPin size={16} className="text-gray-500" />
-              <span>{data.address}</span>
-            </div>
-          )}
-        </div>
-      </header>
+        .template-3-header {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 24px;
+        }
 
-      {/* Main Content */}
-      <div className="px-12 py-8">
-        {/* Summary / Career Objective */}
-        {summaryText && (
+        .left-header {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .right-header {
+          width: 260px;
+          flex-shrink: 0;
+        }
+
+        .template-3-content {
+          width: 100%;
+          max-width: 100%;
+        }
+
+        .section-heading-row {
+          width: 100%;
+          display: block;
+          margin-top: 18px;
+          margin-bottom: 10px;
+          position: relative;
+          min-height: 34px;
+        }
+
+        .section-heading-bar {
+          position: absolute;
+          left: -48px;
+          right: -48px;
+          height: 34px;
+          display: flex;
+          align-items: center;
+          padding-left: 12px;
+          padding-right: 12px;
+          box-sizing: border-box;
+          background: var(--headingBarColor, #f57c00);
+          color: var(--headingTextColor, #000000);
+          font-size: 14px;
+          font-weight: 700;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      `}</style>
+      <div className="template-3-page bg-white text-gray-800 shadow-2xl mx-auto relative overflow-hidden font-sans">
+        {/* Minimalist Header */}
+        <header className="border-b border-gray-200 pb-8">
+          <div className="template-3-header">
+            <div className="left-header">
+              <h1 className="text-4xl font-bold text-gray-900 tracking-tight mb-2">
+                {data.fullName || "Your Name"}
+              </h1>
+              {data.role && (
+                <div className="text-xl text-gray-600 font-medium">
+                  {data.role}
+                </div>
+              )}
+            </div>
+
+            <div className="right-header">
+              <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                {data.email && (
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Mail size={16} className="text-gray-500" />
+                    <span className="truncate">{data.email}</span>
+                  </div>
+                )}
+                {data.phone && (
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Phone size={16} className="text-gray-500" />
+                    <span className="truncate">{data.phone}</span>
+                  </div>
+                )}
+                {data.address && (
+                  <div className="flex items-center gap-2 min-w-0">
+                    <MapPin size={16} className="text-gray-500" />
+                    <span className="truncate">{data.address}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <div className="template-3-content">
+          {/* Summary / Career Objective */}
+          {summaryText && (
           <section className="mb-10">
-            <div className="flex items-center mb-4">
-              <Briefcase size={20} className="text-blue-600 mr-3" />
-              <h2 className="text-2xl font-bold text-gray-800">{summaryTitle}</h2>
+            <div className="section-heading-row">
+              <div
+                className="section-heading-bar"
+                style={{
+                  "--headingBarColor": "#38bdf8",
+                  "--headingTextColor": "#111827",
+                } as React.CSSProperties}
+              >
+                {summaryTitle}
+              </div>
             </div>
-            <div className="pl-8">
+            <div className="mt-3">
               <p className="text-gray-700 leading-relaxed text-sm">
                 {summaryText}
               </p>
@@ -99,9 +171,16 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
           {/* Work Experience */}
           {data.experience.length > 0 && (
             <section>
-              <div className="flex items-center mb-4">
-                <div className="w-8 h-1 bg-blue-600 rounded"></div>
-                <h2 className="text-xl font-bold text-gray-800 ml-3">EXPERIENCE</h2>
+              <div className="section-heading-row">
+                <div
+                  className="section-heading-bar"
+                  style={{
+                    "--headingBarColor": "#2563eb",
+                    "--headingTextColor": "#ffffff",
+                  } as React.CSSProperties}
+                >
+                  EXPERIENCE
+                </div>
               </div>
               <div className="space-y-6">
                 {data.experience.map((exp, index) => (
@@ -129,9 +208,16 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
           {/* Education */}
           {data.education.length > 0 && (
             <section>
-              <div className="flex items-center mb-4">
-                <div className="w-8 h-1 bg-green-600 rounded"></div>
-                <h2 className="text-xl font-bold text-gray-800 ml-3">EDUCATION</h2>
+              <div className="section-heading-row">
+                <div
+                  className="section-heading-bar"
+                  style={{
+                    "--headingBarColor": "#10b981",
+                    "--headingTextColor": "#ffffff",
+                  } as React.CSSProperties}
+                >
+                  EDUCATION
+                </div>
               </div>
               <div className="space-y-5">
                 {data.education.map((edu, index) => (
@@ -160,9 +246,16 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
         {/* Skills Section */}
         {data.skills.length > 0 && (
           <section className="mb-10">
-            <div className="flex items-center mb-6">
-              <Star size={20} className="text-purple-600 mr-3" />
-              <h2 className="text-2xl font-bold text-gray-800">SKILLS & EXPERTISE</h2>
+            <div className="section-heading-row">
+              <div
+                className="section-heading-bar"
+                style={{
+                  "--headingBarColor": "#8b5cf6",
+                  "--headingTextColor": "#ffffff",
+                } as React.CSSProperties}
+              >
+                SKILLS & EXPERTISE
+              </div>
             </div>
             <div className="flex flex-wrap gap-3">
               {data.skills.map((skill, index) => (
@@ -188,9 +281,16 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
           {/* Projects */}
           {data.projects.length > 0 && (
             <section>
-              <div className="flex items-center mb-4">
-                <Code size={20} className="text-amber-600 mr-3" />
-                <h2 className="text-xl font-bold text-gray-800">PROJECTS</h2>
+              <div className="section-heading-row">
+                <div
+                  className="section-heading-bar"
+                  style={{
+                    "--headingBarColor": "#f59e0b",
+                    "--headingTextColor": "#ffffff",
+                  } as React.CSSProperties}
+                >
+                  PROJECTS
+                </div>
               </div>
               <div className="space-y-4">
                 {data.projects.map((project, index) => (
@@ -223,9 +323,16 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
             {/* Certifications */}
             {data.certifications && data.certifications.length > 0 && (
               <section>
-                <div className="flex items-center mb-4">
-                  <Award size={20} className="text-red-600 mr-3" />
-                  <h2 className="text-xl font-bold text-gray-800">CERTIFICATIONS</h2>
+                <div className="section-heading-row">
+                  <div
+                    className="section-heading-bar"
+                    style={{
+                      "--headingBarColor": "#ef4444",
+                      "--headingTextColor": "#ffffff",
+                    } as React.CSSProperties}
+                  >
+                    CERTIFICATIONS
+                  </div>
                 </div>
                 <div className="space-y-3">
                   {data.certifications.map((cert, index) => (
@@ -247,9 +354,16 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
             {/* Languages */}
             {data.languages && data.languages.length > 0 && (
               <section>
-                <div className="flex items-center mb-4">
-                  <Languages size={20} className="text-teal-600 mr-3" />
-                  <h2 className="text-xl font-bold text-gray-800">LANGUAGES</h2>
+                <div className="section-heading-row">
+                  <div
+                    className="section-heading-bar"
+                    style={{
+                      "--headingBarColor": "#14b8a6",
+                      "--headingTextColor": "#ffffff",
+                    } as React.CSSProperties}
+                  >
+                    LANGUAGES
+                  </div>
                 </div>
                 <div className="space-y-3">
                   {data.languages.map((lang, index) => (
@@ -283,9 +397,16 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
 
         {(data.strengths?.length || data.hobbies?.length) && (
           <section className="mb-10">
-            <div className="flex items-center mb-4">
-              <div className="w-8 h-1 bg-blue-600 rounded"></div>
-              <h2 className="text-2xl font-bold text-gray-800 ml-3">ADDITIONAL PROFILE</h2>
+            <div className="section-heading-row">
+              <div
+                className="section-heading-bar"
+                style={{
+                  "--headingBarColor": "#2563eb",
+                  "--headingTextColor": "#ffffff",
+                } as React.CSSProperties}
+              >
+                ADDITIONAL PROFILE
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-6">
               {data.strengths?.length > 0 && (
@@ -342,6 +463,7 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

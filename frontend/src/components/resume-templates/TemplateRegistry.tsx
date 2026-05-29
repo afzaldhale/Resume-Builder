@@ -16,9 +16,7 @@ import Template14 from "./Template14";
 import Template15 from "./Template15";
 import type { ResumeData } from "./types";
 import EmptyTemplate from "./EmptyTemplate";
-
-export const A4_WIDTH_PX = 794;
-export const A4_HEIGHT_PX = 1123;
+import { A4_WIDTH_PX, A4_HEIGHT_PX } from "@/constants/resumeDesignSystem";
 
 export type ResumeTemplateComponent = ComponentType<{ data: ResumeData }>;
 

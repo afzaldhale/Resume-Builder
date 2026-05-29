@@ -2,7 +2,8 @@ import { memo, useMemo } from "react";
 import { fitResumeData, type FitRenderMode } from "@/utils/fitResumeData";
 import type { ResumeData } from "./types";
 import { getCompactMode, resolveResumeMode } from "./templatePolicy";
-import { A4_HEIGHT_PX, A4_WIDTH_PX, getSafeTemplateId } from "./TemplateRegistry";
+import { A4_HEIGHT_PX, A4_WIDTH_PX } from "@/constants/resumeDesignSystem";
+import { getSafeTemplateId } from "@/components/resume-templates/TemplateRegistry";
 import ThemedResumeTemplate from "./ThemedResumeTemplate";
 
 interface ResumeDocumentProps {

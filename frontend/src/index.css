@@ -71,6 +71,12 @@ All colors MUST be HSL.
     --shadow-soft: 0 2px 8px hsla(210, 60%, 15%, 0.08);
     --shadow-medium: 0 4px 16px hsla(210, 60%, 15%, 0.12);
     --shadow-large: 0 8px 32px hsla(210, 60%, 15%, 0.16);
+    --resume-font-family: "Inter", Arial, Helvetica, sans-serif;
+    --resume-line-height: 1.35;
+    --resume-page-width: 794px;
+    --resume-page-height: 1123px;
+    --resume-page-padding-x: 48px;
+    --resume-page-padding-y: 52px;
   }
 
   .dark {
@@ -250,17 +256,32 @@ All colors MUST be HSL.
 }
 
 .resume-preview-outer {
-  width: calc(794px * var(--preview-scale, 0.55));
-  height: calc(1123px * var(--preview-scale, 0.55));
+  width: calc(var(--resume-page-width) * var(--preview-scale, 0.55));
+  height: calc(var(--resume-page-height) * var(--preview-scale, 0.55));
   flex-shrink: 0;
   position: relative;
 }
 
 .resume-preview-inner {
-  width: 794px;
-  height: 1123px;
+  width: var(--resume-page-width);
+  height: var(--resume-page-height);
   transform: scale(var(--preview-scale, 0.55));
   transform-origin: top left;
+}
+
+.resume-page {
+  font-family: var(--resume-font-family);
+  box-sizing: border-box;
+  background: #ffffff;
+  margin: 0 auto;
+}
+
+.resume-page.single-column {
+  padding: var(--resume-page-padding-y) var(--resume-page-padding-x);
+}
+
+.resume-page.sidebar-layout {
+  padding: 0;
 }
 
 .resume-print-mode {
@@ -297,20 +318,20 @@ All colors MUST be HSL.
 }
 
 .resume-print-root {
-  width: 794px;
-  min-height: 1123px;
-  margin: 0 auto;
-  padding: 0;
-  box-sizing: border-box;
-  background: #ffffff;
-  overflow: hidden;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
+    width: var(--resume-page-width);
+    min-height: var(--resume-page-height);
+    margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box;
+    background: #ffffff;
+    overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
 }
 
 .resume-print-root .resume-document-shell {
-  width: 794px !important;
-  min-height: 1123px !important;
+    width: var(--resume-page-width) !important;
+    min-height: var(--resume-page-height) !important;
 }
 
 .resume-print-loading {
@@ -355,16 +376,16 @@ All colors MUST be HSL.
   html,
   body,
   #root {
-    width: 794px;
-    min-height: 1123px;
+    width: var(--resume-page-width);
+    min-height: var(--resume-page-height);
     margin: 0;
     padding: 0;
     background: #ffffff !important;
   }
 
   .resume-print-root {
-    width: 794px;
-    min-height: 1123px;
+    width: var(--resume-page-width);
+    min-height: var(--resume-page-height);
     margin: 0;
     overflow: hidden;
   }
