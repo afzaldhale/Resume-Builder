@@ -70,6 +70,10 @@ export function template15HTML(data) {
   h1 {
     font-size: 24px;
     font-weight: 700;
+    word-break: normal;
+    overflow-wrap: break-word;
+    hyphens: none;
+    word-spacing: normal;
   }
 
   .role {

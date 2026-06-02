@@ -78,4 +78,5 @@ export const getSummaryConfig = (data: ResumeData) => {
   };
 };
 
-export const getCompactMode = (data: ResumeData) => getDensityMode(data) !== "comfortable";
+export const getCompactMode = (data: ResumeData) =>
+  (data.compactLevel || 0) > 0 || getDensityMode(data) !== "comfortable";

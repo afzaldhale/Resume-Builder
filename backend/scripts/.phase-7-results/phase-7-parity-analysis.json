@@ -1,0 +1,578 @@
+{
+  "timestamp": "2026-06-02T09:15:26.471Z",
+  "totalTemplates": 15,
+  "compliant": 4,
+  "warnings": 4,
+  "issues": 11,
+  "templates": {
+    "1": {
+      "name": "Clean Single Column",
+      "type": "SINGLE_COLUMN",
+      "layout": "single",
+      "spec": {
+        "name": "Clean Single Column",
+        "type": "SINGLE_COLUMN",
+        "layout": "single",
+        "typography": {
+          "name": {
+            "size": "24px",
+            "weight": 600
+          },
+          "role": {
+            "size": "14px",
+            "weight": 600
+          },
+          "body": {
+            "size": "11px",
+            "weight": 400
+          }
+        }
+      },
+      "analysis": {
+        "compliant": false,
+        "issues": [
+          "Section title (undefined) below 14px minimum"
+        ],
+        "warnings": [
+          "Name font (24px) is below ideal (28px)"
+        ],
+        "score": 75
+      }
+    },
+    "2": {
+      "name": "Corporate Sidebar Blue",
+      "type": "SIDEBAR",
+      "layout": "40% sidebar + 60% content",
+      "spec": {
+        "name": "Corporate Sidebar Blue",
+        "type": "SIDEBAR",
+        "layout": "40% sidebar + 60% content",
+        "sidebarWidth": "40%",
+        "minSidebarPx": 317,
+        "expectedSidebarPx": 317,
+        "typography": {
+          "name": {
+            "size": "28px",
+            "weight": 700
+          },
+          "role": {
+            "size": "18px",
+            "weight": 600
+          },
+          "body": {
+            "size": "13px",
+            "weight": 400
+          },
+          "sectionTitle": {
+            "size": "16px",
+            "weight": 700
+          }
+        }
+      },
+      "analysis": {
+        "compliant": true,
+        "issues": [],
+        "warnings": [],
+        "score": 100
+      }
+    },
+    "3": {
+      "name": "Colored Heading Corporate",
+      "type": "TWO_COLUMN_HEADER",
+      "layout": "colored header + two-column content",
+      "spec": {
+        "name": "Colored Heading Corporate",
+        "type": "TWO_COLUMN_HEADER",
+        "layout": "colored header + two-column content",
+        "typography": {
+          "name": {
+            "size": "26px",
+            "weight": 700
+          },
+          "role": {
+            "size": "14px",
+            "weight": 600
+          },
+          "body": {
+            "size": "12.5px",
+            "weight": 400
+          },
+          "sectionTitle": {
+            "size": "15px",
+            "weight": 700
+          }
+        }
+      },
+      "analysis": {
+        "compliant": true,
+        "issues": [],
+        "warnings": [],
+        "score": 100
+      }
+    },
+    "4": {
+      "name": "Left Accent Teal",
+      "type": "SIDEBAR",
+      "layout": "230px sidebar + content",
+      "spec": {
+        "name": "Left Accent Teal",
+        "type": "SIDEBAR",
+        "layout": "230px sidebar + content",
+        "sidebarWidth": "230px",
+        "minSidebarPx": 230,
+        "expectedSidebarPx": 230,
+        "typography": {
+          "name": {
+            "size": "26px",
+            "weight": 700
+          },
+          "role": {
+            "size": "14px",
+            "weight": 600
+          },
+          "body": {
+            "size": "11px",
+            "weight": 400
+          },
+          "sectionTitle": {
+            "size": "11px",
+            "weight": 700
+          }
+        }
+      },
+      "analysis": {
+        "compliant": false,
+        "issues": [
+          "Section title (11px) below 14px minimum"
+        ],
+        "warnings": [],
+        "score": 80
+      }
+    },
+    "5": {
+      "name": "Premium Gray Sidebar",
+      "type": "SIDEBAR",
+      "layout": "230px sidebar + content",
+      "spec": {
+        "name": "Premium Gray Sidebar",
+        "type": "SIDEBAR",
+        "layout": "230px sidebar + content",
+        "sidebarWidth": "230px",
+        "minSidebarPx": 230,
+        "expectedSidebarPx": 230,
+        "typography": {
+          "name": {
+            "size": "27px",
+            "weight": 700
+          },
+          "role": {
+            "size": "14px",
+            "weight": 600
+          },
+          "body": {
+            "size": "10.9px",
+            "weight": 400
+          },
+          "sectionTitle": {
+            "size": "11px",
+            "weight": 700
+          }
+        }
+      },
+      "analysis": {
+        "compliant": false,
+        "issues": [
+          "Section title (11px) below 14px minimum"
+        ],
+        "warnings": [],
+        "score": 80
+      }
+    },
+    "6": {
+      "name": "Professional Sidebar Teal",
+      "type": "SIDEBAR",
+      "layout": "220px sidebar + content",
+      "spec": {
+        "name": "Professional Sidebar Teal",
+        "type": "SIDEBAR",
+        "layout": "220px sidebar + content",
+        "sidebarWidth": "220px",
+        "minSidebarPx": 220,
+        "expectedSidebarPx": 220,
+        "typography": {
+          "name": {
+            "size": "26px",
+            "weight": 700
+          },
+          "role": {
+            "size": "14px",
+            "weight": 600
+          },
+          "body": {
+            "size": "10.9px",
+            "weight": 400
+          },
+          "sectionTitle": {
+            "size": "10.8px",
+            "weight": 700
+          }
+        }
+      },
+      "analysis": {
+        "compliant": false,
+        "issues": [
+          "Section title (10.8px) below 14px minimum"
+        ],
+        "warnings": [],
+        "score": 80
+      }
+    },
+    "7": {
+      "name": "Muted Coral Corporate",
+      "type": "SINGLE_COLUMN",
+      "layout": "single",
+      "spec": {
+        "name": "Muted Coral Corporate",
+        "type": "SINGLE_COLUMN",
+        "layout": "single",
+        "typography": {
+          "name": {
+            "size": "26px",
+            "weight": 700
+          },
+          "role": {
+            "size": "14px",
+            "weight": 600
+          },
+          "body": {
+            "size": "11px",
+            "weight": 400
+          }
+        }
+      },
+      "analysis": {
+        "compliant": false,
+        "issues": [
+          "Section title (undefined) below 14px minimum"
+        ],
+        "warnings": [],
+        "score": 80
+      }
+    },
+    "8": {
+      "name": "Compact ATS Single",
+      "type": "SINGLE_COLUMN",
+      "layout": "single",
+      "spec": {
+        "name": "Compact ATS Single",
+        "type": "SINGLE_COLUMN",
+        "layout": "single",
+        "typography": {
+          "name": {
+            "size": "20px",
+            "weight": 700
+          },
+          "role": {
+            "size": "12px",
+            "weight": 600
+          },
+          "body": {
+            "size": "10px",
+            "weight": 400
+          }
+        }
+      },
+      "analysis": {
+        "compliant": false,
+        "issues": [
+          "Section title (undefined) below 14px minimum"
+        ],
+        "warnings": [
+          "Name font (20px) is below ideal (28px)"
+        ],
+        "score": 75
+      }
+    },
+    "9": {
+      "name": "Premium Charcoal Sidebar",
+      "type": "SINGLE_COLUMN",
+      "layout": "single",
+      "spec": {
+        "name": "Premium Charcoal Sidebar",
+        "type": "SINGLE_COLUMN",
+        "layout": "single",
+        "typography": {
+          "name": {
+            "size": "28px",
+            "weight": 700
+          },
+          "role": {
+            "size": "13px",
+            "weight": 600
+          },
+          "body": {
+            "size": "11px",
+            "weight": 400
+          }
+        }
+      },
+      "analysis": {
+        "compliant": false,
+        "issues": [
+          "Section title (undefined) below 14px minimum"
+        ],
+        "warnings": [],
+        "score": 80
+      }
+    },
+    "10": {
+      "name": "Blue Heading Corporate",
+      "type": "SINGLE_COLUMN",
+      "layout": "single",
+      "spec": {
+        "name": "Blue Heading Corporate",
+        "type": "SINGLE_COLUMN",
+        "layout": "single",
+        "typography": {
+          "name": {
+            "size": "28px",
+            "weight": 700
+          },
+          "role": {
+            "size": "14px",
+            "weight": 600
+          },
+          "body": {
+            "size": "11px",
+            "weight": 400
+          }
+        }
+      },
+      "analysis": {
+        "compliant": false,
+        "issues": [
+          "Section title (undefined) below 14px minimum"
+        ],
+        "warnings": [],
+        "score": 80
+      }
+    },
+    "11": {
+      "name": "Classic Two Column",
+      "type": "SIDEBAR",
+      "layout": "35% sidebar + 65% content",
+      "spec": {
+        "name": "Classic Two Column",
+        "type": "SIDEBAR",
+        "layout": "35% sidebar + 65% content",
+        "sidebarWidth": "35%",
+        "minSidebarPx": 278,
+        "expectedSidebarPx": 278,
+        "typography": {
+          "name": {
+            "size": "24px",
+            "weight": 700
+          },
+          "role": {
+            "size": "14px",
+            "weight": 600
+          },
+          "body": {
+            "size": "13px",
+            "weight": 400
+          },
+          "sectionTitle": {
+            "size": "13px",
+            "weight": 700
+          }
+        }
+      },
+      "analysis": {
+        "compliant": false,
+        "issues": [
+          "Section title (13px) below 14px minimum"
+        ],
+        "warnings": [
+          "Name font (24px) is below ideal (28px)"
+        ],
+        "score": 75
+      }
+    },
+    "12": {
+      "name": "Soft Green Corporate",
+      "type": "TWO_COLUMN_HEADER",
+      "layout": "colored header + two-column content",
+      "spec": {
+        "name": "Soft Green Corporate",
+        "type": "TWO_COLUMN_HEADER",
+        "layout": "colored header + two-column content",
+        "typography": {
+          "name": {
+            "size": "28px",
+            "weight": 700
+          },
+          "role": {
+            "size": "16px",
+            "weight": 600
+          },
+          "body": {
+            "size": "13px",
+            "weight": 400
+          },
+          "sectionTitle": {
+            "size": "14px",
+            "weight": 700
+          }
+        }
+      },
+      "analysis": {
+        "compliant": true,
+        "issues": [],
+        "warnings": [],
+        "score": 100
+      }
+    },
+    "13": {
+      "name": "Rose Sidebar Corporate",
+      "type": "SINGLE_COLUMN",
+      "layout": "single",
+      "spec": {
+        "name": "Rose Sidebar Corporate",
+        "type": "SINGLE_COLUMN",
+        "layout": "single",
+        "typography": {
+          "name": {
+            "size": "28px",
+            "weight": 700
+          },
+          "role": {
+            "size": "14px",
+            "weight": 600
+          },
+          "body": {
+            "size": "11px",
+            "weight": 400
+          }
+        }
+      },
+      "analysis": {
+        "compliant": false,
+        "issues": [
+          "Section title (undefined) below 14px minimum"
+        ],
+        "warnings": [],
+        "score": 80
+      }
+    },
+    "14": {
+      "name": "Minimal Left Accent",
+      "type": "SINGLE_COLUMN",
+      "layout": "single",
+      "spec": {
+        "name": "Minimal Left Accent",
+        "type": "SINGLE_COLUMN",
+        "layout": "single",
+        "typography": {
+          "name": {
+            "size": "26px",
+            "weight": 700
+          },
+          "role": {
+            "size": "12px",
+            "weight": 600
+          },
+          "body": {
+            "size": "11px",
+            "weight": 400
+          }
+        }
+      },
+      "analysis": {
+        "compliant": false,
+        "issues": [
+          "Section title (undefined) below 14px minimum"
+        ],
+        "warnings": [],
+        "score": 80
+      }
+    },
+    "15": {
+      "name": "Corporate Clean",
+      "type": "SIDEBAR",
+      "layout": "30% sidebar + 70% content",
+      "spec": {
+        "name": "Corporate Clean",
+        "type": "SIDEBAR",
+        "layout": "30% sidebar + 70% content",
+        "sidebarWidth": "30%",
+        "minSidebarPx": 238,
+        "expectedSidebarPx": 238,
+        "typography": {
+          "name": {
+            "size": "24px",
+            "weight": 700
+          },
+          "role": {
+            "size": "13px",
+            "weight": 600
+          },
+          "body": {
+            "size": "13px",
+            "weight": 400
+          },
+          "sectionTitle": {
+            "size": "14px",
+            "weight": 700
+          }
+        }
+      },
+      "analysis": {
+        "compliant": true,
+        "issues": [],
+        "warnings": [
+          "Name font (24px) is below ideal (28px)"
+        ],
+        "score": 95
+      }
+    }
+  },
+  "summary": {
+    "byType": {
+      "SINGLE_COLUMN": {
+        "count": 7,
+        "compliant": 0,
+        "issues": [
+          "T1: Section title (undefined) below 14px minimum",
+          "T7: Section title (undefined) below 14px minimum",
+          "T8: Section title (undefined) below 14px minimum",
+          "T9: Section title (undefined) below 14px minimum",
+          "T10: Section title (undefined) below 14px minimum",
+          "T13: Section title (undefined) below 14px minimum",
+          "T14: Section title (undefined) below 14px minimum"
+        ]
+      },
+      "SIDEBAR": {
+        "count": 6,
+        "compliant": 2,
+        "issues": [
+          "T4: Section title (11px) below 14px minimum",
+          "T5: Section title (11px) below 14px minimum",
+          "T6: Section title (10.8px) below 14px minimum",
+          "T11: Section title (13px) below 14px minimum"
+        ]
+      },
+      "TWO_COLUMN_HEADER": {
+        "count": 2,
+        "compliant": 2,
+        "issues": []
+      }
+    },
+    "typographyGaps": [
+      "T4: Section title 11px < 14px",
+      "T5: Section title 11px < 14px",
+      "T6: Section title 10.8px < 14px",
+      "T11: Section title 13px < 14px"
+    ],
+    "sidebarGaps": []
+  }
+}

@@ -76,7 +76,7 @@ const getHeadingStyle = (
         : variant === "label-bar"
         ? "0px 0px 0px 10px"
         : "0px",
-    marginBottom: "8px",
+    marginBottom: "6px",
     fontSize: "var(--resume-heading-size)",
     fontWeight: 700,
     letterSpacing: "1px",
@@ -90,6 +90,7 @@ interface ResumeSectionProps {
   title: string;
   theme: ResumeTemplateTheme;
   sidebar?: boolean;
+  compactMode?: boolean;
   summaryTitle?: string;
   children: ReactNode;
 }
@@ -98,6 +99,7 @@ export const ResumeSection = ({
   title,
   theme,
   sidebar = false,
+  compactMode = false,
   summaryTitle,
   children,
 }: ResumeSectionProps) => {
@@ -107,13 +109,13 @@ export const ResumeSection = ({
   const headingStyles = getHeadingStyle(theme, sidebar, variant);
 
   return (
-    <section className="resume-section break-inside-avoid space-y-3" style={{ color: sidebar ? theme.palette.sidebarText || theme.palette.text : theme.palette.text }}>
-      <div
+    <section className="resume-section break-inside-avoid space-y-2" style={{ color: sidebar ? theme.palette.sidebarText || theme.palette.text : theme.palette.text }}>
+      <h2
         className={`resume-section-title resume-section-title-${variant}`}
         style={headingStyles}
       >
         {title}
-      </div>
+      </h2>
       <div
         className={`resume-section-content ${
           theme.summaryStyle === "plain" && title === summaryTitle ? "resume-section-summary-plain" : ""

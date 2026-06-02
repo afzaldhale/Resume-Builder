@@ -20,6 +20,7 @@ import AdminLogin from "./components/pages/admin/AdminLogin";
 import AdminDashboard from "./components/pages/admin/AdminDashboard";
 import AdminUsers from "./components/pages/admin/AdminUsers";
 import AdminRequests from "./components/pages/admin/AdminRequests";
+import AdminResumeQA from "./components/pages/admin/AdminResumeQA";
 
 import NotFound from "./components/pages/NotFound";
 import PrivacyPolicyPage from "./components/pages/PrivacyPolicy";
@@ -132,6 +133,14 @@ const App = () => (
             element={
               <ProtectedRoute requireAdmin>
                 <AdminRequests />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/resume-qa"
+            element={
+              <ProtectedRoute requireAdmin>
+                <AdminResumeQA />
               </ProtectedRoute>
             }
           />

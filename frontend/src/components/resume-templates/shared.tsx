@@ -200,7 +200,7 @@ export const ResumeSidebarContactCard = ({
         className="resume-heading"
         style={{
           color: theme.palette.sidebarText || theme.palette.text,
-          marginBottom: "10px",
+          marginBottom: "8px",
         }}
       >
         {theme.sidebarHeading || "Contact"}
@@ -210,12 +210,12 @@ export const ResumeSidebarContactCard = ({
           width: "100%",
           height: "1px",
           background: theme.palette.divider || theme.palette.sidebarBorder || "rgba(255,255,255,0.28)",
-          marginBottom: "12px",
+          marginBottom: "8px",
         }}
       />
-      <div className="space-y-3">
+      <div className="space-y-2">
         {items.map((item, index) => (
-          <div key={`${item.label}-${item.value}-${index}`} className="space-y-1">
+          <div key={`${item.label}-${item.value}-${index}`} className="space-y-0">
             <p
               style={{
                 fontSize: "var(--resume-item-meta-size)",
@@ -703,21 +703,31 @@ const ResumePageStyles = () => (
       color: var(--resume-muted-text);
     }
 
+    .resume-section-title {
+      display: block;
+      font-size: var(--resume-heading-size);
+      line-height: 1.2;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 0 0 0.35em;
+    }
+
     .resume-bullet-list {
       margin: 0;
-      padding-left: 18px;
+      padding-left: var(--resume-list-indent, 18px);
       font-size: var(--resume-list-size);
       line-height: 1.34;
     }
 
     .resume-bullet-list li + li {
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .resume-summary-box {
       border-left: 4px solid var(--resume-accent);
       background: var(--resume-accent-soft);
-      padding: 12px 14px;
+      padding: var(--resume-summary-box-padding, 10px 12px);
     }
 
     .resume-section-summary-plain .resume-summary-box {
@@ -735,12 +745,12 @@ const ResumePageStyles = () => (
 
     .resume-contact-item:not(:last-child)::after {
       content: "|";
-      margin-left: 10px;
+      margin-left: var(--resume-contact-separator-gap, 8px);
       color: var(--resume-muted-text);
     }
 
     .resume-meta-block + .resume-meta-block {
-      margin-top: 12px;
+      margin-top: 8px;
     }
 
     .break-inside-avoid {
@@ -766,6 +776,11 @@ const ResumePageStyles = () => (
       min-width: 0;
       max-width: 100%;
     }
+
+    .resume-section {
+      display: grid;
+      row-gap: var(--resume-section-vertical-gap, 8px);
+    }
   `}</style>
 );
 
@@ -774,12 +789,14 @@ const renderSections = ({
   sections,
   summaryTitle,
   theme,
+  compactMode = false,
   sidebar = false,
 }: {
   keys: SectionKey[];
   sections: Record<SectionKey, ReactNode>;
   summaryTitle: string;
   theme: ResumeTemplateTheme;
+  compactMode?: boolean;
   sidebar?: boolean;
 }) =>
   keys.map((key) => {
@@ -792,6 +809,7 @@ const renderSections = ({
         title={getSectionLabel(key, summaryTitle)}
         theme={theme}
         sidebar={sidebar}
+        compactMode={compactMode}
         summaryTitle={summaryTitle}
       >
         {content}
@@ -804,6 +822,7 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
   const fresherResume = isFresherResume(data);
   const compactMode = getCompactMode(data);
   const densityMode = getDensityMode(data);
+  const compactLevel = data.compactLevel || 0;
   const densityFactor =
     densityMode === "comfortable"
       ? 1
@@ -811,22 +830,43 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
       ? 0.88
       : 0.82;
   const baseSpacingFactor = compactMode ? 0.92 : 1;
-  const sectionGap = Math.max(
-    14,
-    Math.round(
-      (theme.sectionSpacing || 22) * densityFactor * baseSpacingFactor * (theme.spacingScale || 1)
-    )
-  );
+  const compactSpacingFactor = compactLevel === 1 ? 0.9 : compactLevel >= 2 ? 0.8 : 1;
+  // Target section gap between 12 and 16px for denser single-column templates
+  const rawGap = Math.round((theme.sectionSpacing || 22) * densityFactor * baseSpacingFactor * compactSpacingFactor * (theme.spacingScale || 1));
+  const minSectionGap = densityMode === "comfortable" && compactLevel === 0 ? 12 : 10;
+  const sectionGap = Math.max(minSectionGap, Math.min(16, rawGap));
+
+  // Ensure page padding stays in a professional, tighter range (24-40px vertical/horizontal)
+  const clampPadding = (padding: string) => {
+    try {
+      const parts = padding.trim().split(/\s+/).map((p) => parseInt(p, 10) || 0);
+      // support 'Y X' or 'T R B L'
+      let vert = parts.length === 4 ? parts[0] + parts[2] : parts[0] || 36;
+      let horiz = parts.length === 4 ? parts[1] + parts[3] : parts[1] || parts[0] || 32;
+      // convert to single-side approx by halving if doubled
+      vert = Math.round(vert / (parts.length === 4 ? 2 : 1));
+      horiz = Math.round(horiz / (parts.length === 4 ? 2 : 1));
+      const minPadding = densityMode === "comfortable" && compactLevel === 0 ? 32 : densityMode === "compact" || compactLevel >= 1 ? 28 : 24;
+      vert = Math.max(minPadding, Math.min(40, vert));
+      horiz = Math.max(minPadding, Math.min(40, horiz));
+      return `${vert}px ${horiz}px`;
+    } catch (e) {
+      return "36px 32px";
+    }
+  };
 
   const pageStyle: CSSProperties = {
     padding:
       theme.layout === "single"
-        ? scalePxString(theme.pagePadding || "52px 48px", densityFactor * baseSpacingFactor)
+        ? scalePxString(clampPadding(theme.pagePadding || "36px 32px"), densityFactor * baseSpacingFactor * compactSpacingFactor)
         : "0",
   };
 
   const mainStyle: CSSProperties = {
-    padding: scalePxString(theme.mainPadding || theme.contentPadding || "44px 42px", densityFactor * baseSpacingFactor),
+    padding: scalePxString(
+      clampPadding(theme.mainPadding || theme.contentPadding || "36px 32px"),
+      densityFactor * baseSpacingFactor * compactSpacingFactor
+    ),
   };
 
   const sidebarIntro = (
@@ -915,7 +955,7 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
       style={{
         ...pageStyle,
         ...({
-          "--resume-page-bg": theme.palette.page,
+              "--resume-page-bg": theme.palette.page,
           "--resume-page-text": theme.palette.text,
           "--resume-muted-text": theme.palette.mutedText,
           "--resume-border": theme.palette.border,
@@ -931,6 +971,10 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
           "--resume-name-size": `${Math.round(nameSize * 100) / 100}px`,
           "--resume-role-size": `${Math.round(roleSize * 100) / 100}px`,
           "--resume-line-height": `${lineHeight}`,
+          "--resume-summary-box-padding": compactMode || densityMode !== "comfortable" ? "8px 10px" : "10px 12px",
+          "--resume-list-indent": densityMode === "comfortable" ? "18px" : "16px",
+          "--resume-contact-separator-gap": densityMode === "comfortable" ? "8px" : "6px",
+          "--resume-section-vertical-gap": densityMode === "comfortable" && compactLevel === 0 ? "8px" : densityMode === "compact" ? "7px" : "6px",
           "--resume-font-family": theme.fontFamily || "Inter, Arial, Helvetica, sans-serif",
         } as CSSProperties),
       }}
@@ -956,6 +1000,7 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
               sections,
               summaryTitle,
               theme,
+              compactMode,
             })}
           </div>
         </div>
@@ -975,6 +1020,7 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
                       sections,
                       summaryTitle,
                       theme,
+                      compactMode,
                       sidebar: true,
                     })}
                   </>
@@ -993,6 +1039,7 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
                   sections,
                   summaryTitle,
                   theme,
+                  compactMode,
                 })}
               </div>
             </div>

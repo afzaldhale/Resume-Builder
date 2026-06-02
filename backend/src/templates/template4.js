@@ -55,6 +55,10 @@ export function template4HTML(data) {
     margin: 0 0 4px;
     font-weight: 800;
     letter-spacing: -0.4px;
+    word-break: normal;
+    overflow-wrap: break-word;
+    hyphens: none;
+    word-spacing: normal;
   }
 
   .role {
@@ -87,7 +91,7 @@ export function template4HTML(data) {
 
   .body-grid {
     display: grid;
-    grid-template-columns: 205px 1fr;
+    grid-template-columns: 230px 1fr;
     gap: 18px;
     padding: 18px 20px 16px;
   }
@@ -319,14 +323,6 @@ export function template4HTML(data) {
           <h2 class="section-title">Interests</h2>
           <div class="small-list">
             ${data.hobbies.map((item) => `<div class="small-list-item">${item}</div>`).join("")}
-          </div>
-        </section>` : ""}
-
-        ${socialLinks.length ? `
-        <section class="section">
-          <h2 class="section-title">Links</h2>
-          <div class="link-list">
-            ${socialLinks.map((link) => `<div>${link.platform}: ${link.url}</div>`).join("")}
           </div>
         </section>` : ""}
       </aside>

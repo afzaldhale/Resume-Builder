@@ -40,13 +40,25 @@ const ResumePrint = () => {
     document.documentElement.removeAttribute("data-resume-print-ready");
     window.__RESUME_PRINT_READY__ = false;
 
+    const parseTemplateId = (rawTemplateId: unknown) => {
+      if (typeof rawTemplateId === "number") return rawTemplateId;
+      if (typeof rawTemplateId === "string") {
+        const numeric = Number(rawTemplateId);
+        if (Number.isInteger(numeric) && numeric > 0) return numeric;
+
+        const match = rawTemplateId.match(/template\s*(\d+)/i);
+        if (match) return Number(match[1]);
+      }
+      return NaN;
+    };
+
     const applyPayload = () => {
       const nextPayload = window.__RESUME_PRINT_PAYLOAD__;
       if (!nextPayload?.resumeData) {
         return;
       }
 
-      const requestedTemplateId = Number(nextPayload.templateId);
+      const requestedTemplateId = parseTemplateId(nextPayload.templateId);
       const safeTemplateId = getSafeTemplateId(requestedTemplateId);
 
       if (!isValidTemplateId(requestedTemplateId)) {

@@ -1,0 +1,61 @@
+dataset,theme,before_px,after_px,compact_level,overflow_before,overflow_after
+A,"Clean Single Column",1636,1631,6,false,false
+A,"Corporate Sidebar Blue",1584,1528,6,false,false
+A,"Colored Heading Corporate",1856,1851,6,false,false
+A,"Left Accent Teal",1636,1631,6,false,false
+A,"Premium Gray Sidebar",1505,1438,6,false,false
+A,"Professional Sidebar Teal",1458,1416,6,false,false
+A,"Muted Coral Corporate",1856,1851,6,false,false
+A,"Compact ATS Single",1589,1583,6,false,false
+A,"Premium Charcoal Sidebar",1465,1391,6,false,false
+A,"Blue Heading Corporate",1856,1851,6,false,false
+A,"Classic Two Column",1438,1364,6,false,false
+A,"Soft Green Corporate",1856,1851,6,false,false
+A,"Rose Sidebar Corporate",1507,1482,6,false,false
+A,"Minimal Left Accent",1636,1608,6,false,false
+A,"Corporate Clean",1488,1462,6,false,false
+B,"Clean Single Column",1570,1564,6,false,false
+B,"Corporate Sidebar Blue",1122,1122,0,true,true
+B,"Colored Heading Corporate",1810,1804,6,false,false
+B,"Left Accent Teal",1570,1564,6,false,false
+B,"Premium Gray Sidebar",1122,1122,0,true,true
+B,"Professional Sidebar Teal",1364,1336,6,false,false
+B,"Muted Coral Corporate",1810,1804,6,false,false
+B,"Compact ATS Single",1523,1517,6,false,false
+B,"Premium Charcoal Sidebar",1122,1122,0,true,true
+B,"Blue Heading Corporate",1810,1804,6,false,false
+B,"Classic Two Column",1122,1122,0,true,true
+B,"Soft Green Corporate",1810,1804,6,false,false
+B,"Rose Sidebar Corporate",1122,1122,0,true,true
+B,"Minimal Left Accent",1570,1542,6,false,false
+B,"Corporate Clean",1122,1122,0,true,true
+C,"Clean Single Column",1338,1333,6,false,false
+C,"Corporate Sidebar Blue",1264,1253,6,false,false
+C,"Colored Heading Corporate",1558,1553,6,false,false
+C,"Left Accent Teal",1338,1333,6,false,false
+C,"Premium Gray Sidebar",1144,1133,6,false,false
+C,"Professional Sidebar Teal",1215,1173,6,false,false
+C,"Muted Coral Corporate",1558,1553,6,false,false
+C,"Compact ATS Single",1354,1349,6,false,false
+C,"Premium Charcoal Sidebar",1145,1122,2,false,true
+C,"Blue Heading Corporate",1558,1553,6,false,false
+C,"Classic Two Column",1136,1122,2,false,true
+C,"Soft Green Corporate",1558,1553,6,false,false
+C,"Rose Sidebar Corporate",1247,1206,6,false,false
+C,"Minimal Left Accent",1323,1318,6,false,false
+C,"Corporate Clean",1127,1122,1,false,true
+D,"Clean Single Column",1285,1279,6,false,false
+D,"Corporate Sidebar Blue",1207,1195,6,false,false
+D,"Colored Heading Corporate",1505,1499,6,false,false
+D,"Left Accent Teal",1285,1279,6,false,false
+D,"Premium Gray Sidebar",1122,1122,0,true,true
+D,"Professional Sidebar Teal",1122,1122,0,true,true
+D,"Muted Coral Corporate",1505,1499,6,false,false
+D,"Compact ATS Single",1260,1254,6,false,false
+D,"Premium Charcoal Sidebar",1122,1122,0,true,true
+D,"Blue Heading Corporate",1505,1499,6,false,false
+D,"Classic Two Column",1122,1122,0,true,true
+D,"Soft Green Corporate",1505,1499,6,false,false
+D,"Rose Sidebar Corporate",1190,1163,6,false,false
+D,"Minimal Left Accent",1285,1279,6,false,false
+D,"Corporate Clean",1122,1122,0,true,true

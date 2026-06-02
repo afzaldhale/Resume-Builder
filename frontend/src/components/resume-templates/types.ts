@@ -94,6 +94,7 @@ export interface ResumeData {
   achievements?: string[];
   candidateType?: "experienced" | "fresher";
   theme?: ResumeThemeConfigData;
+  compactLevel?: number;
 
   /**
    * Extra flexibility

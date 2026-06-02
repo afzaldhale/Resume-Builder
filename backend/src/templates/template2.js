@@ -40,6 +40,10 @@ export function template2HTML(data) {
   .sidebar h1 {
     font-size: 28px;
     margin-bottom: 4px;
+    word-break: normal;
+    overflow-wrap: break-word;
+    hyphens: none;
+    word-spacing: normal;
   }
 
   .role {

@@ -62,6 +62,10 @@ export function template5HTML(data) {
     line-height: 1.08;
     font-weight: 800;
     letter-spacing: -0.5px;
+    word-break: normal;
+    overflow-wrap: break-word;
+    hyphens: none;
+    word-spacing: normal;
   }
 
   .role {
@@ -96,7 +100,7 @@ export function template5HTML(data) {
 
   .main-grid {
     display: grid;
-    grid-template-columns: 214px 1fr;
+    grid-template-columns: 230px 1fr;
     gap: 16px;
     margin-top: 14px;
     margin-left: 8px;
@@ -280,14 +284,6 @@ export function template5HTML(data) {
 
   <div class="main-grid">
     <aside>
-      ${summaryText ? `
-      <section class="section">
-        <h2 class="section-title">${summaryTitle}</h2>
-        <div class="rail-card summary-card" style="font-size:10.9px; line-height:1.45; color:#334155;">
-          ${summaryText}
-        </div>
-      </section>` : ""}
-
       ${data.skills?.length ? `
       <section class="section">
         <h2 class="section-title">Skills</h2>
@@ -387,14 +383,6 @@ export function template5HTML(data) {
                   </div>` : ""}
                 </div>
               `).join("")}
-            </div>
-          </div>` : ""}
-
-          ${socialLinks.length ? `
-          <div style="margin-bottom:10px;">
-            <h2 class="section-title">Links</h2>
-            <div class="main-card link-list">
-              ${socialLinks.map((link) => `<div>${link.platform}: ${link.url}</div>`).join("")}
             </div>
           </div>` : ""}
 

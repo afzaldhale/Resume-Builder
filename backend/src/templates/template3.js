@@ -61,6 +61,10 @@ export function template3HTML(data) {
   h1 {
     font-size: 26px;
     margin: 0 0 6px 0;
+    word-break: normal;
+    overflow-wrap: break-word;
+    hyphens: none;
+    word-spacing: normal;
   }
 
   h2 {

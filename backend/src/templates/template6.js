@@ -81,6 +81,10 @@ export function template6HTML(data) {
     line-height: 1.08;
     font-weight: 800;
     letter-spacing: -0.4px;
+    word-break: normal;
+    overflow-wrap: break-word;
+    hyphens: none;
+    word-spacing: normal;
   }
 
   .role {
@@ -277,14 +281,6 @@ export function template6HTML(data) {
 
     <div class="layout">
       <aside>
-        ${summaryText ? `
-        <section class="section">
-          <h2 class="section-title">${isFresher ? "Career Objective" : "Professional Summary"}</h2>
-          <div class="side-card summary-card" style="font-size:10.9px; line-height:1.45; color:#334155;">
-            ${summaryText}
-          </div>
-        </section>` : ""}
-
         ${safeData.skills.length ? `
         <section class="section">
           <h2 class="section-title">Skills</h2>
@@ -387,14 +383,6 @@ export function template6HTML(data) {
                     </div>` : ""}
                   </div>
                 `).join("")}
-              </div>
-            </div>` : ""}
-
-            ${safeData.socialLinks.length ? `
-            <div style="margin-bottom:10px;">
-              <h2 class="section-title">Links</h2>
-              <div class="main-card link-list">
-                ${safeData.socialLinks.map((link) => `<div>${link.platform}: ${link.url}</div>`).join("")}
               </div>
             </div>` : ""}
 

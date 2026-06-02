@@ -69,6 +69,10 @@ export function template11HTML(data) {
     font-size: 24px;
     font-weight: 700;
     letter-spacing: 0.05em;
+    word-break: normal;
+    overflow-wrap: break-word;
+    hyphens: none;
+    word-spacing: normal;
   }
 
   .role {

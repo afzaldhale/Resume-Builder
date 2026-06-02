@@ -5,6 +5,7 @@ export type FitRenderMode = "editor-preview" | "pdf" | "thumbnail";
 
 interface FitResumeDataOptions {
   renderMode?: FitRenderMode;
+  compactLevel?: number;
 }
 
 const BASE_MAX_ENTRIES = {
@@ -81,13 +82,13 @@ const getContentScore = (resumeData: ResumeData) => {
   return textScore + listScore;
 };
 
-const buildEntryLimits = (resumeData: ResumeData) => {
+const buildEntryLimits = (resumeData: ResumeData, compactLevel = 0) => {
   const limits = { ...BASE_MAX_ENTRIES };
   const score = getContentScore(resumeData);
   const resumeMode = resolveResumeMode(resumeData);
   const compactMode = getCompactMode(resumeData);
 
-  if (compactMode || score > 13) {
+  if (compactMode || score > 13 || compactLevel >= 1) {
     if (resumeMode === "experienced") {
       limits.experience = 3;
       limits.projects = 2;
@@ -95,7 +96,6 @@ const buildEntryLimits = (resumeData: ResumeData) => {
       limits.achievements = 3;
       limits.customSections = 1;
     } else {
-      // Fresher mode should prefer denser layout over dropping visible sections.
       limits.skills = 11;
       limits.customSections = 2;
     }
@@ -116,6 +116,57 @@ const buildEntryLimits = (resumeData: ResumeData) => {
     limits.references = 1;
   }
 
+  // Content density optimization for compact levels 3-6
+  if (compactLevel >= 3) {
+    limits.certifications = Math.min(limits.certifications, 2);
+    // Level 3: Experience bullet reduction + project description cap
+    limits.projects = Math.min(limits.projects, 2);
+  }
+
+  if (compactLevel >= 4) {
+    // Level 4: Project description reduction and duplicate tech suppression
+    limits.certifications = Math.min(limits.certifications, 2);
+  }
+
+  if (compactLevel >= 5) {
+    limits.hobbies = Math.min(limits.hobbies, 2);
+    limits.projects = Math.min(limits.projects, 2);
+    // Level 5: Education compression, hide GPA when critical
+    limits.education = Math.min(limits.education, 3);
+  }
+
+  if (compactLevel >= 6) {
+    limits.strengths = Math.min(limits.strengths, 3);
+    // Level 6: Keep only 2 most recent jobs
+    limits.experience = Math.min(limits.experience, 2);
+    // Level 6: Keep only 2 most recent education entries
+    limits.education = Math.min(limits.education, 2);
+    // Level 6: Hide custom sections (Additional Information)
+    limits.customSections = 0;
+    limits.projects = Math.min(limits.projects, 2);
+  }
+
+  if (compactLevel >= 7) {
+    // Level 7: Strength reduction
+    limits.strengths = Math.min(limits.strengths, 2);
+  }
+
+  if (compactLevel >= 8) {
+    // Level 8: Additional information removal
+    limits.customSections = 0;
+  }
+
+  if (compactLevel >= 9) {
+    // Level 9: Keep only latest 2 projects
+    limits.projects = Math.min(limits.projects, 2);
+  }
+
+  if (compactLevel >= 10) {
+    // Level 10: Keep latest 2 jobs and prioritize latest content
+    limits.experience = Math.min(limits.experience, 2);
+    limits.projects = Math.min(limits.projects, 2);
+  }
+
   return limits;
 };
 
@@ -127,79 +178,217 @@ const fitSimpleList = (items: string[] = [], max: number, maxLength: number) => 
   return fitted;
 };
 
+const fitSummary = (resumeData: ResumeData, compactLevel: number) => {
+  // Move summary truncation earlier: apply at compact level >= 2
+  const maxSummary = compactLevel >= 2 ? 180 : MAX_LENGTH.summary;
+  const text = resumeData.summary || resumeData.careerObjective || "";
+  const alternate = resumeData.careerObjective || resumeData.summary || "";
+
+  return {
+    summary: truncate(text, maxSummary),
+    careerObjective: truncate(alternate, maxSummary),
+  };
+};
+
 export const fitResumeData = (
   resumeData: ResumeData,
   options: FitResumeDataOptions = {}
 ): ResumeData => {
-  const { renderMode = "editor-preview" } = options;
+  const { renderMode = "editor-preview", compactLevel = 0 } = options;
+  const level = Math.max(0, Math.min(compactLevel, 10));
+  const summaryConfig = fitSummary(resumeData, level);
+  const limits = buildEntryLimits(resumeData, level);
 
-  if (renderMode !== "thumbnail") {
-    return {
-      ...resumeData,
-      strengths: resumeData.strengths || [],
-      hobbies: resumeData.hobbies || [],
-      achievements: resumeData.achievements || [],
-      references: resumeData.references || [],
-      customSections: resumeData.customSections || [],
-      socialLinks: resumeData.socialLinks || [],
-      theme: resumeData.theme,
+  // Education: Keep most recent entries, assuming latest-first data ordering
+  const educationToFit = resumeData.education.slice(0, limits.education);
+  const education = educationToFit.map((item, index, list) => {
+    const fitted = {
+      ...item,
+      degree: truncate(item.degree, 60),
+      school: truncate(item.school, 48),
     };
-  }
+    // Level 4+: Hide redundant labels
+    if (level >= 4) {
+      fitted.school = truncate(item.school, 48);
+    }
+    // Level 5+: Hide GPA if space is critical
+    if (level >= 5 && item.gpa) {
+      fitted.gpa = undefined;
+    }
+    if (resumeData.education.length > limits.education && index === list.length - 1) {
+      fitted._more = resumeData.education.length - limits.education;
+      fitted._field = "education";
+    }
+    return fitted;
+  });
 
-  const limits = buildEntryLimits(resumeData);
+  // Experience: Keep most recent jobs, assuming latest-first data ordering
+  const experienceToFit = resumeData.experience.slice(0, limits.experience);
+  const experience = experienceToFit.map((item, index, list) => {
+    let descriptionLines = 3;
+    let bulletMax = undefined;
+    let bulletCharMax = Infinity;
 
-  const education = resumeData.education.slice(0, limits.education).map((item, index, list) => ({
-    ...item,
-    degree: truncate(item.degree, 60),
-    school: truncate(item.school, 48),
-    ...(resumeData.education.length > limits.education && index === list.length - 1
-      ? { _more: resumeData.education.length - limits.education, _field: "education" }
-      : {}),
-  }));
+    // Level 3: Limit to 2 bullets per role
+    if (level >= 3) {
+      bulletMax = 2;
+    }
+    // Level 4: Limit each bullet to 120 characters
+    if (level >= 4) {
+      bulletCharMax = 120;
+    }
+    // Level 5: Limit role description block to max 3 rendered lines
+    if (level >= 5) {
+      descriptionLines = 3;
+    }
+    // Level 7: Limit to 1 bullet per role
+    if (level >= 7) {
+      bulletMax = 1;
+      descriptionLines = 1;
+    }
+    // Level 9: Limit to very short description
+    if (level >= 9) {
+      bulletMax = 1;
+      bulletCharMax = 80;
+      descriptionLines = 1;
+    }
 
-  const experience = resumeData.experience.slice(0, limits.experience).map((item, index, list) => ({
-    ...item,
-    role: truncate(item.role, 48),
-    company: truncate(item.company, 42),
-    description: truncateLines(item.description, limits.experience < 4 ? 2 : 3),
-    ...(resumeData.experience.length > limits.experience && index === list.length - 1
-      ? { _more: resumeData.experience.length - limits.experience, _field: "experience" }
-      : {}),
-  }));
+    const description = item.description || "";
+    let descLines = description
+      .split("\n")
+      .filter((line) => line.trim().length > 0);
 
-  const projects = resumeData.projects.slice(0, limits.projects).map((item, index, list) => ({
-    ...item,
-    name: truncate(item.name, 40),
-    description: truncate(item.description, MAX_LENGTH.projectDescription),
-    technologies: item.technologies
-      .slice(0, limits.projects < 3 ? 3 : 4)
-      .map((tech) => truncate(tech, MAX_LENGTH.technology)),
-    ...(resumeData.projects.length > limits.projects && index === list.length - 1
-      ? { _more: resumeData.projects.length - limits.projects, _field: "projects" }
-      : {}),
-  }));
+    // Apply bullet limit if specified
+    if (bulletMax !== undefined) {
+      descLines = descLines.slice(0, bulletMax);
+    }
+
+    // Apply character limit to each bullet
+    if (bulletCharMax !== Infinity) {
+      descLines = descLines.map((line) => truncate(line, bulletCharMax));
+    }
+
+    const finalDesc = truncateLines(descLines.join("\n"), descriptionLines);
+
+    const fitted = {
+      ...item,
+      role: truncate(item.role, 48),
+      company: truncate(item.company, 42),
+      description: finalDesc,
+    };
+
+    if (resumeData.experience.length > limits.experience && index === list.length - 1) {
+      fitted._more = resumeData.experience.length - limits.experience;
+      fitted._field = "experience";
+    }
+
+    return fitted;
+  });
+
+  // Projects: Keep most recent projects, assuming latest-first data ordering
+  const projectsToFit = resumeData.projects.slice(0, limits.projects);
+  const skillSet = new Set((resumeData.skills || []).map((skill) => skill.toLowerCase().trim()));
+  const projects = projectsToFit.map((item, index, list) => {
+    let descriptionMaxLength = MAX_LENGTH.projectDescription;
+    let projectDescLines = Infinity;
+
+    // Level 3: Limit project description to 160 chars
+    if (level >= 3) {
+      descriptionMaxLength = 160;
+    }
+    // Level 6: Limit project description to 2 rendered lines
+    if (level >= 6) {
+      projectDescLines = 2;
+    }
+    // Level 7: Limit to 1 line
+    if (level >= 7) {
+      descriptionMaxLength = 100;
+      projectDescLines = 1;
+    }
+    // Level 9: Hide description
+    if (level >= 9) {
+      descriptionMaxLength = 0;
+      projectDescLines = 0;
+    }
+
+    const duplicateTechLine =
+      level >= 4 &&
+      item.technologies.length > 0 &&
+      item.technologies.every((tech) => skillSet.has(tech.toLowerCase().trim()));
+
+    if (projectDescLines === 0 || descriptionMaxLength === 0) {
+      return {
+        ...item,
+        name: truncate(item.name, 40),
+        description: "",
+        technologies: duplicateTechLine ? [] : item.technologies.slice(0, level >= 9 ? 0 : 2).map((tech) => truncate(tech, MAX_LENGTH.technology)),
+        ...(resumeData.projects.length > limits.projects && index === list.length - 1
+          ? { _more: resumeData.projects.length - limits.projects, _field: "projects" }
+          : {}),
+      };
+    }
+
+    if (projectDescLines !== Infinity && level >= 6) {
+      const descLines = (item.description || "")
+        .split("\n")
+        .map((line) => truncate(line, MAX_LENGTH.line))
+        .filter(Boolean)
+        .slice(0, projectDescLines);
+      return {
+        ...item,
+        name: truncate(item.name, 40),
+        description: descLines.join("\n"),
+        technologies: duplicateTechLine
+          ? []
+          : item.technologies
+              .slice(0, level >= 9 ? 0 : level >= 7 ? 1 : 2)
+              .map((tech) => truncate(tech, MAX_LENGTH.technology)),
+        ...(resumeData.projects.length > limits.projects && index === list.length - 1
+          ? { _more: resumeData.projects.length - limits.projects, _field: "projects" }
+          : {}),
+      };
+    }
+
+    const fitted = {
+      ...item,
+      name: truncate(item.name, 40),
+      description: truncate(item.description, descriptionMaxLength),
+      technologies: duplicateTechLine
+        ? []
+        : item.technologies
+            .slice(0, limits.projects < 3 ? 2 : 3)
+            .map((tech) => truncate(tech, MAX_LENGTH.technology)),
+    };
+
+    if (resumeData.projects.length > limits.projects && index === list.length - 1) {
+      fitted._more = resumeData.projects.length - limits.projects;
+      fitted._field = "projects";
+    }
+
+    return fitted;
+  });
+
+  const fittedStrengths = fitSimpleList(resumeData.strengths || [], limits.strengths, MAX_LENGTH.line);
+  const fittedHobbies = fitSimpleList(resumeData.hobbies || [], limits.hobbies, MAX_LENGTH.hobby);
+  const fittedAchievements = level >= 7 ? [] : fitSimpleList(resumeData.achievements || [], limits.achievements, MAX_LENGTH.achievement);
+  const fittedReferences = fitSimpleList(resumeData.references || [], limits.references, MAX_LENGTH.reference);
 
   return {
     ...resumeData,
-    role: truncate(resumeData.role, MAX_LENGTH.role),
-    address: truncate(resumeData.address, MAX_LENGTH.address),
-    summary: truncate(resumeData.summary || resumeData.careerObjective || "", MAX_LENGTH.summary),
-    careerObjective: truncate(
-      resumeData.careerObjective || resumeData.summary || "",
-      MAX_LENGTH.summary
-    ),
+    ...summaryConfig,
     education,
     experience,
     projects,
     skills: fitSimpleList(resumeData.skills, limits.skills, MAX_LENGTH.skill),
-    certifications: resumeData.certifications,
-    languages: resumeData.languages,
-    strengths: resumeData.strengths || [],
-    hobbies: resumeData.hobbies || [],
-    achievements: resumeData.achievements || [],
-    references: (resumeData.references || []).slice(0, limits.references),
-    customSections: resumeData.customSections || [],
+    certifications: resumeData.certifications.slice(0, limits.certifications),
+    languages: resumeData.languages.slice(0, limits.languages),
+    strengths: fittedStrengths,
+    hobbies: fittedHobbies,
+    achievements: fittedAchievements,
+    references: fittedReferences,
+    customSections: resumeData.customSections?.slice(0, limits.customSections) || [],
     socialLinks: resumeData.socialLinks,
     theme: resumeData.theme,
+    compactLevel: level,
   };
 };
