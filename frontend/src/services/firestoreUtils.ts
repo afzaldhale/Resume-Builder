@@ -1,9 +1,10 @@
 // Utility functions for Firestore operations and data management
+import { ResumeData } from '@/components/resume-templates/types';
 
 /**
  * Debounce function for auto-save
  */
-export const debounce = <T extends (...args: any[]) => void>(
+export const debounce = <T extends (...args: unknown[]) => void>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
@@ -20,7 +21,7 @@ export const debounce = <T extends (...args: any[]) => void>(
 /**
  * Format Firestore timestamp to readable date
  */
-export const formatFirestoreDate = (timestamp: any): string => {
+export const formatFirestoreDate = (timestamp: unknown): string => {
   if (!timestamp) return 'N/A';
 
   let date: Date;
@@ -43,7 +44,7 @@ export const formatFirestoreDate = (timestamp: any): string => {
 /**
  * Get relative time (e.g., "2 hours ago")
  */
-export const getRelativeTime = (timestamp: any): string => {
+export const getRelativeTime = (timestamp: unknown): string => {
   if (!timestamp) return 'N/A';
 
   let date: Date;
@@ -72,7 +73,7 @@ export const getRelativeTime = (timestamp: any): string => {
 /**
  * Validate resume data structure
  */
-export const validateResumeData = (data: any, candidateType: 'fresher' | 'experienced'): string[] => {
+export const validateResumeData = (data: ResumeData, candidateType: 'fresher' | 'experienced'): string[] => {
   const errors: string[] = [];
 
   // Required fields for all
@@ -108,7 +109,7 @@ export const validateResumeData = (data: any, candidateType: 'fresher' | 'experi
 /**
  * Sanitize resume data for storage
  */
-export const sanitizeResumeData = (data: any): any => {
+export const sanitizeResumeData = (data: ResumeData): ResumeData => {
   return {
     ...data,
     fullName: data.fullName?.trim() || '',
@@ -116,30 +117,26 @@ export const sanitizeResumeData = (data: any): any => {
     phone: data.phone?.trim() || '',
     role: data.role?.trim() || '',
     address: data.address?.trim() || '',
-    professionalSummary: data.professionalSummary?.trim() || '',
-    careerObjective: data.careerObjective?.trim() || '',
-    additionalInfo: data.additionalInfo?.trim() || '',
-    skills: Array.isArray(data.skills) ? data.skills.filter((s: any) => s.name?.trim()) : [],
+    summary: data.summary?.trim() || undefined,
+    careerObjective: data.careerObjective?.trim() || undefined,
+    skills: Array.isArray(data.skills) ? data.skills.filter((s: string) => s?.trim()) : [],
     education: Array.isArray(data.education)
-      ? data.education.filter((e: any) => e.institution?.trim() && e.degree?.trim())
+      ? data.education.filter((e) => e.school?.trim() && e.degree?.trim())
       : [],
-    experience: Array.isArray(data.workExperience)
-      ? data.workExperience.filter((e: any) => e.company?.trim() && e.position?.trim())
-      : [],
-    internships: Array.isArray(data.internships)
-      ? data.internships.filter((i: any) => i.company?.trim() && i.position?.trim())
+    experience: Array.isArray(data.experience)
+      ? data.experience.filter((e) => e.company?.trim() && e.role?.trim())
       : [],
     projects: Array.isArray(data.projects)
-      ? data.projects.filter((p: any) => p.name?.trim())
+      ? data.projects.filter((p) => p.name?.trim())
       : [],
     certifications: Array.isArray(data.certifications)
-      ? data.certifications.filter((c: any) => c.name?.trim())
+      ? data.certifications.filter((c) => c.name?.trim())
       : [],
     languages: Array.isArray(data.languages)
-      ? data.languages.filter((l: any) => l.language?.trim())
+      ? data.languages.filter((l) => l.language?.trim())
       : [],
     socialLinks: Array.isArray(data.socialLinks)
-      ? data.socialLinks.filter((s: any) => s.platform?.trim() && s.url?.trim())
+      ? data.socialLinks.filter((s) => s.platform?.trim() && s.url?.trim())
       : [],
   };
 };
@@ -183,7 +180,7 @@ export const createEmptyResume = (candidateType: 'fresher' | 'experienced') => {
 /**
  * Calculate resume completeness percentage
  */
-export const calculateResumeCompleteness = (data: any, candidateType: 'fresher' | 'experienced'): number => {
+export const calculateResumeCompleteness = (data: ResumeData, candidateType: 'fresher' | 'experienced'): number => {
   let filledFields = 0;
   let totalFields = 10; // Base fields
 

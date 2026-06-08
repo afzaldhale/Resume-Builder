@@ -22,8 +22,6 @@ const ContactUsPage = () => {
         
         // In a real application, you would send this data to an API endpoint.
         // For now, we'll just simulate a successful submission.
-        
-        console.log('Form Submitted:', formData);
         setStatus('success');
         
         // Clear form after submission

@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { Timestamp } from 'firebase/firestore';
+import { ResumeData } from '@/components/resume-templates/types';
 
 export interface Resume {
   id: string;
   title: string;
   templateId: number;
-  resumeData: any;
+  resumeData: ResumeData;
   createdAt: Timestamp | Date;
   updatedAt: Timestamp | Date;
   isPublished: boolean;

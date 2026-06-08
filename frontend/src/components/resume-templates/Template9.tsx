@@ -7,7 +7,7 @@ interface Template9Props {
 }
 
 const Template9: React.FC<Template9Props> = ({ data }) => {
-  const { isFresher, summaryText, summaryTitle } = getSummaryConfig(data);
+  const { summaryText, summaryTitle } = getSummaryConfig(data);
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white w-[794px] min-h-[1123px] mx-auto relative overflow-hidden font-sans">

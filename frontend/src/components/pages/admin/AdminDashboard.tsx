@@ -3,7 +3,7 @@ import AdminSidebar from "../../AdminSidebar";
 import { Card } from "../../ui/card";
 import { Users, FileText, Clock, CheckCircle, Eye, EyeOff } from "lucide-react";
 import api from "../../../api/axios";
-import { AxiosResponse } from "axios";
+import { AxiosResponse, AxiosError } from "axios";
 import { toast } from "sonner";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
@@ -128,8 +128,8 @@ const AdminDashboard = () => {
         setNewUserEmail("");
         setNewUserPassword("");
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to create user");
+    } catch (error: AxiosError) {
+      toast.error((error as AxiosError).response?.data?.message || "Failed to create user");
     } finally {
       setCreatingUser(false);
     }

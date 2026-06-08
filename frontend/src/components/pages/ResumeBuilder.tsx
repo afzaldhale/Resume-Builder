@@ -18,7 +18,7 @@ import { API_BASE_URL } from "@/lib/apiBaseUrl";
 import UserSidebar from "@/components/UserSidebar";
 import EmptyTemplate from "@/components/resume-templates/EmptyTemplate";
 import ResumeDocument from "@/components/resume-templates/ResumeDocument";
-import { A4_HEIGHT_PX, A4_WIDTH_PX } from "@/constants/resumeDesignSystem";
+
 import {
   CertificationItem,
   LanguageItem,
@@ -410,7 +410,6 @@ const ResumeBuilder = () => {
 
   const deferredTemplateData = useDeferredValue(templateData);
   const deferredSelectedTemplate = useDeferredValue(selectedTemplate);
-  const previewWidth = A4_WIDTH_PX * PREVIEW_SCALE;
   const selectedTemplateMeta = getTemplateById(selectedTemplate);
   const themeConfig = getTemplateThemeConfig(selectedTemplate);
   const mergedThemeColors = mergeThemeColors(selectedTemplate, themeColors);

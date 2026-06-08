@@ -2,6 +2,7 @@ import { useCallback, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { useResumeStore } from '@/store/resumeStore';
 import { resumeService, Resume } from '@/services/resumeService';
+import { ResumeData } from '@/components/resume-templates/types';
 import { toast } from 'sonner';
 
 /**
@@ -55,7 +56,7 @@ export const useResume = () => {
    * Create new resume
    */
   const createResume = useCallback(
-    async (resumeData: any, templateId: number, title: string = 'My Resume') => {
+    async (resumeData: ResumeData, templateId: number, title: string = 'My Resume') => {
       if (!user) {
         toast.error('You must be logged in');
         return null;
@@ -124,7 +125,7 @@ export const useResume = () => {
    * Auto-save resume (debounced)
    */
   const autoSave = useCallback(
-    async (resumeId: string, resumeData: any) => {
+    async (resumeId: string, resumeData: ResumeData) => {
       if (!user) return;
 
       try {

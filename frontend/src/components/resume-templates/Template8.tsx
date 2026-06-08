@@ -8,7 +8,7 @@ interface Template8Props {
 }
 
 const Template8: React.FC<Template8Props> = ({ data }) => {
-  const { isFresher, summaryText, summaryTitle } = getSummaryConfig(data);
+  const { summaryText, summaryTitle } = getSummaryConfig(data);
 
   return (
     <div className="w-[794px] mx-auto bg-slate-50 text-gray-900 font-sans border border-gray-300">

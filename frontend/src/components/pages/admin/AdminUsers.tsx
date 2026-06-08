@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import api from "../../../api/axios";
+import { AxiosError } from "axios";
 
 interface User {
   id: number;
@@ -70,8 +71,8 @@ const AdminUsers = () => {
         setUsers(prev => prev.filter(user => user.id !== id));
         toast.success("User deleted successfully");
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to delete user");
+    } catch (error: AxiosError) {
+      toast.error((error as AxiosError).response?.data?.message || "Failed to delete user");
     } finally {
       setDeletingId(null);
     }

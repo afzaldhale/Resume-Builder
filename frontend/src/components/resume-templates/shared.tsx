@@ -185,13 +185,16 @@ const getSectionLabel = (key: SectionKey, summaryTitle: string) => {
 export const ResumeSidebarContactCard = ({
   data,
   theme,
-  compactMode = false,
+  _compactMode = false,
 }: {
   data: ResumeData;
   theme: ResumeTemplateTheme;
-  compactMode?: boolean;
+  compactMode?: boolean; // kept for API compatibility
 }) => {
   const items = getContactItems(data);
+
+  // mark API-compatible but unused param as used to satisfy lint
+  void _compactMode;
 
   if (items.length === 0) return null;
 
@@ -389,7 +392,7 @@ export const ResumeContactRow = ({
   items,
   align = "left",
   color,
-  compactMode = false,
+  compactMode: _compactMode = false,
   densityMode = "comfortable",
 }: {
   items: ContactItem[];
@@ -398,8 +401,9 @@ export const ResumeContactRow = ({
   compactMode?: boolean;
   densityMode?: "comfortable" | "compact" | "ultra-compact";
 }) => {
-  const baseSize = compactMode ? 10.6 : 11;
-  const densityScale = densityMode === "compact" ? 0.94 : densityMode === "ultra-compact" ? 0.88 : 1;
+  // mark unused compactMode param
+  void _compactMode;
+
   const gapX = densityMode === "ultra-compact" ? 10 : densityMode === "compact" ? 12 : 14;
   const gapY = densityMode === "ultra-compact" ? 4 : densityMode === "compact" ? 6 : 8;
 
@@ -854,7 +858,7 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
       vert = Math.max(minPadding, Math.min(40, vert));
       horiz = Math.max(minPadding, Math.min(40, horiz));
       return `${vert}px ${horiz}px`;
-    } catch (e) {
+    } catch {
       return "36px 32px";
     }
   };

@@ -28,34 +28,7 @@ const Template5: React.FC<Template5Props> = ({ data }) => {
     return icons[platform] || <Globe size={16} />;
   };
 
-  // Get timeline dot color based on section
-  const getTimelineColor = (section: string): string => {
-    const colors: Record<string, string> = {
-      summary: "bg-blue-500",
-      experience: "bg-green-500",
-      education: "bg-purple-500",
-      skills: "bg-amber-500",
-      projects: "bg-red-500",
-      certifications: "bg-teal-500",
-      languages: "bg-indigo-500",
-      social: "bg-pink-500"
-    };
-    return colors[section] || "bg-blue-500";
-  };
-
-  // Get section icon
-  const getSectionIcon = (section: string): React.ReactNode => {
-    const icons: Record<string, React.ReactNode> = {
-      summary: <Briefcase size={18} />,
-      experience: <Calendar size={18} />,
-      education: <GraduationCap size={18} />,
-      skills: <Star size={18} />,
-      projects: <Code size={18} />,
-      certifications: <Award size={18} />,
-      languages: <Languages size={18} />
-    };
-    return icons[section] || <ChevronRight size={18} />;
-  };
+  // Timeline helpers are defined per-section inside `TimelineSection`.
 
   return (
     <div className="bg-white text-gray-800 w-[794px] min-h-[1123px] shadow-2xl mx-auto relative overflow-hidden font-sans">

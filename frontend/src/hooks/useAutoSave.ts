@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { debounce } from '@/services/firestoreUtils';
+import { ResumeData } from '@/components/resume-templates/types';
 import { useResume } from './useResume';
 
 /**
@@ -10,11 +11,11 @@ import { useResume } from './useResume';
  */
 export const useAutoSave = (
   resumeId: string | null | undefined,
-  resumeData: any,
+  resumeData: ResumeData | null | undefined,
   delay: number = 2000
 ) => {
   const { autoSave } = useResume();
-  const debouncedAutoSaveRef = useRef<any>(null);
+  const debouncedAutoSaveRef = useRef<((id: string, data: ResumeData) => void) | null>(null);
 
   useEffect(() => {
     if (!resumeId || !resumeData) return;
@@ -22,7 +23,7 @@ export const useAutoSave = (
     // Create debounced auto-save on first mount
     if (!debouncedAutoSaveRef.current) {
       debouncedAutoSaveRef.current = debounce(
-        async (id: string, data: any) => {
+        async (id: string, data: ResumeData) => {
           await autoSave(id, data);
         },
         delay
@@ -46,8 +47,7 @@ export const useAutoSave = (
  * Useful for collaborative editing or syncing across tabs
  */
 export const useResumeListener = (resumeId: string | null | undefined, userId: string | null | undefined) => {
-  const { setCurrentResume } = useResumeStore?.() || {};
-
+  // Placeholder: real-time listener not implemented yet.
   useEffect(() => {
     if (!resumeId || !userId) return;
 

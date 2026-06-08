@@ -1,10 +1,7 @@
 import React from "react";
 import { ResumeData } from "./types";
 import { getSummaryConfig } from "./templatePolicy";
-import { 
-  Mail, Phone, MapPin, Briefcase, GraduationCap, 
-  Code, Award, Languages, User, ChevronRight
-} from "lucide-react";
+import { Mail, Phone, MapPin, Briefcase, User, ChevronRight } from "lucide-react";
 
 interface Template6Props {
   data: ResumeData;

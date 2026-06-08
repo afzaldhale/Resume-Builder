@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ClipboardCheck, CircleCheck, AlertTriangle, XSquare, FileText } from "lucide-react";
+import { CircleCheck, AlertTriangle, XSquare, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ResumeDocument from "@/components/resume-templates/ResumeDocument";
 import { STRESS_RESUME_DATASETS } from "@/components/resume-templates/stressDatasets";

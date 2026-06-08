@@ -67,12 +67,7 @@ export const generateResumePDF = async (resumeData, templateId, options = {}) =>
   const renderUrl = getPrintRenderUrl();
 
   try {
-    console.log("\nPDF Generation Started");
-    console.log(`   Template ID requested: ${templateId}`);
-    console.log(`   Template ID rendered: ${safeTemplateId}`);
-    console.log(`   Template Name: ${TEMPLATE_NAMES[safeTemplateId]}`);
-    console.log(`   Frontend print route: ${renderUrl}`);
-    console.log(`   Debug Mode: ${debugMode}`);
+    // Reduced logging for production: only log errors and essential warnings.
 
     if (safeTemplateId !== Number.parseInt(templateId, 10)) {
       console.warn(
@@ -103,9 +98,10 @@ export const generateResumePDF = async (resumeData, templateId, options = {}) =>
     const page = await browser.newPage();
 
     if (debugMode) {
+      // In debug mode, surface browser console messages to server logs for investigation
       page.on("console", (msg) => {
         try {
-          console.log("[puppeteer]", msg.type(), msg.text());
+          console.debug("[puppeteer]", msg.type(), msg.text());
         } catch (e) {}
       });
       page.on("pageerror", (err) => console.error("[puppeteer pageerror]", err.message));
@@ -151,7 +147,7 @@ export const generateResumePDF = async (resumeData, templateId, options = {}) =>
     const fontsReadyHandle = await page.evaluateHandle("document.fonts.ready");
     await fontsReadyHandle.jsonValue();
 
-    console.log("   Generating PDF...");
+    // Generating PDF
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,
@@ -165,7 +161,7 @@ export const generateResumePDF = async (resumeData, templateId, options = {}) =>
       scale: 1,
     });
 
-    console.log(`PDF generated successfully (${pdfBuffer.length} bytes)\n`);
+    // PDF generated successfully
     return pdfBuffer;
   } catch (error) {
     console.error("\nPDF Generation Error:", error.message);

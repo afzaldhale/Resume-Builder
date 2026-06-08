@@ -37,7 +37,6 @@ const getHeadingStyle = (
 ) => {
   const accentColor = theme.palette.accent || theme.palette.headingText || theme.palette.text;
   const headingColor = theme.palette.headingText || (sidebar ? theme.palette.sidebarText : theme.palette.text);
-  const textColor = sidebar ? theme.palette.sidebarText || theme.palette.text : theme.palette.text;
 
   // compute horizontal page padding (default 48px) from theme.pagePadding if available
   let horizontalPadding = 48;
@@ -47,7 +46,7 @@ const getHeadingStyle = (
       if (parts.length === 2) horizontalPadding = parseInt(parts[1]) || horizontalPadding;
       else if (parts.length === 4) horizontalPadding = parseInt(parts[1]) || parseInt(parts[3]) || horizontalPadding;
     }
-  } catch (e) {
+  } catch {
     // ignore
   }
 
@@ -110,6 +109,9 @@ export const ResumeSection = ({
   children,
 }: ResumeSectionProps) => {
   if (!children) return null;
+
+  // mark compactMode param as intentionally unused to satisfy lint
+  void compactMode;
 
   const variant = resolveHeadingVariant(theme);
   const headingStyles = getHeadingStyle(theme, sidebar, variant);

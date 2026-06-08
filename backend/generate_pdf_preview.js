@@ -7,6 +7,6 @@ import path from 'path';
   const file = path.resolve('preview_template3.html');
   await page.goto(`file://${file}`, { waitUntil: 'networkidle0' });
   await page.pdf({ path: 'preview_template3.pdf', format: 'A4', printBackground: true });
-  console.log('Wrote preview_template3.pdf');
+  if (process.env.DEBUG_PREVIEW === 'true') console.log('Wrote preview_template3.pdf');
   await browser.close();
 })();

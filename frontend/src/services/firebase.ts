@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, FirestoreError } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
@@ -24,8 +24,7 @@ if (!firebaseConfig.apiKey) {
     appId: !!firebaseConfig.appId,
   });
 } else {
-  console.log('✅ Firebase initialized successfully');
-  console.log('🔗 Firebase project:', firebaseConfig.projectId);
+  // Production: avoid noisy console output, use error logging only
 }
 
 export const app = initializeApp(firebaseConfig);
@@ -38,13 +37,14 @@ const testFirestoreConnection = async () => {
   try {
     // Try to get a non-existent document to test connectivity
     await getDoc(doc(db, '_test', 'connection'));
-    console.log('✅ Firestore connection successful');
-  } catch (error: any) {
-    if (error.code === 'unavailable' || error.message.includes('offline')) {
+    // Successful connectivity - no noisy console output in production
+  } catch (error) {
+    const err = error as FirestoreError;
+    if (err.code === 'unavailable' || err.message.includes('offline')) {
       console.error('❌ Firestore connection failed - check security rules and network');
       console.error('🔧 You may need to deploy Firestore security rules');
     } else {
-      console.log('✅ Firestore initialized (test query completed)');
+      // Firestore initialized; suppress informational logs in production
     }
   }
 };

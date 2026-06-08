@@ -96,7 +96,7 @@ const AdminRequests = () => {
       updateRequestStatus(id, "approved");
       await api.put(`/api/admin/requests/${id}/approve`);
       toast.success("Resume approved");
-    } catch (error) {
+    } catch {
       toast.error("Approval failed");
       fetchRequests(); // rollback safety
     }
@@ -111,7 +111,7 @@ const AdminRequests = () => {
       updateRequestStatus(id, "rejected");
       await api.put(`/api/admin/requests/${id}/reject`);
       toast.success("Resume rejected");
-    } catch (error) {
+    } catch {
       toast.error("Rejection failed");
       fetchRequests(); // rollback safety
     }

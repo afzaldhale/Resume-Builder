@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FileText, Plus, Edit, Trash2, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Timestamp } from "firebase/firestore";
 import { toast } from "sonner";
 import { useAuthContext } from "@/context/AuthContext";
 import { resumeService } from "@/services/resumeService";
@@ -13,8 +14,8 @@ interface ResumeItem {
   title: string;
   templateId: number;
   isPublished: boolean;
-  createdAt: any;
-  updatedAt: any;
+  createdAt: Date | Timestamp;
+  updatedAt: Date | Timestamp;
 }
 
 const MyResumes = () => {
@@ -57,9 +58,9 @@ const MyResumes = () => {
     }
   };
 
-  const formatDate = (date: any) => {
+  const formatDate = (date: Date | Timestamp | null | undefined): string => {
     if (!date) return "N/A";
-    const d = date.toDate ? date.toDate() : new Date(date);
+    const d = 'toDate' in date ? (date as Timestamp).toDate() : new Date(date as Date);
     return d.toLocaleDateString();
   };
 

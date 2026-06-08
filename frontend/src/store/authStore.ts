@@ -31,7 +31,7 @@ interface AuthStore {
   changeCandidateType: (candidateType: 'fresher' | 'experienced') => void;
 }
 
-export const useAuthStore = create<AuthStore>((set, get) => ({
+export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   profile: null,
   loading: true,
@@ -47,10 +47,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     })),
 
   setProfile: (profile) =>
-    set((state) => ({
+    set({
       profile,
       isAdmin: profile?.role === 'admin' ? true : false,
-    })),
+    }),
 
   setLoading: (loading) => set({ loading }),
 

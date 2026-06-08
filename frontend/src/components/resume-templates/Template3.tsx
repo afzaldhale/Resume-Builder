@@ -1,18 +1,14 @@
 import React from "react";
 import { ResumeData } from "./types";
 import { getSummaryConfig } from "./templatePolicy";
-import { 
-  Mail, Phone, MapPin, Linkedin, Github, Globe, 
-  Briefcase, GraduationCap, Award, Languages, Star,
-  Calendar, Code, CheckCircle, ExternalLink
-} from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Github, Globe, Calendar, CheckCircle, ExternalLink } from "lucide-react";
 
 interface Template3Props {
   data: ResumeData;
 }
 
 const Template3: React.FC<Template3Props> = ({ data }) => {
-  const { isFresher, summaryText, summaryTitle } = getSummaryConfig(data);
+  const { summaryText, summaryTitle } = getSummaryConfig(data);
 
   // Icon mapping for social platforms
   const getSocialIcon = (platform: string) => {

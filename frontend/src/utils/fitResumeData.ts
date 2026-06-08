@@ -32,6 +32,6 @@ export const fitResumeData = (
     customSections: Array.isArray(resumeData.customSections) ? [...resumeData.customSections] : [],
     socialLinks: Array.isArray(resumeData.socialLinks) ? [...resumeData.socialLinks] : [],
     theme: resumeData.theme,
-    compactLevel: 0,
+    compactLevel: _options.compactLevel ?? 0,
   } as ResumeData;
 };

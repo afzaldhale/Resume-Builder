@@ -1,10 +1,11 @@
 import api from '@/api/axios';
+import { ResumeData } from '@/components/resume-templates/types';
 
 export interface Resume {
   id: string;
   title: string;
   templateId: number;
-  resumeData: any;
+  resumeData: ResumeData;
   isPublished: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -14,7 +15,7 @@ export interface Resume {
 class ResumeService {
   async createResume(
     userId: string,
-    resumeData: any,
+    resumeData: ResumeData,
     templateId: number,
     title: string = 'My Resume'
   ): Promise<{ id: string }> {
@@ -37,18 +38,18 @@ class ResumeService {
       const response = await api.get('/api/resumes/mine');
       const resumes = response.data.resumes || [];
 
-      return resumes.slice(0, limitCount).map((resume: any) => ({
+      return resumes.slice(0, limitCount).map((resume: Record<string, unknown>) => ({
         id: String(resume.id),
-        title: resume.title,
-        templateId: resume.template_id ?? resume.templateId,
+        title: (resume.title as string) || '',
+        templateId: ((resume.template_id as number) ?? (resume.templateId as number)) || 1,
         resumeData:
-          resume.resume_data || resume.resumeData || {},
-        status: resume.status || 'draft',
-        isPublished: resume.status === 'approved',
-        createdAt: resume.created_at ? new Date(resume.created_at) : new Date(),
-        updatedAt: resume.updated_at
-          ? new Date(resume.updated_at)
-          : new Date(resume.created_at || Date.now()),
+          (resume.resume_data as ResumeData) || (resume.resumeData as ResumeData) || {},
+        status: (resume.status as string) || 'draft',
+        isPublished: (resume.status as string) === 'approved',
+        createdAt: (resume.created_at as string) ? new Date(resume.created_at as string) : new Date(),
+        updatedAt: (resume.updated_at as string)
+          ? new Date(resume.updated_at as string)
+          : new Date((resume.created_at as string) || Date.now()),
       }));
     } catch (error) {
       console.error('Get my resumes error:', error);
@@ -109,7 +110,7 @@ class ResumeService {
     }
   }
 
-  async autoSaveResume(userId: string, resumeId: string, resumeData: any): Promise<void> {
+  async autoSaveResume(userId: string, resumeId: string, resumeData: ResumeData): Promise<void> {
     try {
       await api.put(`/api/resumes/${resumeId}`, {
         resumeData,

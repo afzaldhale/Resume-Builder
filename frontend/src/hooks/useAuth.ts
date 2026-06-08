@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/services/firebase';
 import { useAuthStore } from '@/store/authStore';
-import { authService } from '@/services/authService';
+import { authService, UserProfile } from '@/services/authService';
 
 /**
  * Hook for Firebase authentication state management
@@ -20,7 +20,7 @@ export const useAuth = () => {
         if (firebaseUser) {
           setUser(firebaseUser);
           const userProfile = await authService.getUserProfile(firebaseUser.uid);
-          setProfile(userProfile as any);
+          setProfile(userProfile as UserProfile);
         } else {
           setUser(null);
           setProfile(null);

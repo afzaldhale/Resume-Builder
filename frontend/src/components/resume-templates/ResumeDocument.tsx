@@ -142,63 +142,6 @@ const ResumeDocumentComponent = ({
       return;
     }
 
-    const buildHierarchy = (element: HTMLElement, depth: number) => {
-      if (depth <= 0) return null;
-      return {
-        tag: element.tagName.toLowerCase(),
-        classes: element.className || null,
-        childCount: element.children.length,
-        children: Array.from(element.children).map((child) => {
-          if (!(child instanceof HTMLElement)) return null;
-          return buildHierarchy(child, depth - 1);
-        }).filter(Boolean),
-      };
-    };
-
-    const getDomPath = (node: HTMLElement | null) => {
-      if (!node) return null;
-      const parts: string[] = [];
-      let current: HTMLElement | null = node;
-      while (current && current !== document.body) {
-        const selector = [current.tagName.toLowerCase()]
-          .concat(current.id ? [`#${current.id}`] : [])
-          .concat(current.className ? Array.from(current.classList).map((name) => `.${name}`) : [])
-          .join("");
-        parts.unshift(selector);
-        current = current.parentElement;
-      }
-      return parts.join(" > ");
-    };
-
-    const describeElement = (element: HTMLElement | null) => {
-      if (!element) return null;
-      return {
-        tag: element.tagName.toLowerCase(),
-        id: element.id || null,
-        classes: element.className || null,
-        path: getDomPath(element),
-        childCount: element.children.length,
-      };
-    };
-
-    const preHeaderCount = document.querySelectorAll("header").length;
-    const preSectionCount = document.querySelectorAll(".resume-section").length;
-    const preHierarchy = buildHierarchy(pageElement, 3);
-
-    if (typeof window !== "undefined") {
-      const runtimeWindow = window as unknown as Record<string, any>;
-      runtimeWindow.__PRE_PAGINATION_DOM_TRUTH__ = {
-        templateId: safeTemplateId,
-        beforePagination: {
-          outerHTML: pageElement.outerHTML,
-          headerCount: preHeaderCount,
-          sectionCount: preSectionCount,
-          childHierarchy: preHierarchy,
-        },
-        afterPagination: null,
-      };
-    }
-
     // Pagination-first splitting: measure and split into multiple .page containers.
     // Run once per render change to avoid infinite loops.
     const scrollHeight = pageElement.scrollHeight;
@@ -252,44 +195,9 @@ const ResumeDocumentComponent = ({
       if (headerElement) {
         headerNodes.push(headerElement);
       }
-      const headerDiscovery = {
-        querySelectorHeader: Boolean(headerElement),
-        headerPath: headerElement ? getDomPath(headerElement) : null,
-        pageRootToHeaderPath: headerElement
-          ? `${getDomPath(pageRoot)} > ${getDomPath(headerElement)}`
-          : null,
-        pageRootToFirstSectionPath: sectionElements[0]
-          ? `${getDomPath(pageRoot)} > ${getDomPath(sectionElements[0])}`
-          : null,
-        insideContentWrapper: Boolean(
-          headerElement && contentWrapper.contains(headerElement)
-        ),
-        directChildOfContentWrapper:
-          Boolean(headerElement && headerElement.parentElement === contentWrapper),
-        previousElementSiblingTraversal: Boolean(
-          headerElement && headerNodes.some((node) => node === headerElement || node.contains(headerElement))
-        ),
-      };
+      
 
-      const paginationInput = {
-        pageRoot: describeElement(pageRoot),
-        contentWrapper: describeElement(contentWrapper),
-        contentWrapperChildren: Array.from(contentWrapper.children).map((child) => {
-          if (!(child instanceof HTMLElement)) return null;
-          return describeElement(child);
-        }).filter(Boolean),
-        headerElement: headerElement ? describeElement(headerElement) : null,
-        firstSection: sectionElements[0] ? describeElement(sectionElements[0]) : null,
-        headerNodes: headerNodes.map((node) => describeElement(node)),
-        headerDiscovery,
-      };
-
-      if (typeof window !== "undefined") {
-        const runtimeWindow = window as unknown as Record<string, any>;
-        if (runtimeWindow.__PRE_PAGINATION_DOM_TRUTH__) {
-          runtimeWindow.__PRE_PAGINATION_DOM_TRUTH__.paginationInput = paginationInput;
-        }
-      }
+      // pagination instrumentation removed for production
 
       const pageTemplate = pageRoot.cloneNode(false) as HTMLElement;
       const pageBodyTemplate = contentWrapper.cloneNode(false) as HTMLElement;
@@ -491,15 +399,7 @@ const ResumeDocumentComponent = ({
         }
       });
 
-      if (typeof window !== "undefined") {
-        const runtimeWindow = window as unknown as Record<string, any>;
-        if (runtimeWindow.__PRE_PAGINATION_DOM_TRUTH__) {
-          runtimeWindow.__PRE_PAGINATION_DOM_TRUTH__.afterPagination = {
-            headerCount: document.querySelectorAll("header").length,
-            sectionCount: document.querySelectorAll(".resume-section").length,
-          };
-        }
-      }
+      // post-pagination instrumentation removed for production
     }
   }, [renderMode, fittedData, compactLevel]);
 
