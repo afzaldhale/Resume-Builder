@@ -148,7 +148,6 @@ export function template1HTML(data) {
           ${exp.description
             .split("\\n")
             .filter(Boolean)
-            .slice(0, 3)
             .map(line => `<li>${line}</li>`)
             .join("")}
         </ul>` : ""}

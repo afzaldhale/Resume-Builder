@@ -58,6 +58,7 @@ export interface ResumeTemplateTheme {
   mainPadding?: string;
   layoutType?: "single-column" | "sidebar";
   headingVariant?: "full-width-bar" | "label-bar" | "underline" | "plain";
+  headingInset?: boolean;
   typographyScale?: number;
   spacingScale?: number;
   headerDivider?: boolean;
@@ -373,7 +374,7 @@ export const ResumePage = ({
       background: theme.palette.page,
       color: theme.palette.text,
       position: "relative",
-      overflow: "hidden",
+      overflow: "visible",
       border: `1px solid ${theme.palette.border}`,
       fontFamily: theme.fontFamily || "var(--resume-font-family, Inter, Arial, Helvetica, sans-serif)",
       margin: "0 auto",
@@ -637,6 +638,7 @@ const ResumePageStyles = () => (
     }
 
     .resume-page,
+    .resume-page,
     .resume-page * {
       box-sizing: border-box;
     }
@@ -644,7 +646,9 @@ const ResumePageStyles = () => (
     .resume-page {
       width: var(--resume-page-width);
       height: var(--resume-page-height);
-      overflow: hidden;
+      overflow: visible;
+      page-break-after: always;
+      break-after: page;
       font-family: var(--resume-font-family, Inter, Arial, Helvetica, sans-serif);
     }
     .resume-page.single-column {

@@ -1,0 +1,303 @@
+{
+  "fullName": "Comprehensive Stress Test Resume",
+  "email": "stress.test@resume.com",
+  "phone": "+1-555-STRESS-01",
+  "role": "Senior Full Stack Engineer with Extensive Experience",
+  "address": "123 Test Street, Suite 500, San Francisco, CA 94105",
+  "summary": "A comprehensive professional with 15+ years of experience across multiple industries and technology stacks. This resume is designed to stress-test the pagination system by containing maximum realistic content across all sections to ensure no truncation or content hiding occurs. All user-entered content must remain fully visible in both frontend preview and PDF output.",
+  "careerObjective": "To demonstrate pagination-first architecture that preserves all user content without any truncation, compression, or hiding of information. This resume contains extensive entries across all sections to verify multi-page rendering works correctly.",
+  "candidateType": "experienced",
+  "skills": [
+    "JavaScript",
+    "TypeScript",
+    "React",
+    "Vue.js",
+    "Angular",
+    "Node.js",
+    "Python",
+    "Java",
+    "C#",
+    ".NET",
+    "SQL",
+    "MongoDB",
+    "PostgreSQL",
+    "GraphQL",
+    "REST API",
+    "AWS",
+    "Azure",
+    "Google Cloud",
+    "Docker",
+    "Kubernetes",
+    "CI/CD",
+    "Git",
+    "Agile",
+    "Scrum",
+    "Leadership",
+    "Team Management",
+    "Technical Architecture",
+    "System Design",
+    "Microservices",
+    "Serverless"
+  ],
+  "experience": [
+    {
+      "role": "Principal Engineer - Full Stack Architecture",
+      "company": "TechCorp Global Solutions",
+      "startDate": "2021-01",
+      "endDate": null,
+      "description": "Led architectural redesign of core platform serving 5M+ users across multiple continents and regions. Designed and implemented microservices architecture with Kubernetes orchestration serving 100k requests per second. Established engineering excellence standards and mentored 20+ engineers on best practices and design patterns. Implemented zero-downtime deployment strategy reducing deployment time from 4 hours to 15 minutes. Built real-time analytics pipeline processing 10TB of data daily using Apache Kafka and Spark. Achieved 99.99% uptime SLA through redundancy and failover mechanisms. Implemented cost optimization reducing cloud infrastructure spending by 40% annually. Led security audit and implementation of SOC 2 compliance across entire infrastructure. Mentored junior engineers and conducted technical interviews for senior positions. Architected API gateway system handling 1M requests per second with sub-100ms latency."
+    },
+    {
+      "role": "Senior Full Stack Engineer - Platform Development",
+      "company": "InnovateTech Solutions Inc.",
+      "startDate": "2019-03",
+      "endDate": "2020-12",
+      "description": "Architected and built scalable React frontend serving 2M+ active users daily with performance optimization techniques including code splitting, lazy loading, and server-side rendering. Implemented Node.js backend microservices handling critical business operations with 99.9% availability. Designed database schema supporting complex transactions and consistency requirements across distributed systems. Built comprehensive monitoring and alerting system using Prometheus and Grafana detecting anomalies in real-time. Implemented feature flags and A/B testing framework enabling data-driven product decisions. Led cross-functional team of 8 engineers delivering features on aggressive timeline. Optimized database queries reducing response time by 70% through indexing and query analysis. Built CI/CD pipeline using Jenkins and Docker reducing deployment time from 2 hours to 10 minutes. Implemented caching strategy using Redis reducing database load by 60%. Authored technical documentation and style guides used across 50+ engineers."
+    },
+    {
+      "role": "Full Stack Developer - Product Engineering",
+      "company": "StartupXYZ",
+      "startDate": "2017-06",
+      "endDate": "2019-02",
+      "description": "Built entire product from scratch using React and Node.js serving first 100k users and $5M ARR. Implemented real-time collaboration features using WebSockets allowing concurrent document editing by multiple users. Built analytics dashboard tracking user behavior and product metrics visualized in real-time. Implemented payment processing integration with Stripe handling $1M+ monthly transactions. Optimized frontend bundle size from 2.5MB to 400KB improving initial load time by 80%. Built mobile-responsive design ensuring optimal experience across all devices and screen sizes. Implemented authentication system with OAuth2 and JWT token management. Created comprehensive test suite with 85% code coverage preventing production incidents. Mentored 2 junior developers on full stack development practices. Designed and documented API contracts enabling smooth frontend-backend integration."
+    },
+    {
+      "role": "Junior Developer - Web Development",
+      "company": "WebAgency Pro",
+      "startDate": "2015-09",
+      "endDate": "2017-05",
+      "description": "Developed custom WordPress themes and plugins for 50+ client websites generating $500k+ in revenue. Built responsive websites achieving 90+ Google Lighthouse scores and SEO rankings. Implemented JavaScript functionality enhancing user experience and engagement metrics. Managed website performance optimization reducing page load times by 60%. Assisted senior developers with technical architecture decisions and code reviews. Participated in daily standups and sprint planning with agile development team. Learned professional development practices including version control, testing, and documentation standards."
+    }
+  ],
+  "education": [
+    {
+      "degree": "Master of Science in Computer Science",
+      "school": "Stanford University",
+      "startYear": "2013",
+      "endYear": "2015",
+      "gpa": "3.9"
+    },
+    {
+      "degree": "Bachelor of Science in Computer Engineering",
+      "school": "UC Berkeley",
+      "startYear": "2009",
+      "endYear": "2013",
+      "gpa": "3.8"
+    },
+    {
+      "degree": "Diploma in Information Technology",
+      "school": "San Jose City College",
+      "startYear": "2007",
+      "endYear": "2009",
+      "gpa": "3.95"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Real-Time Collaborative Document Editor",
+      "description": "Built production-grade document editing platform supporting concurrent editing by 1000+ simultaneous users with real-time synchronization and conflict resolution. Features include rich text formatting, commenting system, version history tracking, and access control. Implemented using React for frontend, Node.js for backend, WebSockets for real-time communication, and MongoDB for data persistence.",
+      "technologies": [
+        "React",
+        "TypeScript",
+        "Node.js",
+        "WebSocket",
+        "MongoDB",
+        "Redis",
+        "Docker",
+        "Kubernetes",
+        "AWS",
+        "GraphQL",
+        "Firebase"
+      ]
+    },
+    {
+      "name": "Distributed Analytics Processing Pipeline",
+      "description": "Engineered scalable data pipeline processing 100TB+ daily data volume across global data centers for real-time business intelligence and reporting. Implemented data ingestion, transformation, aggregation, and visualization components. System achieves <100ms query response time and maintains data consistency across replicas.",
+      "technologies": [
+        "Apache Kafka",
+        "Apache Spark",
+        "Elasticsearch",
+        "Kibana",
+        "Python",
+        "Scala",
+        "AWS S3",
+        "AWS EC2",
+        "PostgreSQL",
+        "Redis"
+      ]
+    },
+    {
+      "name": "Machine Learning Recommendation Engine",
+      "description": "Built personalized recommendation system using collaborative filtering and deep learning models serving 50M+ recommendations daily with 45% click-through rate improvement. Implemented feature engineering pipeline, model training infrastructure, and real-time serving layer.",
+      "technologies": [
+        "Python",
+        "TensorFlow",
+        "PyTorch",
+        "Scikit-learn",
+        "Pandas",
+        "Jupyter",
+        "Airflow",
+        "Docker",
+        "Kubernetes",
+        "AWS SageMaker"
+      ]
+    },
+    {
+      "name": "Mobile Payment Processing System",
+      "description": "Developed secure payment processing platform handling 5M+ daily transactions across iOS and Android with PCI DSS compliance. Implemented end-to-end encryption, fraud detection, and settlement automation.",
+      "technologies": [
+        "React Native",
+        "Node.js",
+        "Stripe API",
+        "AWS",
+        "PostgreSQL",
+        "Redis",
+        "Docker",
+        "CI/CD"
+      ]
+    },
+    {
+      "name": "Full-Text Search Infrastructure",
+      "description": "Architected and deployed Elasticsearch-based full-text search system supporting 10B+ documents across multiple indices with sub-500ms query latency and 99.9% availability SLA.",
+      "technologies": [
+        "Elasticsearch",
+        "Kibana",
+        "Logstash",
+        "Python",
+        "AWS",
+        "Kubernetes",
+        "Prometheus"
+      ]
+    },
+    {
+      "name": "Multi-Tenant SaaS Platform",
+      "description": "Built complete SaaS platform supporting 500+ enterprise clients with isolated data, multi-tenancy, custom branding, and role-based access control. Achieved $10M ARR and 95% customer retention.",
+      "technologies": [
+        "React",
+        "Vue.js",
+        "Node.js",
+        "PostgreSQL",
+        "MongoDB",
+        "AWS",
+        "Docker",
+        "Kubernetes",
+        "GraphQL",
+        "REST API"
+      ]
+    }
+  ],
+  "certifications": [
+    {
+      "name": "AWS Certified Solutions Architect - Professional",
+      "issuer": "Amazon Web Services",
+      "year": "2022"
+    },
+    {
+      "name": "Kubernetes Application Developer (CKAD)",
+      "issuer": "Cloud Native Computing Foundation",
+      "year": "2021"
+    },
+    {
+      "name": "Certified Kubernetes Administrator (CKA)",
+      "issuer": "Cloud Native Computing Foundation",
+      "year": "2021"
+    },
+    {
+      "name": "AWS Certified Solutions Architect - Associate",
+      "issuer": "Amazon Web Services",
+      "year": "2020"
+    },
+    {
+      "name": "AWS Certified Developer - Associate",
+      "issuer": "Amazon Web Services",
+      "year": "2020"
+    },
+    {
+      "name": "Google Cloud Professional Cloud Architect",
+      "issuer": "Google Cloud",
+      "year": "2019"
+    },
+    {
+      "name": "Certified Scrum Master (CSM)",
+      "issuer": "Scrum Alliance",
+      "year": "2018"
+    },
+    {
+      "name": "Microsoft Azure Fundamentals (AZ-900)",
+      "issuer": "Microsoft",
+      "year": "2018"
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "level": "Native"
+    },
+    {
+      "language": "Spanish",
+      "level": "Fluent"
+    },
+    {
+      "language": "Mandarin Chinese",
+      "level": "Intermediate"
+    },
+    {
+      "language": "French",
+      "level": "Intermediate"
+    },
+    {
+      "language": "German",
+      "level": "Basic"
+    }
+  ],
+  "strengths": [
+    "Full-stack system design and architecture",
+    "Leading and mentoring high-performing engineering teams",
+    "Distributed systems and scalability optimization",
+    "Cloud infrastructure and DevOps practices",
+    "Real-time data processing and analytics",
+    "API design and backend optimization",
+    "React and modern frontend frameworks",
+    "Database design and optimization",
+    "Security architecture and compliance",
+    "Agile methodology and sprint management"
+  ],
+  "hobbies": [
+    "Contributing to open-source projects",
+    "Writing technical blog posts",
+    "Speaking at technology conferences",
+    "Mentoring junior developers",
+    "Rock climbing and outdoor adventures",
+    "Reading science fiction novels",
+    "Photography and videography",
+    "Board games and strategy games"
+  ],
+  "achievements": [
+    "Named one of 40 Under 40 Tech Leaders by Tech Magazine 2022",
+    "Speaker at Google I/O, AWS re:Invent, and KubeCon conferences",
+    "Author of 15+ technical blog posts with 500k+ total reads",
+    "Contributed to 3 open-source projects with 10k+ GitHub stars",
+    "Led team that reduced infrastructure costs by $5M annually",
+    "Implemented system handling 100M+ daily requests with 99.99% uptime"
+  ],
+  "socialLinks": [
+    {
+      "platform": "GitHub",
+      "url": "https://github.com/stress-test-engineer"
+    },
+    {
+      "platform": "LinkedIn",
+      "url": "https://linkedin.com/in/stress-test-engineer"
+    },
+    {
+      "platform": "Twitter",
+      "url": "https://twitter.com/stress_test_eng"
+    }
+  ],
+  "theme": {
+    "colors": {
+      "primary": "#0066cc",
+      "secondary": "#666666"
+    }
+  }
+}

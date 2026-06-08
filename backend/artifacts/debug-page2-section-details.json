@@ -1,0 +1,18 @@
+[
+  {
+    "index": 1,
+    "title": "Work Experience",
+    "className": "resume-section break-inside-avoid space-y-2",
+    "scrollHeight": 1290,
+    "childCount": 2,
+    "outerHTMLPreview": "<section class=\"resume-section break-inside-avoid space-y-2\" style=\"color: rgb(31, 41, 55);\"><h2 class=\"resume-section-title resume-section-title-full-width-bar\" style=\"color: rgb(31, 41, 55); background: rgb(245, 130, 0); border-top-color: rgb(245, 130, 0); border-right-color: rgb(245, 130, 0); border-bottom-color: rgb(245, 130, 0); padding: 10px 12px; margin-bottom: 6px; font-size: var(--resume-"
+  },
+  {
+    "index": 2,
+    "title": "unnamed",
+    "className": "resume-section break-inside-avoid space-y-2",
+    "scrollHeight": 1242,
+    "childCount": 1,
+    "outerHTMLPreview": "<section class=\"resume-section break-inside-avoid space-y-2\" style=\"color: rgb(31, 41, 55);\"><div class=\"resume-section-content\"><div class=\"space-y-3.5\"><div class=\"resume-meta-block break-inside-avoid\"><h3 class=\"resume-item-title\">Principal Engineer - Full Stack Architecture</h3><p class=\"resume-item-subtitle mt-1\">TechCorp Global Solutions</p><p class=\"resume-item-meta mt-1.5\">01-2021</p><div "
+  }
+]

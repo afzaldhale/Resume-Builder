@@ -1,0 +1,19 @@
+{
+  "printMediaRulesFound": 1,
+  "cssRules": [
+    {
+      "mediaQuery": "print",
+      "ruleCount": 3,
+      "sampleRules": [
+        "html, body, #root { width: var(--resume-page-width); min-height: var(--resume-page-height); margin: 0px; padding: 0px; background: rgb(255, 255, 255) !important; }",
+        ".resume-print-root { width: var(--resume-page-width); min-height: var(--resume-page-height); margin: 0px; overflow: visible; }",
+        ".resume-page { width: 794px !important; height: 1123px !important; margin: 0px !important; padding: 0px !important; box-shadow: none !important; transform: none !important; scale: 1 !important; }"
+      ]
+    }
+  ],
+  "headerComputedStyles": null,
+  "firstPageComputedStyles": {
+    "display": "block",
+    "overflow": "visible"
+  }
+}

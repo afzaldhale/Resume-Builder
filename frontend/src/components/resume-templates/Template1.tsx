@@ -6,81 +6,75 @@ interface Template1Props {
   data: ResumeData;
 }
 
+const SectionHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="mt-[20px]">
+    <div style={{ height: '38px', backgroundColor: '#F58200' }} className="flex items-center">
+      <div className="pl-3 text-black uppercase font-bold text-[13px]">{children}</div>
+    </div>
+  </div>
+);
+
 const Template1: React.FC<Template1Props> = ({ data }) => {
   const { summaryText, summaryTitle } = getSummaryConfig(data);
 
   return (
-    <div className="bg-white text-gray-800 w-[794px] min-h-[1123px] mx-auto p-8 font-sans">
-      {/* Header */}
-      <header>
-        <h1 className="text-2xl font-bold mb-1">{data.fullName || "Your Name"}</h1>
-        
-        {data.role && (
-          <p className="text-sm font-semibold mb-4">{data.role}</p>
-        )}
-        
-        {/* Contact Info */}
-        <div className="text-xs space-y-1 mb-6">
-          {data.email && <p>Email: {data.email}</p>}
-          {data.phone && <p>Phone: {data.phone}</p>}
-          {data.address && <p>Location: {data.address}</p>}
-          {data.socialLinks && data.socialLinks.length > 0 && (
-            <p>{data.socialLinks.map(l => `${l.platform}: ${l.url}`).join(" | ")}</p>
-          )}
-        </div>
-      </header>
+    <div className="bg-white text-[#222] w-[794px] min-h-[1123px] mx-auto font-sans">
+      <div className="max-w-[600px] mx-auto px-10 py-8 text-[12px] leading-[1.6]">
+        <header className="flex justify-between items-start gap-8">
+          <div>
+              <h1 className="text-[38px] font-extrabold uppercase tracking-[4px] leading-tight">{data.fullName || "Your Name"}</h1>
+              {data.role && (
+                <p className="text-[14px] font-light uppercase tracking-[1px] mt-2 mb-4">{data.role}</p>
+              )}
+          </div>
 
-      <div className="border-b border-gray-300 mb-6"></div>
+          <div className="text-sm text-right space-y-1 min-w-[180px] text-[#444] leading-tight">
+            {data.phone && <div className="">Mobile: {data.phone}</div>}
+            {data.email && <div className="">Email: {data.email}</div>}
+            {data.address && <div className="">Address: {data.address}</div>}
+            {data.socialLinks && data.socialLinks.length > 0 && (
+              <div className="">{data.socialLinks.map(l => `${l.platform}: ${l.url}`).join(" | ")}</div>
+            )}
+          </div>
+        </header>
 
-      {/* Main Content */}
-      <div className="space-y-6">
-        {/* Summary / Career Objective */}
+        <div className="mt-3 border-t border-gray-200"></div>
+
+        {/* Summary */}
         {summaryText && (
           <section>
-            <h2 className="text-base font-bold uppercase border-b border-gray-300 pb-1 mb-2">
-              {summaryTitle}
-            </h2>
-            <p className="text-sm">{summaryText}</p>
+            <SectionHeader>{summaryTitle}</SectionHeader>
+            <div className="mt-[12px] text-[12px] leading-[1.6]">
+              <p>{summaryText}</p>
+            </div>
           </section>
         )}
 
         {/* Skills */}
         {data.skills.length > 0 && (
           <section>
-            <h2 className="text-base font-bold uppercase border-b border-gray-300 pb-1 mb-2">
-              Skills
-            </h2>
-            <p className="text-sm">{[...new Set(data.skills)].join(", ")}</p>
+            <SectionHeader>Skills</SectionHeader>
+            <div className="mt-[12px] text-[12px] leading-[1.6]">{[...new Set(data.skills)].join(", ")}</div>
           </section>
         )}
 
         {/* Experience */}
         {data.experience.length > 0 && (
           <section>
-            <h2 className="text-base font-bold uppercase border-b border-gray-300 pb-1 mb-2">
-              Professional Experience
-            </h2>
-            <div className="space-y-4">
+            <SectionHeader>Professional Experience</SectionHeader>
+            <div className="mt-[12px] space-y-4">
               {data.experience.map((exp, index) => (
                 <div key={index}>
-                  <h3 className="text-sm font-bold">
-                    {exp.role}{exp.company && ` – ${exp.company}`}
-                  </h3>
-                  <p className="text-xs text-gray-600">
-                    {exp.startDate || ""}{exp.endDate && ` – ${exp.endDate}`}
-                  </p>
+                  <h3 className="text-[14px] font-bold">{exp.role}{exp.company && ` – ${exp.company}`}</h3>
+                  <div className="text-[12px] text-[#666]">{exp.startDate || ""}{exp.endDate && ` – ${exp.endDate}`}</div>
                   {exp.description && (
-                    <ul className="text-sm list-disc ml-5 mt-1 space-y-1">
-                      {exp.description
-                        .split("\n")
-                        .filter(Boolean)
-                        .slice(0, 3)
-                        .map((line, i) => (
-                          <li key={i}>{line}</li>
-                        ))}
+                    <ul className="list-disc ml-5 mt-1">
+                      {exp.description.split("\n").filter(Boolean).map((line, i) => (
+                        <li key={i} className="text-[12px]">{line}</li>
+                      ))}
                     </ul>
                   )}
-                  {exp.impact && <p className="text-xs text-gray-600 mt-1">Impact: {exp.impact}</p>}
+                  {exp.impact && <div className="text-[12px] text-[#666] mt-1">Impact: {exp.impact}</div>}
                 </div>
               ))}
             </div>
@@ -90,18 +84,14 @@ const Template1: React.FC<Template1Props> = ({ data }) => {
         {/* Projects */}
         {data.projects.length > 0 && (
           <section>
-            <h2 className="text-base font-bold uppercase border-b border-gray-300 pb-1 mb-2">
-              Projects
-            </h2>
-            <div className="space-y-4">
+            <SectionHeader>Projects</SectionHeader>
+            <div className="mt-[12px] space-y-4">
               {data.projects.map((project, index) => (
                 <div key={index}>
-                  <h3 className="text-sm font-bold">{project.name}</h3>
-                  <p className="text-sm">{project.description}</p>
-                  {project.impact && <p className="text-xs text-gray-600 mt-1">Impact: {project.impact}</p>}
-                  {project.technologies.length > 0 && (
-                    <p className="text-xs text-gray-600 mt-1">Technologies: {project.technologies.join(", ")}</p>
-                  )}
+                  <h3 className="text-[14px] font-bold">{project.name}</h3>
+                  <div className="text-[12px] mt-1">{project.description}</div>
+                  {project.impact && <div className="text-[12px] text-[#666] mt-1">Impact: {project.impact}</div>}
+                  {project.technologies.length > 0 && <div className="text-[12px] text-[#666] mt-1">Technologies: {project.technologies.join(", ")}</div>}
                 </div>
               ))}
             </div>
@@ -111,19 +101,13 @@ const Template1: React.FC<Template1Props> = ({ data }) => {
         {/* Education */}
         {data.education.length > 0 && (
           <section>
-            <h2 className="text-base font-bold uppercase border-b border-gray-300 pb-1 mb-2">
-              Education
-            </h2>
-            <div className="space-y-3">
+            <SectionHeader>Education</SectionHeader>
+            <div className="mt-[12px] space-y-3">
               {data.education.map((edu, index) => (
                 <div key={index}>
-                  <h3 className="text-sm font-bold">
-                    {edu.degree} – {edu.school}
-                  </h3>
-                  <p className="text-xs text-gray-600">
-                    {edu.startYear || ""}{edu.endYear && ` – ${edu.endYear}`}
-                  </p>
-                  {edu.gpa && <p className="text-xs text-gray-600">GPA: {edu.gpa}</p>}
+                  <h3 className="text-[16px] font-bold">{edu.degree} – {edu.school}</h3>
+                  <div className="text-[14px]"><span className="text-[12px] text-[#666]">{edu.startYear || ""}{edu.endYear && ` – ${edu.endYear}`}</span></div>
+                  {edu.gpa && <div className="text-[12px] text-[#666]">GPA: {edu.gpa}</div>}
                 </div>
               ))}
             </div>
@@ -133,53 +117,47 @@ const Template1: React.FC<Template1Props> = ({ data }) => {
         {/* Certifications */}
         {data.certifications && data.certifications.length > 0 && (
           <section>
-            <h2 className="text-base font-bold uppercase border-b border-gray-300 pb-1 mb-2">
-              Certifications
-            </h2>
-            <ul className="text-sm list-disc ml-5 space-y-1">
-              {data.certifications.slice(0, 3).map((cert, index) => (
-                <li key={index}>
-                  {cert.name}{cert.issuer && ` – ${cert.issuer}`}{cert.year && ` (${cert.year})`}
-                </li>
-              ))}
-            </ul>
+            <SectionHeader>Certifications</SectionHeader>
+            <div className="mt-[20px]">
+              <ul className="list-disc ml-5 space-y-2">
+                {data.certifications.map((cert, index) => (
+                  <li key={index} className="text-[12px]">
+                    <strong>{cert.name}</strong>
+                    {cert.issuer && <span className="ml-2">{cert.issuer}</span>}
+                    {cert.year && <span className="ml-2 text-[#666]">{cert.year}</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </section>
         )}
 
         {/* Languages */}
         {data.languages && data.languages.length > 0 && (
           <section>
-            <h2 className="text-base font-bold uppercase border-b border-gray-300 pb-1 mb-2">
-              Languages
-            </h2>
-            <p className="text-sm">{data.languages.map(l => `${l.language} (${l.level})`).join(", ")}</p>
+            <SectionHeader>Languages</SectionHeader>
+            <div className="mt-[12px] text-[12px]">{data.languages.map(l => `${l.language} (${l.level})`).join(", ")}</div>
           </section>
         )}
 
         {/* Strengths */}
         {data.strengths && data.strengths.length > 0 && (
           <section>
-            <h2 className="text-base font-bold uppercase border-b border-gray-300 pb-1 mb-2">
-              Strengths
-            </h2>
-            <p className="text-sm">{data.strengths.join(", ")}</p>
+            <SectionHeader>Strengths</SectionHeader>
+            <div className="mt-[12px] text-[12px]">{data.strengths.join(", ")}</div>
           </section>
         )}
 
-        {/* Hobbies & Interests */}
+        {/* Hobbies */}
         {data.hobbies && data.hobbies.length > 0 && (
           <section>
-            <h2 className="text-base font-bold uppercase border-b border-gray-300 pb-1 mb-2">
-              Hobbies & Interests
-            </h2>
-            <p className="text-sm">{data.hobbies.join(", ")}</p>
+            <SectionHeader>Hobbies & Interests</SectionHeader>
+            <div className="mt-[12px] text-[12px]">{data.hobbies.join(", ")}</div>
           </section>
         )}
 
-        {/* Footer */}
-        <div className="pt-4 mt-6 border-t border-gray-300 text-xs text-gray-500">
-          <p>Generated with Resume Builder • {new Date().getFullYear()}</p>
-        </div>
+        {/* Small spacer for safety */}
+        <div className="h-3" />
       </div>
     </div>
   );

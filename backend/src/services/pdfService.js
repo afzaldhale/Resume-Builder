@@ -81,7 +81,7 @@ export const generateResumePDF = async (resumeData, templateId, options = {}) =>
     }
 
     browser = await puppeteer.launch({
-      headless: "new",
+      headless: debugMode ? false : "new",
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
@@ -102,9 +102,18 @@ export const generateResumePDF = async (resumeData, templateId, options = {}) =>
 
     const page = await browser.newPage();
 
+    if (debugMode) {
+      page.on("console", (msg) => {
+        try {
+          console.log("[puppeteer]", msg.type(), msg.text());
+        } catch (e) {}
+      });
+      page.on("pageerror", (err) => console.error("[puppeteer pageerror]", err.message));
+    }
+
     await page.setViewport({
       width: A4_WIDTH_PX,
-      height: A4_HEIGHT_PX,
+      height: A4_HEIGHT_PX * 10, // Set tall enough to capture multi-page content
       deviceScaleFactor: 1,
     });
 

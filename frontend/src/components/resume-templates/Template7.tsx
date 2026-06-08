@@ -56,8 +56,7 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
               {summaryText && (
                 <div className="mt-4 pl-16">
                   <div className="text-sm text-gray-600 italic border-l-2 border-pink-400 pl-3">
-                    "{summaryTitle}: {summaryText.substring(0, 120)}
-                    {summaryText.length > 120 ? "..." : ""}"
+                    "{summaryTitle}: {summaryText}"
                   </div>
                 </div>
               )}
@@ -165,7 +164,6 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
 
                 <div className="flex flex-wrap gap-2">
                   {[...new Set(data.projects.flatMap((project) => project.technologies))]
-                    .slice(0, 10)
                     .map((tech, index) => (
                       <div
                         key={index}
@@ -330,10 +328,10 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                           Project #{index + 1}
                         </div>
                       </div>
-                      <p className="text-gray-700 text-sm mb-4 line-clamp-3">{project.description}</p>
+                      <p className="text-gray-700 text-sm mb-4">{project.description}</p>
                       {project.technologies.length > 0 && (
                         <div className="flex flex-wrap gap-1.5">
-                          {project.technologies.slice(0, 3).map((tech, techIndex) => (
+                          {project.technologies.map((tech, techIndex) => (
                             <span
                               key={techIndex}
                               className="text-xs bg-gradient-to-r from-amber-50 to-orange-50 text-amber-800 font-medium px-2 py-1 rounded-full border border-amber-200"
@@ -341,11 +339,6 @@ const Template7: React.FC<Template7Props> = ({ data }) => {
                               {tech}
                             </span>
                           ))}
-                          {project.technologies.length > 3 && (
-                            <span className="text-xs text-gray-500 px-2 py-1">
-                              +{project.technologies.length - 3} more
-                            </span>
-                          )}
                         </div>
                       )}
                     </div>

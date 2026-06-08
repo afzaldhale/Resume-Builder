@@ -1,0 +1,121 @@
+ 340:                     makePage,
+ 341:                     currentPageBody,
+ 342:                     A4_HEIGHT_PX
+ 343:                   );
+ 344:                 } else {
+ 345:                   appendToCurrent(childClone);
+ 346:                 }
+ 347:             } else {
+ 348:               currentPageBody.removeChild(shallow);
+ 349:               if (childClone.nodeType === Node.ELEMENT_NODE) {
+ 350:                 splitLargeNode(
+ 351:                   childClone,
+ 352:                   sectionSource || (childClone instanceof HTMLElement && childClone.matches(".resume-section") ? childClone : undefined)
+ 353:                 );
+ 354:               } else if (childClone.textContent?.trim()) {
+ 355:                 currentPageBody = splitTextIntoChunks(
+ 356:                   childClone.textContent.trim(),
+ 357:                   makePage,
+ 358:                   currentPageBody,
+ 359:                   A4_HEIGHT_PX
+ 360:                 );
+ 361:               } else {
+ 362:                 appendToCurrent(childClone);
+ 363:               }
+ 364:             }
+ 365:           }
+ 366:         }
+ 367:         if (isEmptyNode(shallow)) {
+ 368:           shallow.parentNode?.removeChild(shallow);
+ 369:         }
+ 370:       };
+ 371: 
+ 372:       const appendSection = (sectionEl: Element) => {
+ 373:         const sectionClone = sectionEl.cloneNode(true);
+ 374:         const hadContent = currentPageBody.childNodes.length > 0;
+ 375:         appendToCurrent(sectionClone);
+ 376: 
+ 377:         if (currentPageBody.scrollHeight <= A4_HEIGHT_PX + 2) {
+ 378:           return;
+ 379:         }
+ 380: 
+ 381:         currentPageBody.removeChild(sectionClone);
+ 382: 
+ 383:         if (hadContent) {
+ 384:           moveToNewPage();
+ 385:           appendToCurrent(sectionClone);
+ 386:           if (currentPageBody.scrollHeight <= A4_HEIGHT_PX + 2) {
+ 387:             return;
+ 388:           }
+ 389:           currentPageBody.removeChild(sectionClone);
+ 390:         }
+ 391: 
+ 392:         splitLargeNode(sectionClone, sectionClone as HTMLElement);
+ 393:       };
+ 394: 
+ 395:       headerNodes.forEach((node) => {
+ 396:         appendToCurrent(node.cloneNode(true));
+ 397:       });
+ 398: 
+ 399:       sectionElements.forEach((sectionEl) => appendSection(sectionEl));
+ 400: 
+ 401:       const pageElements = Array.from(pageParent.querySelectorAll<HTMLElement>(".resume-theme-root.resume-page"));
+ 402:       pageElements.forEach((page, index) => {
+ 403:         if (page.scrollHeight > A4_HEIGHT_PX + 2) {
+ 404:           console.warn(
+ 405:             `[resume-pagination] Page ${index + 1} exceeds A4 height: ${page.scrollHeight}px > ${A4_HEIGHT_PX}px`,
+ 406:             page
+ 407:           );
+ 408:         }
+ 409:       });
+ 410: 
+ 411:       pageElements.forEach((page) => {
+ 412:         const sections = Array.from(page.querySelectorAll<HTMLElement>(".resume-section"));
+ 413:         if (sections.length === 0 && page.scrollHeight < 140) {
+ 414:           page.remove();
+ 415:           return;
+ 416:         }
+ 417:         if (sections.length !== 1) {
+ 418:           return;
+ 419:         }
+ 420:         const section = sections[0];
+ 421:         const title = section.querySelector<HTMLElement>(".resume-section-title");
+ 422:         const textOnly = section.textContent?.trim() || "";
+ 423:         const titleText = title?.textContent?.trim() || "";
+ 424:         const bodyText = textOnly.replace(titleText, "").trim();
+ 425:         const content = section.querySelector<HTMLElement>(".resume-section-content");
+ 426:         const hasMeaningfulContent = Boolean(bodyText) || Boolean(content?.children.length);
+ 427:         if (!hasMeaningfulContent) {
+ 428:           page.remove();
+ 429:         }
+ 430:       });
+ 431: 
+ 432:       if (typeof window !== "undefined") {
+ 433:         const runtimeWindow = window as unknown as Record<string, any>;
+ 434:         if (runtimeWindow.__PRE_PAGINATION_DOM_TRUTH__) {
+ 435:           runtimeWindow.__PRE_PAGINATION_DOM_TRUTH__.afterPagination = {
+ 436:             headerCount: document.querySelectorAll("header").length,
+ 437:             sectionCount: document.querySelectorAll(".resume-section").length,
+ 438:           };
+ 439:         }
+ 440:       }
+ 441:     }
+ 442:   }, [renderMode, fittedData, compactLevel]);
+ 443: 
+ 444:   return (
+ 445:     <div
+ 446:       ref={documentRef}
+ 447:       className={`resume-document-shell ${className}`.trim()}
+ 448:       data-template-id={safeTemplateId}
+ 449:       data-resume-mode={resumeMode}
+ 450:       data-compact-mode={compactMode ? "true" : "false"}
+ 451:       data-compact-level={compactLevel}
+ 452:       data-initial-scroll-height={measurements.initialScrollHeight}
+ 453:       data-final-scroll-height={measurements.finalScrollHeight}
+ 454:       data-initial-overflow={measurements.initialOverflow ? "true" : "false"}
+ 455:       data-final-overflow={measurements.finalOverflow ? "true" : "false"}
+ 456:       data-render-mode={renderMode}
+ 457:       style={{
+ 458:         width: `${A4_WIDTH_PX}px`,
+ 459:         minHeight: `${A4_HEIGHT_PX}px`,
+ 460:       }}

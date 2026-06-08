@@ -1,0 +1,24 @@
+{
+  "resumePageCount": 3,
+  "themeRootResumePageCount": 3,
+  "pageClassNames": [
+    {
+      "index": 1,
+      "className": "resume-theme-root resume-page single-column",
+      "scrollHeight": 54,
+      "clientHeight": 54
+    },
+    {
+      "index": 2,
+      "className": "resume-theme-root resume-page single-column",
+      "scrollHeight": 7246,
+      "clientHeight": 7246
+    },
+    {
+      "index": 3,
+      "className": "resume-theme-root resume-page single-column",
+      "scrollHeight": 202,
+      "clientHeight": 202
+    }
+  ]
+}

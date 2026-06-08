@@ -1,6 +1,7 @@
 import { memo, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { fitResumeData, type FitRenderMode } from "@/utils/fitResumeData";
 import type { ResumeData } from "./types";
+import splitTextIntoChunks from "@/utils/splitTextIntoChunks";
 import { getCompactMode, resolveResumeMode } from "./templatePolicy";
 import { A4_HEIGHT_PX, A4_WIDTH_PX } from "@/constants/resumeDesignSystem";
 import { getSafeTemplateId } from "@/components/resume-templates/TemplateRegistry";
@@ -41,6 +42,22 @@ const ResumeDocumentStyles = () => (
 
     .resume-document-shell[data-render-mode="pdf"] [class*="shadow-"] {
       box-shadow: none !important;
+    }
+    /* Disable UI truncation helpers when rendering for PDF to preserve all user content */
+    .resume-document-shell[data-render-mode="pdf"] .truncate,
+    .resume-document-shell[data-render-mode="pdf"] .whitespace-nowrap,
+    .resume-document-shell[data-render-mode="pdf"] [class*="line-clamp"],
+    .resume-document-shell[data-render-mode="pdf"] [class*="line-clamp"] * {
+      overflow: visible !important;
+      white-space: normal !important;
+      -webkit-line-clamp: unset !important;
+      text-overflow: clip !important;
+    }
+    .page {
+      width: ${A4_WIDTH_PX}px;
+      min-height: ${A4_HEIGHT_PX}px;
+      box-sizing: border-box;
+      page-break-after: always;
     }
   `}</style>
 );
@@ -102,6 +119,7 @@ const ResumeDocumentComponent = ({
   );
   const resumeMode = resolveResumeMode(fittedData);
   const compactMode = renderMode === "pdf" ? getCompactMode(fittedData) : false;
+  const splitStateRef = useRef<{ splitDone: boolean }>({ splitDone: false });
 
   useLayoutEffect(() => {
     setCompactLevel(0);
@@ -111,6 +129,7 @@ const ResumeDocumentComponent = ({
       initialOverflow: false,
       finalOverflow: false,
     });
+    splitStateRef.current.splitDone = false;
   }, [normalizedData, renderMode]);
 
   useLayoutEffect(() => {
@@ -123,6 +142,65 @@ const ResumeDocumentComponent = ({
       return;
     }
 
+    const buildHierarchy = (element: HTMLElement, depth: number) => {
+      if (depth <= 0) return null;
+      return {
+        tag: element.tagName.toLowerCase(),
+        classes: element.className || null,
+        childCount: element.children.length,
+        children: Array.from(element.children).map((child) => {
+          if (!(child instanceof HTMLElement)) return null;
+          return buildHierarchy(child, depth - 1);
+        }).filter(Boolean),
+      };
+    };
+
+    const getDomPath = (node: HTMLElement | null) => {
+      if (!node) return null;
+      const parts: string[] = [];
+      let current: HTMLElement | null = node;
+      while (current && current !== document.body) {
+        const selector = [current.tagName.toLowerCase()]
+          .concat(current.id ? [`#${current.id}`] : [])
+          .concat(current.className ? Array.from(current.classList).map((name) => `.${name}`) : [])
+          .join("");
+        parts.unshift(selector);
+        current = current.parentElement;
+      }
+      return parts.join(" > ");
+    };
+
+    const describeElement = (element: HTMLElement | null) => {
+      if (!element) return null;
+      return {
+        tag: element.tagName.toLowerCase(),
+        id: element.id || null,
+        classes: element.className || null,
+        path: getDomPath(element),
+        childCount: element.children.length,
+      };
+    };
+
+    const preHeaderCount = document.querySelectorAll("header").length;
+    const preSectionCount = document.querySelectorAll(".resume-section").length;
+    const preHierarchy = buildHierarchy(pageElement, 3);
+
+    if (typeof window !== "undefined") {
+      const runtimeWindow = window as unknown as Record<string, any>;
+      runtimeWindow.__PRE_PAGINATION_DOM_TRUTH__ = {
+        templateId: safeTemplateId,
+        beforePagination: {
+          outerHTML: pageElement.outerHTML,
+          headerCount: preHeaderCount,
+          sectionCount: preSectionCount,
+          childHierarchy: preHierarchy,
+        },
+        afterPagination: null,
+      };
+    }
+
+    // Pagination-first splitting: measure and split into multiple .page containers.
+    // Run once per render change to avoid infinite loops.
     const scrollHeight = pageElement.scrollHeight;
     const overflow = scrollHeight > A4_HEIGHT_PX + 1;
 
@@ -135,8 +213,293 @@ const ResumeDocumentComponent = ({
       finalOverflow: overflow,
     }));
 
-    if (overflow && compactLevel < 10) {
-      setCompactLevel((level) => level + 1);
+    if (!splitStateRef.current.splitDone) {
+      splitStateRef.current.splitDone = true;
+      // Perform DOM-based pagination split. We clone headers and atomic entries so
+      // content is never truncated. Sections are treated atomically; where a
+      // section contains multiple entry nodes (e.g., experience items), those
+      // entries are considered atomic and moved one-by-one.
+      const pageRoot = documentRef.current?.querySelector<HTMLElement>(".resume-theme-root");
+      const pageParent = pageRoot?.parentElement;
+      if (!pageRoot || !pageParent) {
+        return;
+      }
+
+      const nonStyleChild = Array.from(pageRoot.children).find(
+        (child) =>
+          child.nodeType === Node.ELEMENT_NODE &&
+          child.nodeName !== "STYLE" &&
+          child.childElementCount > 0
+      ) as HTMLElement | undefined;
+
+      const fallbackChild = Array.from(pageRoot.children).find(
+        (child) => child.nodeType === Node.ELEMENT_NODE && child.nodeName !== "STYLE"
+      ) as HTMLElement | undefined;
+
+      const contentWrapper =
+        pageRoot.querySelector<HTMLElement>(".resume-content") ||
+        pageRoot.querySelector<HTMLElement>("[data-resume-content]") ||
+        nonStyleChild ||
+        fallbackChild ||
+        pageRoot;
+
+      const sectionElements = Array.from(
+        contentWrapper.querySelectorAll<HTMLElement>(".resume-section")
+      );
+
+      const headerElement = contentWrapper.querySelector<HTMLElement>("header");
+      const headerNodes: HTMLElement[] = [];
+      if (headerElement) {
+        headerNodes.push(headerElement);
+      }
+      const headerDiscovery = {
+        querySelectorHeader: Boolean(headerElement),
+        headerPath: headerElement ? getDomPath(headerElement) : null,
+        pageRootToHeaderPath: headerElement
+          ? `${getDomPath(pageRoot)} > ${getDomPath(headerElement)}`
+          : null,
+        pageRootToFirstSectionPath: sectionElements[0]
+          ? `${getDomPath(pageRoot)} > ${getDomPath(sectionElements[0])}`
+          : null,
+        insideContentWrapper: Boolean(
+          headerElement && contentWrapper.contains(headerElement)
+        ),
+        directChildOfContentWrapper:
+          Boolean(headerElement && headerElement.parentElement === contentWrapper),
+        previousElementSiblingTraversal: Boolean(
+          headerElement && headerNodes.some((node) => node === headerElement || node.contains(headerElement))
+        ),
+      };
+
+      const paginationInput = {
+        pageRoot: describeElement(pageRoot),
+        contentWrapper: describeElement(contentWrapper),
+        contentWrapperChildren: Array.from(contentWrapper.children).map((child) => {
+          if (!(child instanceof HTMLElement)) return null;
+          return describeElement(child);
+        }).filter(Boolean),
+        headerElement: headerElement ? describeElement(headerElement) : null,
+        firstSection: sectionElements[0] ? describeElement(sectionElements[0]) : null,
+        headerNodes: headerNodes.map((node) => describeElement(node)),
+        headerDiscovery,
+      };
+
+      if (typeof window !== "undefined") {
+        const runtimeWindow = window as unknown as Record<string, any>;
+        if (runtimeWindow.__PRE_PAGINATION_DOM_TRUTH__) {
+          runtimeWindow.__PRE_PAGINATION_DOM_TRUTH__.paginationInput = paginationInput;
+        }
+      }
+
+      const pageTemplate = pageRoot.cloneNode(false) as HTMLElement;
+      const pageBodyTemplate = contentWrapper.cloneNode(false) as HTMLElement;
+
+      pageParent.innerHTML = "";
+
+      const pages: HTMLElement[] = [];
+
+      const createPageBody = (page: HTMLElement) => {
+        const body = pageBodyTemplate.cloneNode(false) as HTMLElement;
+        page.appendChild(body);
+        return body;
+      };
+
+      const makePage = () => {
+        const page = pageTemplate.cloneNode(false) as HTMLElement;
+        pageParent.appendChild(page);
+        pages.push(page);
+        return page;
+      };
+
+      let currentPage = makePage();
+      let currentPageBody = createPageBody(currentPage);
+
+      const appendToCurrent = (node: Node) => {
+        currentPageBody.appendChild(node);
+      };
+
+      const moveToNewPage = () => {
+        currentPage = makePage();
+        currentPageBody = createPageBody(currentPage);
+      };
+
+      const cloneHeaderOnly = (node: Node, sectionSource?: HTMLElement) => {
+        if (!(node instanceof HTMLElement)) {
+          return node.cloneNode(false);
+        }
+
+        const sourceSection = node.matches(".resume-section")
+          ? node
+          : node.closest<HTMLElement>(".resume-section") || sectionSource;
+
+        if (sourceSection) {
+          const headerOnly = sourceSection.cloneNode(false) as HTMLElement;
+          const title = sourceSection.querySelector<HTMLElement>(".resume-section-title");
+          if (title) {
+            headerOnly.appendChild(title.cloneNode(true));
+          }
+          return headerOnly;
+        }
+
+        return node.cloneNode(false);
+      };
+
+      const isEmptyNode = (wrapper: Node) => {
+        if (!(wrapper instanceof HTMLElement)) {
+          return false;
+        }
+        return !Array.from(wrapper.childNodes).some((child) => {
+          if (child.nodeType === Node.TEXT_NODE) {
+            return Boolean(child.textContent?.trim());
+          }
+          if (child instanceof HTMLElement) {
+            if (child.matches(".resume-section-title")) {
+              return false;
+            }
+            return Boolean(child.textContent?.trim());
+          }
+          return true;
+        });
+      };
+
+      const splitLargeNode = (node: Node, sectionSource?: HTMLElement) => {
+        const textContent = node.textContent?.trim() || "";
+        const hasChildren = (node as HTMLElement).children?.length > 0;
+
+        if (!hasChildren && textContent) {
+          currentPageBody = splitTextIntoChunks(
+            textContent,
+            makePage,
+            currentPageBody,
+            A4_HEIGHT_PX
+          );
+          return;
+        }
+
+        const shallow = node.cloneNode(false);
+        appendToCurrent(shallow);
+
+        for (const child of Array.from(node.childNodes)) {
+          const childClone = child.cloneNode(true);
+          const hadBefore = currentPageBody.childNodes.length > 0;
+          shallow.appendChild(childClone);
+
+          if (currentPageBody.scrollHeight > A4_HEIGHT_PX + 2) {
+            shallow.removeChild(childClone);
+                if (hadBefore) {
+              moveToNewPage();
+              const nextWrapper = cloneHeaderOnly(node, sectionSource);
+              appendToCurrent(nextWrapper);
+              currentPageBody = nextWrapper as HTMLElement;
+                if (childClone.nodeType === Node.ELEMENT_NODE) {
+                  splitLargeNode(
+                    childClone,
+                    sectionSource || (childClone instanceof HTMLElement && childClone.matches(".resume-section") ? childClone : undefined)
+                  );
+                } else if (childClone.textContent?.trim()) {
+                  currentPageBody = splitTextIntoChunks(
+                    childClone.textContent.trim(),
+                    makePage,
+                    currentPageBody,
+                    A4_HEIGHT_PX
+                  );
+                } else {
+                  appendToCurrent(childClone);
+                }
+            } else {
+              currentPageBody.removeChild(shallow);
+              if (childClone.nodeType === Node.ELEMENT_NODE) {
+                splitLargeNode(
+                  childClone,
+                  sectionSource || (childClone instanceof HTMLElement && childClone.matches(".resume-section") ? childClone : undefined)
+                );
+              } else if (childClone.textContent?.trim()) {
+                currentPageBody = splitTextIntoChunks(
+                  childClone.textContent.trim(),
+                  makePage,
+                  currentPageBody,
+                  A4_HEIGHT_PX
+                );
+              } else {
+                appendToCurrent(childClone);
+              }
+            }
+          }
+        }
+        if (isEmptyNode(shallow)) {
+          shallow.parentNode?.removeChild(shallow);
+        }
+      };
+
+      const appendSection = (sectionEl: Element) => {
+        const sectionClone = sectionEl.cloneNode(true);
+        const hadContent = currentPageBody.childNodes.length > 0;
+        appendToCurrent(sectionClone);
+
+        if (currentPageBody.scrollHeight <= A4_HEIGHT_PX + 2) {
+          return;
+        }
+
+        currentPageBody.removeChild(sectionClone);
+
+        if (hadContent) {
+          moveToNewPage();
+          appendToCurrent(sectionClone);
+          if (currentPageBody.scrollHeight <= A4_HEIGHT_PX + 2) {
+            return;
+          }
+          currentPageBody.removeChild(sectionClone);
+        }
+
+        splitLargeNode(sectionClone, sectionClone as HTMLElement);
+      };
+
+      headerNodes.forEach((node) => {
+        appendToCurrent(node.cloneNode(true));
+      });
+
+      sectionElements.forEach((sectionEl) => appendSection(sectionEl));
+
+      const pageElements = Array.from(pageParent.querySelectorAll<HTMLElement>(".resume-theme-root.resume-page"));
+      pageElements.forEach((page, index) => {
+        if (page.scrollHeight > A4_HEIGHT_PX + 2) {
+          console.warn(
+            `[resume-pagination] Page ${index + 1} exceeds A4 height: ${page.scrollHeight}px > ${A4_HEIGHT_PX}px`,
+            page
+          );
+        }
+      });
+
+      pageElements.forEach((page) => {
+        const sections = Array.from(page.querySelectorAll<HTMLElement>(".resume-section"));
+        if (sections.length === 0 && page.scrollHeight < 140) {
+          page.remove();
+          return;
+        }
+        if (sections.length !== 1) {
+          return;
+        }
+        const section = sections[0];
+        const title = section.querySelector<HTMLElement>(".resume-section-title");
+        const textOnly = section.textContent?.trim() || "";
+        const titleText = title?.textContent?.trim() || "";
+        const bodyText = textOnly.replace(titleText, "").trim();
+        const content = section.querySelector<HTMLElement>(".resume-section-content");
+        const hasMeaningfulContent = Boolean(bodyText) || Boolean(content?.children.length);
+        if (!hasMeaningfulContent) {
+          page.remove();
+        }
+      });
+
+      if (typeof window !== "undefined") {
+        const runtimeWindow = window as unknown as Record<string, any>;
+        if (runtimeWindow.__PRE_PAGINATION_DOM_TRUTH__) {
+          runtimeWindow.__PRE_PAGINATION_DOM_TRUTH__.afterPagination = {
+            headerCount: document.querySelectorAll("header").length,
+            sectionCount: document.querySelectorAll(".resume-section").length,
+          };
+        }
+      }
     }
   }, [renderMode, fittedData, compactLevel]);
 

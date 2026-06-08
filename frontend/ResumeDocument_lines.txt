@@ -1,0 +1,221 @@
+ 120:   const resumeMode = resolveResumeMode(fittedData);
+ 121:   const compactMode = renderMode === "pdf" ? getCompactMode(fittedData) : false;
+ 122:   const splitStateRef = useRef<{ splitDone: boolean }>({ splitDone: false });
+ 123: 
+ 124:   useLayoutEffect(() => {
+ 125:     setCompactLevel(0);
+ 126:     setMeasurements({
+ 127:       initialScrollHeight: 0,
+ 128:       finalScrollHeight: 0,
+ 129:       initialOverflow: false,
+ 130:       finalOverflow: false,
+ 131:     });
+ 132:     splitStateRef.current.splitDone = false;
+ 133:   }, [normalizedData, renderMode]);
+ 134: 
+ 135:   useLayoutEffect(() => {
+ 136:     if (renderMode !== "pdf") {
+ 137:       return;
+ 138:     }
+ 139: 
+ 140:     const pageElement = documentRef.current?.querySelector<HTMLElement>(".resume-theme-root");
+ 141:     if (!pageElement) {
+ 142:       return;
+ 143:     }
+ 144: 
+ 145:     const buildHierarchy = (element: HTMLElement, depth: number) => {
+ 146:       if (depth <= 0) return null;
+ 147:       return {
+ 148:         tag: element.tagName.toLowerCase(),
+ 149:         classes: element.className || null,
+ 150:         childCount: element.children.length,
+ 151:         children: Array.from(element.children).map((child) => {
+ 152:           if (!(child instanceof HTMLElement)) return null;
+ 153:           return buildHierarchy(child, depth - 1);
+ 154:         }).filter(Boolean),
+ 155:       };
+ 156:     };
+ 157: 
+ 158:     const preHeaderCount = document.querySelectorAll("header").length;
+ 159:     const preSectionCount = document.querySelectorAll(".resume-section").length;
+ 160:     const preHierarchy = buildHierarchy(pageElement, 3);
+ 161: 
+ 162:     if (typeof window !== "undefined") {
+ 163:       const runtimeWindow = window as unknown as Record<string, any>;
+ 164:       runtimeWindow.__PRE_PAGINATION_DOM_TRUTH__ = {
+ 165:         templateId: safeTemplateId,
+ 166:         beforePagination: {
+ 167:           outerHTML: pageElement.outerHTML,
+ 168:           headerCount: preHeaderCount,
+ 169:           sectionCount: preSectionCount,
+ 170:           childHierarchy: preHierarchy,
+ 171:         },
+ 172:         afterPagination: null,
+ 173:       };
+ 174:     }
+ 175: 
+ 176:     // Pagination-first splitting: measure and split into multiple .page containers.
+ 177:     // Run once per render change to avoid infinite loops.
+ 178:     const scrollHeight = pageElement.scrollHeight;
+ 179:     const overflow = scrollHeight > A4_HEIGHT_PX + 1;
+ 180: 
+ 181:     setMeasurements((previous) => ({
+ 182:       initialScrollHeight:
+ 183:         previous.initialScrollHeight || scrollHeight,
+ 184:       finalScrollHeight: scrollHeight,
+ 185:       initialOverflow:
+ 186:         previous.initialScrollHeight > 0 ? previous.initialOverflow : overflow,
+ 187:       finalOverflow: overflow,
+ 188:     }));
+ 189: 
+ 190:     if (!splitStateRef.current.splitDone) {
+ 191:       splitStateRef.current.splitDone = true;
+ 192:       // Perform DOM-based pagination split. We clone headers and atomic entries so
+ 193:       // content is never truncated. Sections are treated atomically; where a
+ 194:       // section contains multiple entry nodes (e.g., experience items), those
+ 195:       // entries are considered atomic and moved one-by-one.
+ 196:       const pageRoot = documentRef.current?.querySelector<HTMLElement>(".resume-theme-root");
+ 197:       const pageParent = pageRoot?.parentElement;
+ 198:       if (!pageRoot || !pageParent) {
+ 199:         return;
+ 200:       }
+ 201: 
+ 202:       const nonStyleChild = Array.from(pageRoot.children).find(
+ 203:         (child) => child.nodeType === Node.ELEMENT_NODE && child.nodeName !== "STYLE"
+ 204:       ) as HTMLElement | undefined;
+ 205: 
+ 206:       const contentWrapper =
+ 207:         pageRoot.querySelector<HTMLElement>(".resume-content") ||
+ 208:         pageRoot.querySelector<HTMLElement>("[data-resume-content]") ||
+ 209:         nonStyleChild ||
+ 210:         pageRoot;
+ 211: 
+ 212:       const sectionElements = Array.from(
+ 213:         contentWrapper.querySelectorAll<HTMLElement>(".resume-section")
+ 214:       );
+ 215: 
+ 216:       const headerNodes: HTMLElement[] = [];
+ 217:       if (sectionElements.length > 0) {
+ 218:         let previous = sectionElements[0].previousElementSibling as HTMLElement | null;
+ 219:         const headerBuffers: HTMLElement[] = [];
+ 220:         while (previous) {
+ 221:           if (
+ 222:             previous.nodeName !== "STYLE" &&
+ 223:             !previous.classList.contains("resume-section")
+ 224:           ) {
+ 225:             headerBuffers.push(previous);
+ 226:           }
+ 227:           previous = previous.previousElementSibling as HTMLElement | null;
+ 228:         }
+ 229:         headerNodes.push(...headerBuffers.reverse());
+ 230:       }
+ 231: 
+ 232:       const pageTemplate = pageRoot.cloneNode(false) as HTMLElement;
+ 233:       const pageBodyTemplate = contentWrapper.cloneNode(false) as HTMLElement;
+ 234: 
+ 235:       pageParent.innerHTML = "";
+ 236: 
+ 237:       const pages: HTMLElement[] = [];
+ 238: 
+ 239:       const createPageBody = (page: HTMLElement) => {
+ 240:         const body = pageBodyTemplate.cloneNode(false) as HTMLElement;
+ 241:         page.appendChild(body);
+ 242:         return body;
+ 243:       };
+ 244: 
+ 245:       const makePage = () => {
+ 246:         const page = pageTemplate.cloneNode(false) as HTMLElement;
+ 247:         pageParent.appendChild(page);
+ 248:         pages.push(page);
+ 249:         return page;
+ 250:       };
+ 251: 
+ 252:       let currentPage = makePage();
+ 253:       let currentPageBody = createPageBody(currentPage);
+ 254: 
+ 255:       const appendToCurrent = (node: Node) => {
+ 256:         currentPageBody.appendChild(node);
+ 257:       };
+ 258: 
+ 259:       const moveToNewPage = () => {
+ 260:         currentPage = makePage();
+ 261:         currentPageBody = createPageBody(currentPage);
+ 262:       };
+ 263: 
+ 264:       const cloneHeaderOnly = (node: Node, sectionSource?: HTMLElement) => {
+ 265:         if (!(node instanceof HTMLElement)) {
+ 266:           return node.cloneNode(false);
+ 267:         }
+ 268: 
+ 269:         const sourceSection = node.matches(".resume-section")
+ 270:           ? node
+ 271:           : node.closest<HTMLElement>(".resume-section") || sectionSource;
+ 272: 
+ 273:         if (sourceSection) {
+ 274:           const headerOnly = sourceSection.cloneNode(false) as HTMLElement;
+ 275:           const title = sourceSection.querySelector<HTMLElement>(".resume-section-title");
+ 276:           if (title) {
+ 277:             headerOnly.appendChild(title.cloneNode(true));
+ 278:           }
+ 279:           return headerOnly;
+ 280:         }
+ 281: 
+ 282:         return node.cloneNode(false);
+ 283:       };
+ 284: 
+ 285:       const isEmptyNode = (wrapper: Node) => {
+ 286:         if (!(wrapper instanceof HTMLElement)) {
+ 287:           return false;
+ 288:         }
+ 289:         return !Array.from(wrapper.childNodes).some((child) => {
+ 290:           if (child.nodeType === Node.TEXT_NODE) {
+ 291:             return Boolean(child.textContent?.trim());
+ 292:           }
+ 293:           if (child instanceof HTMLElement) {
+ 294:             if (child.matches(".resume-section-title")) {
+ 295:               return false;
+ 296:             }
+ 297:             return Boolean(child.textContent?.trim());
+ 298:           }
+ 299:           return true;
+ 300:         });
+ 301:       };
+ 302: 
+ 303:       const splitLargeNode = (node: Node, sectionSource?: HTMLElement) => {
+ 304:         const textContent = node.textContent?.trim() || "";
+ 305:         const hasChildren = (node as HTMLElement).children?.length > 0;
+ 306: 
+ 307:         if (!hasChildren && textContent) {
+ 308:           currentPageBody = splitTextIntoChunks(
+ 309:             textContent,
+ 310:             makePage,
+ 311:             currentPageBody,
+ 312:             A4_HEIGHT_PX
+ 313:           );
+ 314:           return;
+ 315:         }
+ 316: 
+ 317:         const shallow = node.cloneNode(false);
+ 318:         appendToCurrent(shallow);
+ 319: 
+ 320:         for (const child of Array.from(node.childNodes)) {
+ 321:           const childClone = child.cloneNode(true);
+ 322:           const hadBefore = currentPageBody.childNodes.length > 0;
+ 323:           shallow.appendChild(childClone);
+ 324: 
+ 325:           if (currentPageBody.scrollHeight > A4_HEIGHT_PX + 2) {
+ 326:             shallow.removeChild(childClone);
+ 327:                 if (hadBefore) {
+ 328:               moveToNewPage();
+ 329:               const nextWrapper = cloneHeaderOnly(node, sectionSource);
+ 330:               appendToCurrent(nextWrapper);
+ 331:               currentPageBody = nextWrapper as HTMLElement;
+ 332:                 if (childClone.nodeType === Node.ELEMENT_NODE) {
+ 333:                   splitLargeNode(
+ 334:                     childClone,
+ 335:                     sectionSource || (childClone instanceof HTMLElement && childClone.matches(".resume-section") ? childClone : undefined)
+ 336:                   );
+ 337:                 } else if (childClone.textContent?.trim()) {
+ 338:                   currentPageBody = splitTextIntoChunks(
+ 339:                     childClone.textContent.trim(),
+ 340:                     makePage,

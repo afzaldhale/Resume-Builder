@@ -1,0 +1,235 @@
+{
+  "timestamp": "2026-06-08T08:55:11.996Z",
+  "phase": "PHASE 11 - Multi-Page PDF Parity & Truncation Removal",
+  "testType": "Stress Test",
+  "totalTests": 6,
+  "passed": 0,
+  "failed": 6,
+  "successRate": "0.0%",
+  "results": [
+    {
+      "template": 1,
+      "status": "FAIL",
+      "metrics": {
+        "pageCount": 3,
+        "themeRootCount": 3,
+        "pages": [
+          {
+            "index": 0,
+            "height": 54,
+            "className": "resume-theme-root resume-page single-column",
+            "childCount": 1
+          },
+          {
+            "index": 1,
+            "height": 7246,
+            "className": "resume-theme-root resume-page single-column",
+            "childCount": 2
+          },
+          {
+            "index": 2,
+            "height": 202,
+            "className": "resume-theme-root resume-page single-column",
+            "childCount": 1
+          }
+        ],
+        "totalScrollHeight": 7502,
+        "skillsCount": 8,
+        "experienceCount": 0,
+        "projectCount": 0,
+        "certCount": 0,
+        "educationCount": 0
+      }
+    },
+    {
+      "template": 2,
+      "status": "FAIL",
+      "metrics": {
+        "pageCount": 4,
+        "themeRootCount": 4,
+        "pages": [
+          {
+            "index": 0,
+            "height": 0,
+            "className": "resume-theme-root resume-page sidebar-layout",
+            "childCount": 1
+          },
+          {
+            "index": 1,
+            "height": 2795,
+            "className": "resume-theme-root resume-page sidebar-layout",
+            "childCount": 2
+          },
+          {
+            "index": 2,
+            "height": 1895,
+            "className": "resume-theme-root resume-page sidebar-layout",
+            "childCount": 1
+          },
+          {
+            "index": 3,
+            "height": 2795,
+            "className": "resume-theme-root resume-page sidebar-layout",
+            "childCount": 1
+          }
+        ],
+        "totalScrollHeight": 7485,
+        "skillsCount": 8,
+        "experienceCount": 0,
+        "projectCount": 0,
+        "certCount": 0,
+        "educationCount": 0
+      }
+    },
+    {
+      "template": 3,
+      "status": "FAIL",
+      "metrics": {
+        "pageCount": 3,
+        "themeRootCount": 3,
+        "pages": [
+          {
+            "index": 0,
+            "height": 54,
+            "className": "resume-theme-root resume-page single-column",
+            "childCount": 1
+          },
+          {
+            "index": 1,
+            "height": 6397,
+            "className": "resume-theme-root resume-page single-column",
+            "childCount": 2
+          },
+          {
+            "index": 2,
+            "height": 190,
+            "className": "resume-theme-root resume-page single-column",
+            "childCount": 1
+          }
+        ],
+        "totalScrollHeight": 6641,
+        "skillsCount": 8,
+        "experienceCount": 0,
+        "projectCount": 0,
+        "certCount": 0,
+        "educationCount": 0
+      }
+    },
+    {
+      "template": 4,
+      "status": "FAIL",
+      "metrics": {
+        "pageCount": 3,
+        "themeRootCount": 3,
+        "pages": [
+          {
+            "index": 0,
+            "height": 54,
+            "className": "resume-theme-root resume-page single-column",
+            "childCount": 2
+          },
+          {
+            "index": 1,
+            "height": 5997,
+            "className": "resume-theme-root resume-page single-column",
+            "childCount": 2
+          },
+          {
+            "index": 2,
+            "height": 190,
+            "className": "resume-theme-root resume-page single-column",
+            "childCount": 1
+          }
+        ],
+        "totalScrollHeight": 6241,
+        "skillsCount": 8,
+        "experienceCount": 0,
+        "projectCount": 0,
+        "certCount": 0,
+        "educationCount": 0
+      }
+    },
+    {
+      "template": 5,
+      "status": "FAIL",
+      "metrics": {
+        "pageCount": 4,
+        "themeRootCount": 4,
+        "pages": [
+          {
+            "index": 0,
+            "height": 0,
+            "className": "resume-theme-root resume-page sidebar-layout",
+            "childCount": 1
+          },
+          {
+            "index": 1,
+            "height": 2725,
+            "className": "resume-theme-root resume-page sidebar-layout",
+            "childCount": 2
+          },
+          {
+            "index": 2,
+            "height": 1717,
+            "className": "resume-theme-root resume-page sidebar-layout",
+            "childCount": 1
+          },
+          {
+            "index": 3,
+            "height": 2725,
+            "className": "resume-theme-root resume-page sidebar-layout",
+            "childCount": 1
+          }
+        ],
+        "totalScrollHeight": 7167,
+        "skillsCount": 8,
+        "experienceCount": 0,
+        "projectCount": 0,
+        "certCount": 0,
+        "educationCount": 0
+      }
+    },
+    {
+      "template": 7,
+      "status": "FAIL",
+      "metrics": {
+        "pageCount": 3,
+        "themeRootCount": 3,
+        "pages": [
+          {
+            "index": 0,
+            "height": 54,
+            "className": "resume-theme-root resume-page single-column",
+            "childCount": 2
+          },
+          {
+            "index": 1,
+            "height": 6397,
+            "className": "resume-theme-root resume-page single-column",
+            "childCount": 2
+          },
+          {
+            "index": 2,
+            "height": 190,
+            "className": "resume-theme-root resume-page single-column",
+            "childCount": 1
+          }
+        ],
+        "totalScrollHeight": 6641,
+        "skillsCount": 8,
+        "experienceCount": 0,
+        "projectCount": 0,
+        "certCount": 0,
+        "educationCount": 0
+      }
+    }
+  ],
+  "stressTestData": {
+    "skills": 30,
+    "experience": 4,
+    "projects": 6,
+    "certifications": 8,
+    "education": 3,
+    "languages": 5
+  }
+}

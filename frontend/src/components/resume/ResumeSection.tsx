@@ -53,11 +53,17 @@ const getHeadingStyle = (
 
   const fullWidthStyles =
     variant === "full-width-bar"
-      ? {
-          width: `calc(100% + ${horizontalPadding * 2}px)`,
-          marginLeft: `-${horizontalPadding}px`,
-          boxSizing: "border-box" as const,
-        }
+      ? theme.headingInset
+        ? {
+            width: "100%",
+            marginLeft: "0px",
+            boxSizing: "border-box" as const,
+          }
+        : {
+            width: `calc(100% + ${horizontalPadding * 2}px)`,
+            marginLeft: `-${horizontalPadding}px`,
+            boxSizing: "border-box" as const,
+          }
       : {};
 
   return {

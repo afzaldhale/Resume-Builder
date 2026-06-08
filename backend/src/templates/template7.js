@@ -561,10 +561,6 @@ export function template7HTML(data) {
     color: #4b5563;
     margin-bottom: 16px;
     line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
   }
 
   .tech-tags {
@@ -801,7 +797,7 @@ export function template7HTML(data) {
           ${safeData.summary ? `
           <div class="creative-tagline">
             <div class="tagline-text">
-              "${safeData.summary.substring(0, 120)}${safeData.summary.length > 120 ? '...' : ''}"
+              "${safeData.summary}"
             </div>
           </div>
           ` : ""}
@@ -903,7 +899,7 @@ export function template7HTML(data) {
                   project.technologies.forEach(tech => allTech.add(tech));
                 }
               });
-              return Array.from(allTech).slice(0, 10).map(tech => 
+              return Array.from(allTech).map(tech => 
                 `<div class="tool-tag">${tech}</div>`
               ).join("");
             })()}
@@ -1016,12 +1012,9 @@ export function template7HTML(data) {
               <p class="project-description">${project.description || ""}</p>
               ${project.technologies && project.technologies.length > 0 ? `
               <div class="tech-tags">
-                ${project.technologies.slice(0, 3).map(tech => 
+                ${project.technologies.map(tech => 
                   `<span class="tech-tag">${tech}</span>`
                 ).join("")}
-                ${project.technologies.length > 3 ? 
-                  `<span class="more-tag">+${project.technologies.length - 3} more</span>` : ""
-                }
               </div>
               ` : ""}
             </div>

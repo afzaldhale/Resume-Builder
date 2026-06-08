@@ -1,0 +1,74 @@
+{
+  "url": "http://127.0.0.1:8080/print/resume?mode=preview",
+  "htmlClasses": "resume-pdf-mode resume-print-ready",
+  "bodyClasses": "resume-print-mode",
+  "rootStatus": {
+    "exists": true,
+    "outerHTML": "<div class=\"resume-theme-root resume-page single-column\" style=\"width: 794px; height: 1123px; background: rgb(255, 255, 255); color: rgb(31, 41, 55); position: relative; overflow: visible; border: 1px solid rgb(216, 225, 235); font-family: Inter, Arial, Helvetica, sans-serif; margin: 0px auto; padding: 36px 32px; --resume-page-bg: #FFFFFF; --resume-page-text: #1F2937; --resume-muted-text: #617084; --resume-border: #D8E1EB; --resume-accent: #2E5C8A; --resume-accent-soft: #F8FAFC; --resume-accent-text: #1F2937; --resume-heading-size: 14.00px; --resume-body-size: 12.00px; --resume-item-title-size: 15.00px; --resume-item-subtitle-size: 12.00px; --resume-item-meta-size: 10.50px; --resume-list-size: 12.00px; --resume-name-size: 32px; --resume-role-size: 15px; --resume-line-height: 1.4; --resume-summary-box-padding: 10px 12px; --resume-list-indent: 18px; --resume-contact-separator-gap: 8px; --resume-section-vertical-gap: 8px; --resume-font-family: Inter, Arial, Helvetica, sans-serif;\"><div cl"
+  },
+  "headerStatus": {
+    "exists": false,
+    "count": 0,
+    "directParent": null,
+    "ancestors": [],
+    "siblings": null,
+    "outerHTML": null
+  },
+  "sectionStatus": {
+    "exists": true,
+    "count": 8,
+    "directParent": {
+      "tag": "div",
+      "classes": "flex h-full flex-col"
+    },
+    "ancestors": [
+      {
+        "tag": "section",
+        "classes": "resume-section break-inside-avoid space-y-2"
+      },
+      {
+        "tag": "div",
+        "classes": "flex h-full flex-col"
+      },
+      {
+        "tag": "div",
+        "classes": "resume-theme-root resume-page single-column"
+      }
+    ],
+    "siblings": {
+      "prev": [],
+      "next": [
+        {
+          "tag": "section",
+          "classes": "resume-section break-inside-avoid space-y-2"
+        },
+        {
+          "tag": "section",
+          "classes": "resume-section break-inside-avoid space-y-2"
+        },
+        {
+          "tag": "section",
+          "classes": "resume-section break-inside-avoid space-y-2"
+        },
+        {
+          "tag": "section",
+          "classes": "resume-section break-inside-avoid space-y-2"
+        },
+        {
+          "tag": "section",
+          "classes": "resume-section break-inside-avoid space-y-2"
+        },
+        {
+          "tag": "section",
+          "classes": "resume-section break-inside-avoid space-y-2"
+        },
+        {
+          "tag": "section",
+          "classes": "resume-section break-inside-avoid space-y-2"
+        }
+      ]
+    },
+    "outerHTML": "<section class=\"resume-section break-inside-avoid space-y-2\" style=\"color: rgb(31, 41, 55);\"><h2 class=\"resume-section-title resume-section-title-underline\" style=\"color: rgb(31, 41, 55); border-top-color: rgb(216, 225, 235); border-right-color: rgb(216, 225, 235); border-bottom-color: rgb(216, 225, 235); padding: 0px; margin-bottom: 6px; font-size: var(--resume-heading-size); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; line-height: 1.4;\">Professional Summary</h2><div class"
+  },
+  "headerReachableFromSection": false
+}
