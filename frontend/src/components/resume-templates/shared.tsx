@@ -185,16 +185,13 @@ const getSectionLabel = (key: SectionKey, summaryTitle: string) => {
 export const ResumeSidebarContactCard = ({
   data,
   theme,
-  _compactMode = false,
+  compactMode = false,
 }: {
   data: ResumeData;
   theme: ResumeTemplateTheme;
   compactMode?: boolean; // kept for API compatibility
 }) => {
   const items = getContactItems(data);
-
-  // mark API-compatible but unused param as used to satisfy lint
-  void _compactMode;
 
   if (items.length === 0) return null;
 
@@ -557,7 +554,7 @@ export const ResumeContactRow = ({
   items: ContactItem[];
   align?: "left" | "right";
   color: string;
-  compactMode?: boolean;
+  _compactMode?: boolean;
   densityMode?: "comfortable" | "compact" | "ultra-compact";
 }) => {
   // mark unused compactMode param
@@ -919,13 +916,13 @@ export const renderTemplate = (data: ResumeData, theme: ResumeTemplateTheme) => 
 
   const fresherSectionKeys = [
     ...getResumeSectionOrder("fresher").filter((key): key is SectionKey => key !== "header"),
-    "projects",
-    "achievements",
-    "references",
-    "custom",
-  ].filter((key, index, items) => items.indexOf(key) === index && hasSectionData(key, data));
+    "projects" as SectionKey,
+    "achievements" as SectionKey,
+    "references" as SectionKey,
+    "custom" as SectionKey,
+  ].filter((key, index, items) => items.indexOf(key) === index && hasSectionData(key as ResumeSectionKey, data));
 
-  const fresherSidebarKeys = (theme.sidebarSections || DEFAULT_FRESHER_SIDEBAR).filter((key) =>
+  const fresherSidebarKeys = (theme.sidebarSections || DEFAULT_FRESHER_SIDEBAR).filter((key: SectionKey) =>
     fresherSectionKeys.includes(key)
   );
   const fresherMainKeys = (theme.fresherMainSections || DEFAULT_FRESHER_MAIN).filter((key) =>

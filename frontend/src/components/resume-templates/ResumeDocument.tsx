@@ -55,7 +55,7 @@ const ResumeDocumentStyles = () => (
     }
 
     .resume-page-body-offset {
-      padding-top: 48px;
+      padding-top: 88px;
     }
 
     .page {
@@ -215,7 +215,7 @@ const ResumeDocumentComponent = ({
         const body = pageBodyTemplate.cloneNode(false) as HTMLElement;
         if (pages.length > 1) {
           body.classList.add("resume-page-body-offset");
-          // spacing is provided via single CSS rule `.resume-page-body-offset` (48px)
+          // spacing is provided via single CSS rule `.resume-page-body-offset` (88px)
         }
         page.appendChild(body);
         return body;
