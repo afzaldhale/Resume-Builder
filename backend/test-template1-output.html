@@ -1,0 +1,282 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Resume</title>
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #ffffff;
+    color: #111827;
+    line-height: 1.4;
+  }
+
+  .page {
+    width: 794px;
+    height: 1123px;
+    margin: auto;
+    padding: 36px;
+    box-sizing: border-box;
+  }
+
+  h1 {
+    font-size: 26px;
+    margin: 0 0 6px 0;
+  }
+
+  h2 {
+    font-size: 15px;
+    margin: 20px 0 6px 0;
+    text-transform: uppercase;
+    font-weight: bold;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 4px;
+  }
+
+  h3 {
+    font-size: 13px;
+    margin: 0;
+    font-weight: bold;
+  }
+
+  p {
+    font-size: 12.5px;
+    margin: 3px 0;
+  }
+
+  .contact p {
+    margin: 2px 0;
+  }
+
+  .header-divider {
+    border-bottom: 1px solid #d1d5db;
+    margin: 12px 0 16px 0;
+  }
+
+  .section {
+    margin-bottom: 12px;
+  }
+
+  ul {
+    margin: 4px 0 0 18px;
+    padding: 0;
+  }
+
+  li {
+    font-size: 12.5px;
+    margin-bottom: 3px;
+  }
+
+  .muted {
+    font-size: 12px;
+    color: #374151;
+  }
+
+  
+  .resume-extra-section,
+  .resume-additional-section {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .resume-extra-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .resume-extra-item {
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+
+  .resume-extra-custom-block + .resume-extra-custom-block {
+    margin-top: 8px;
+  }
+
+  .resume-extra-custom-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  @media print {
+    .page,
+    .section,
+    .resume-extra-section,
+    .resume-additional-section {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+  }
+
+</style>
+</head>
+
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <h1>John Smith</h1>
+    <p><strong>Senior Software Engineer</strong></p>
+
+    <div class="contact">
+      <p>Email: john.smith@example.com</p>
+      <p>Phone: +1 555 987 6543</p>
+      <p>Location: San Francisco, CA 94105</p>
+      <p>LinkedIn: linkedin.com/in/johnsmith</p>
+    </div>
+  </header>
+
+  <div class="header-divider"></div>
+
+  <!-- SUMMARY -->
+  
+  <section class="section">
+    <h2>Professional Summary</h2>
+    <p>Experienced software engineer with 8+ years of experience building scalable web applications.</p>
+  </section>
+  
+
+  <!-- SKILLS -->
+  
+  <section class="section">
+    <h2>Skills</h2>
+    <p>JavaScript, React, TypeScript, Node.js, AWS, Docker</p>
+  </section>
+  
+
+  <!-- EXPERIENCE -->
+  
+  <section class="section">
+    <h2>Professional Experience</h2>
+    
+      <div>
+        <h3>Senior Software Engineer – Tech Corp</h3>
+        <p class="muted">Jan 2021 – Present</p>
+
+        
+        <ul>
+          <li>Led development of microservices architecture
+Managed team of 5 engineers
+Improved system performance by 40%</li>
+        </ul>
+
+        <p class="muted">Impact: Reduced deployment time from 2 hours to 15 minutes</p>
+      </div>
+    
+      <div>
+        <h3>Software Engineer – StartUp Inc</h3>
+        <p class="muted">Jun 2019 – Dec 2020</p>
+
+        
+        <ul>
+          <li>Built REST APIs
+Implemented CI/CD pipeline</li>
+        </ul>
+
+        <p class="muted">Impact: Achieved 99.9% uptime</p>
+      </div>
+    
+  </section>
+  
+
+  <!-- PROJECTS -->
+  
+  <section class="section">
+    <h2>Projects</h2>
+    
+      <div>
+        <h3>Resume Builder</h3>
+        <p>A full-stack resume builder application</p>
+        <p class="muted">Impact: Completed in 2 weeks with 5000+ downloads</p>
+        <p class="muted">Technologies: React, Node.js, PostgreSQL</p>
+      </div>
+    
+  </section>
+  
+
+  <!-- EDUCATION -->
+  
+  <section class="section">
+    <h2>Education</h2>
+    
+      <div>
+        <h3>BS Computer Science – State University</h3>
+        <p class="muted">2014 – 2018</p>
+      </div>
+    
+  </section>
+  
+
+  <!-- CERTIFICATIONS -->
+  
+  <section class="section">
+    <h2>Certifications</h2>
+    <ul>
+      
+        <li>AWS Certified Solutions Architect – Amazon (2022)</li>
+      
+        <li>Kubernetes Administrator – CNCF (2021)</li>
+      
+    </ul>
+  </section>
+  
+
+  <!-- LANGUAGES -->
+  
+  <section class="section">
+    <h2>Languages</h2>
+    <p>English (Native), Spanish (Intermediate)</p>
+  </section>
+  
+
+  
+  <section class="section">
+    <h2>Hobbies</h2>
+    <p>Rock Climbing, Photography</p>
+  </section>
+  
+
+  
+      <section class="section resume-extra-section">
+        <h2 class="section-title">Strengths</h2>
+        <ul class="resume-extra-list">
+          <li class="resume-extra-item">Problem Solving</li><li class="resume-extra-item">Team Leadership</li><li class="resume-extra-item">System Design</li>
+        </ul>
+      </section>
+    
+      <section class="section resume-extra-section">
+        <h2 class="section-title">Achievements</h2>
+        <ul class="resume-extra-list">
+          <li class="resume-extra-item">Performance Optimization Award | Tech Corp | 2023</li>
+        </ul>
+      </section>
+    
+      <section class="section resume-extra-section">
+        <h2 class="section-title">References</h2>
+        <ul class="resume-extra-list">
+          <li class="resume-extra-item">Jane Doe | CTO | Tech Corp | jane@techcorp.com | +1 555 123 4567</li>
+        </ul>
+      </section>
+    
+        <section class="section resume-extra-section">
+          <h2 class="section-title">Additional Information</h2>
+          
+    <div class="resume-extra-custom-block">
+      <div class="resume-extra-custom-title">Publications</div>
+      <div class="resume-extra-item">Paper on Microservices Architecture - 2023</div>
+    </div>
+  
+        </section>
+      
+
+</div>
+</body>
+</html>

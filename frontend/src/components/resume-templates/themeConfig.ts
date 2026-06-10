@@ -92,7 +92,7 @@ const createMinimalConfig = (templateId: number): TemplateThemeConfig => ({
 
 export const templateThemeConfigs: Record<number, TemplateThemeConfig> = {
   1: createMinimalConfig(1),
-  2: createSidebarConfig(2),
+  2: createMinimalConfig(2),
   3: createSingleBarConfig(3, "#38BDF8"),
   4: createMinimalConfig(4),
   5: createSidebarConfig(5),
@@ -132,14 +132,18 @@ export const getTemplateThemeConfig = (templateId: number) =>
 export const getDefaultThemeColors = (templateId: number) =>
   getTemplateThemeConfig(templateId).defaultColors;
 
-const normalizeHex = (value: string) => {
+const normalizeHex = (value?: string | null) => {
+  if (typeof value !== "string") {
+    return null;
+  }
+
   const normalized = value.trim();
   return /^#([0-9A-F]{3}|[0-9A-F]{6})$/i.test(normalized) ? normalized.toUpperCase() : null;
 };
 
 export const sanitizeThemeColors = (
   templateId: number,
-  colors?: Record<string, string>
+  colors?: Record<string, unknown>
 ): Partial<Record<TemplateColorKey, string>> => {
   const config = getTemplateThemeConfig(templateId);
   const allowedKeys = new Set(config.editableColors.map((item) => item.key));

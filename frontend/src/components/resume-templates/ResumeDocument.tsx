@@ -58,6 +58,10 @@ const ResumeDocumentStyles = () => (
       padding-top: 88px;
     }
 
+    .resume-document-shell[data-template-id="1"] .resume-page-body-offset {
+      padding-top: 104px;
+    }
+
     .page {
       width: ${A4_WIDTH_PX}px;
       min-height: ${A4_HEIGHT_PX}px;

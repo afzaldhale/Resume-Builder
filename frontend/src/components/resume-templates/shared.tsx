@@ -138,13 +138,14 @@ const formatRange = (start?: string, end?: string) => {
 const getContactItems = (data: ResumeData): ContactItem[] => {
   const items: ContactItem[] = [];
 
-  if (hasText(data.email)) items.push({ label: "Email", value: data.email });
   if (hasText(data.phone)) items.push({ label: "Phone", value: data.phone });
+  if (hasText(data.email)) items.push({ label: "Email", value: data.email });
   if (hasText(data.address)) items.push({ label: "Location", value: data.address });
 
   (data.socialLinks || []).forEach((link) => {
     if (hasText(link.url)) {
-      items.push({ label: link.platform || "Link", value: link.url });
+      const label = link.platform?.toLowerCase().includes("linkedin") ? "LinkedIn" : link.platform || "Website";
+      items.push({ label, value: link.url });
     }
   });
 
@@ -214,30 +215,43 @@ export const ResumeSidebarContactCard = ({
           marginBottom: "8px",
         }}
       />
-      <div className="space-y-2">
+      <div className="space-y-3">
         {items.map((item, index) => (
-          <div key={`${item.label}-${item.value}-${index}`} className="space-y-0">
-            <p
+          <div key={`${item.label}-${item.value}-${index}`} className="flex items-start gap-3">
+            <span
+              aria-hidden="true"
               style={{
-                fontSize: "var(--resume-item-meta-size)",
-                lineHeight: "var(--resume-line-height)",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
                 color: theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText,
+                fontSize: "1rem",
+                lineHeight: "1.2",
+                minWidth: "20px",
               }}
             >
-              {item.label}
-            </p>
-            <p
-              style={{
-                fontSize: "var(--resume-body-size)",
-                lineHeight: "var(--resume-line-height)",
-                color: theme.palette.sidebarText || theme.palette.text,
-                wordBreak: "break-word",
-              }}
-            >
-              {item.value}
-            </p>
+              {item.label === "Phone" ? "☎" : item.label === "Email" ? "✉" : item.label === "Location" ? "📍" : "🔗"}
+            </span>
+            <div className="space-y-0">
+              <p
+                style={{
+                  fontSize: "var(--resume-item-meta-size)",
+                  lineHeight: "var(--resume-line-height)",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText,
+                }}
+              >
+                {item.label}
+              </p>
+              <p
+                style={{
+                  fontSize: "var(--resume-body-size)",
+                  lineHeight: "var(--resume-line-height)",
+                  color: theme.palette.sidebarText || theme.palette.text,
+                  wordBreak: "break-word",
+                }}
+              >
+                {item.value}
+              </p>
+            </div>
           </div>
         ))}
       </div>
