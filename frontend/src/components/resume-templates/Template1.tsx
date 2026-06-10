@@ -156,8 +156,7 @@ const Template1: React.FC<Template1Props> = ({ data }) => {
           </section>
         )}
 
-        {/* Small spacer for safety */}
-        <div className="h-3" />
+        {/* Spacer removed — using .resume-page-body-offset for multi-page spacing */}
       </div>
     </div>
   );

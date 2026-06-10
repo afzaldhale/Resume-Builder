@@ -388,252 +388,7 @@ export const ResumePage = ({
   </div>
 );
 
-export const ResumeContactRow = ({
-  items,
-  align = "left",
-  color,
-  compactMode: _compactMode = false,
-  densityMode = "comfortable",
-}: {
-  items: ContactItem[];
-  align?: "left" | "right";
-  color: string;
-  compactMode?: boolean;
-  densityMode?: "comfortable" | "compact" | "ultra-compact";
-}) => {
-  // mark unused compactMode param
-  void _compactMode;
-
-  const gapX = densityMode === "ultra-compact" ? 10 : densityMode === "compact" ? 12 : 14;
-  const gapY = densityMode === "ultra-compact" ? 4 : densityMode === "compact" ? 6 : 8;
-
-  return (
-    <div
-      className="flex flex-wrap"
-      style={{
-        justifyContent: align === "right" ? "flex-end" : "flex-start",
-        maxWidth: align === "right" ? "390px" : "100%",
-        gap: `${gapY}px ${gapX}px`,
-      }}
-    >
-      {items.map((item, index) => (
-        <span
-          key={`${item.label}-${item.value}-${index}`}
-          className="resume-contact-item"
-          style={{
-            color,
-            fontSize: "var(--resume-item-meta-size)",
-            lineHeight: "var(--resume-line-height)",
-          }}
-        >
-          {item.value}
-        </span>
-      ))}
-    </div>
-  );
-};
-
-export const ResumeHeader = ({
-  data,
-  theme,
-  compactMode = false,
-  densityMode = "comfortable",
-}: {
-  data: ResumeData;
-  theme: ResumeTemplateTheme;
-  compactMode?: boolean;
-  densityMode?: "comfortable" | "compact" | "ultra-compact";
-}) => {
-  const { summaryText } = getSummaryConfig(data);
-  const contactItems = getContactItems(data);
-
-  // sizes come from the shared CSS variables which honor typographyScale
-  const titleSize = "var(--resume-name-size)";
-  const roleSize = "var(--resume-role-size)";
-
-  return (
-    <header
-      className="break-inside-avoid"
-      style={{
-        background: theme.headerBand ? theme.palette.headerBg || theme.palette.page : "transparent",
-        borderBottom: theme.headerDivider ? `1px solid ${theme.palette.border}` : "none",
-        paddingBottom: theme.headerDivider ? "16px" : "0",
-      }}
-    >
-      <div
-        className={theme.headerLayout === "split" ? "flex items-end justify-between gap-8" : "space-y-2.5"}
-      >
-        <div className="min-w-0">
-          <h1
-            className="font-bold tracking-[0.02em] uppercase"
-            style={{
-              fontSize: titleSize,
-              lineHeight: "var(--resume-line-height)",
-              color: theme.palette.nameText || theme.palette.text,
-            }}
-          >
-            {data.fullName}
-          </h1>
-          {hasText(data.role) ? (
-            <p
-              className="mt-2 font-medium uppercase"
-              style={{
-                fontSize: roleSize,
-                lineHeight: "var(--resume-line-height)",
-                color: theme.palette.titleText || theme.palette.mutedText,
-                letterSpacing: "0.08em",
-              }}
-            >
-              {data.role}
-            </p>
-          ) : null}
-        </div>
-
-        {theme.showHeaderContact !== false && contactItems.length > 0 ? (
-          <ResumeContactRow
-            items={contactItems}
-            align={theme.headerLayout === "split" ? "right" : "left"}
-            color={theme.palette.mutedText}
-            compactMode={compactMode}
-            densityMode={densityMode}
-          />
-        ) : null}
-      </div>
-
-      {theme.summaryInHeader && hasText(summaryText) ? (
-        <div className="mt-4">
-          {theme.summaryStyle === "plain" ? (
-            <p className="resume-body-copy">{summaryText}</p>
-          ) : (
-            <div className="resume-summary-box">
-              <p className="resume-body-copy">{summaryText}</p>
-            </div>
-          )}
-        </div>
-      ) : null}
-    </header>
-  );
-};
-
-export const ResumeSidebar = ({
-  children,
-  theme,
-  compactMode = false,
-}: {
-  children: ReactNode;
-  theme: ResumeTemplateTheme;
-  compactMode?: boolean;
-}) => (
-  <aside
-    className="h-full min-h-full self-stretch"
-    style={{
-      background: theme.palette.sidebarBg || theme.palette.accentSoft,
-      color: theme.palette.sidebarText || theme.palette.text,
-      padding: scalePxString(theme.sidebarPadding || "28px 22px", compactMode ? 0.82 : 1),
-    }}
-  >
-    {children}
-  </aside>
-);
-
-export const ResumeAccentStrip = ({
-  theme,
-}: {
-  theme: ResumeTemplateTheme;
-}) => (
-  <div
-    aria-hidden="true"
-    style={{
-      position: "absolute",
-      left: "0",
-      top: "0",
-      width: "6px",
-      height: "100%",
-      background: theme.palette.accent,
-    }}
-  />
-);
-
-export const ResumeBulletList = ({
-  items,
-  fallbackText,
-  className = "",
-}: {
-  items: string[];
-  fallbackText?: string;
-  className?: string;
-}) => {
-  const filteredItems = items.filter(Boolean);
-  if (filteredItems.length === 0 && !hasText(fallbackText)) return null;
-
-  if (filteredItems.length <= 1 && hasText(fallbackText)) {
-    return <p className={`resume-body-copy ${className}`.trim()}>{fallbackText}</p>;
-  }
-
-  return (
-    <ul className={`resume-bullet-list ${className}`.trim()}>
-      {filteredItems.map((item, index) => (
-        <li key={`${item}-${index}`}>{item}</li>
-      ))}
-    </ul>
-  );
-};
-
-export const ResumeTagList = ({
-  items,
-}: {
-  items: string[];
-}) => {
-  const filteredItems = uniqueItems(items.filter(Boolean));
-  if (filteredItems.length === 0) return null;
-
-  return <p className="resume-body-copy resume-skills">{filteredItems.join(", ")}</p>;
-};
-
-export const ResumeMetaBlock = ({
-  title,
-  subtitle,
-  meta,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  meta?: string;
-  children?: ReactNode;
-}) => (
-  <div className="resume-meta-block break-inside-avoid">
-    <h3 className="resume-item-title">{title}</h3>
-    {hasText(subtitle) ? <p className="resume-item-subtitle mt-1">{subtitle}</p> : null}
-    {hasText(meta) ? <p className="resume-item-meta mt-1.5">{meta}</p> : null}
-    {children ? <div className="mt-2.5">{children}</div> : null}
-  </div>
-);
-
-export const ResumeTwoColumnLayout = ({
-  sidebar,
-  main,
-  theme,
-}: {
-  sidebar: ReactNode;
-  main: ReactNode;
-  theme: ResumeTemplateTheme;
-}) => {
-  const sidebarWidth = theme.sidebarWidth || "30%";
-  const mainWidth = `calc(100% - ${sidebarWidth})`;
-
-  return (
-    <div className="resume-two-column-layout flex h-full items-stretch">
-      <div className="resume-sidebar" style={{ width: sidebarWidth, flex: `0 0 ${sidebarWidth}` }}>
-        {sidebar}
-      </div>
-      <main className="resume-main" style={{ width: mainWidth }}>
-        {main}
-      </main>
-    </div>
-  );
-};
-
-const ResumePageStyles = () => (
+export const ResumePageStyles = () => (
   <style>{`
     .resume-theme-root {
       background: var(--resume-page-bg);
@@ -791,6 +546,251 @@ const ResumePageStyles = () => (
     }
   `}</style>
 );
+
+export const ResumeContactRow = ({
+  items,
+  align = "left",
+  color,
+  compactMode: _compactMode = false,
+  densityMode = "comfortable",
+}: {
+  items: ContactItem[];
+  align?: "left" | "right";
+  color: string;
+  compactMode?: boolean;
+  densityMode?: "comfortable" | "compact" | "ultra-compact";
+}) => {
+  // mark unused compactMode param
+  void _compactMode;
+
+  const gapX = densityMode === "ultra-compact" ? 10 : densityMode === "compact" ? 12 : 14;
+  const gapY = densityMode === "ultra-compact" ? 4 : densityMode === "compact" ? 6 : 8;
+
+  return (
+    <div
+      className="flex flex-wrap"
+      style={{
+        justifyContent: align === "right" ? "flex-end" : "flex-start",
+        maxWidth: align === "right" ? "390px" : "100%",
+        gap: `${gapY}px ${gapX}px`,
+      }}
+    >
+      {items.map((item, index) => (
+        <span
+          key={`${item.label}-${item.value}-${index}`}
+          className="resume-contact-item"
+          style={{
+            color,
+            fontSize: "var(--resume-item-meta-size)",
+            lineHeight: "var(--resume-line-height)",
+          }}
+        >
+          {item.value}
+        </span>
+      ))}
+    </div>
+  );
+};
+
+export const ResumeHeader = ({
+  data,
+  theme,
+  compactMode = false,
+  densityMode = "comfortable",
+}: {
+  data: ResumeData;
+  theme: ResumeTemplateTheme;
+  compactMode?: boolean;
+  densityMode?: "comfortable" | "compact" | "ultra-compact";
+}) => {
+  const { summaryText } = getSummaryConfig(data);
+  const contactItems = getContactItems(data);
+
+  // sizes come from the shared CSS variables which honor typographyScale
+  const titleSize = "var(--resume-name-size)";
+  const roleSize = "var(--resume-role-size)";
+
+  return (
+    <header
+      className="break-inside-avoid"
+      style={{
+        background: theme.headerBand ? theme.palette.headerBg || theme.palette.page : "transparent",
+        borderBottom: theme.headerDivider ? `1px solid ${theme.palette.border}` : "none",
+        paddingBottom: theme.headerDivider ? "16px" : "0",
+      }}
+    >
+      <div
+        className={theme.headerLayout === "split" ? "flex items-end justify-between gap-8" : "space-y-2.5"}
+      >
+        <div className="min-w-0">
+          <h1
+            className="font-bold tracking-[0.02em] uppercase"
+            style={{
+              fontSize: titleSize,
+              lineHeight: "var(--resume-line-height)",
+              color: theme.palette.nameText || theme.palette.text,
+            }}
+          >
+            {data.fullName}
+          </h1>
+          {hasText(data.role) ? (
+            <p
+              className="mt-2 font-medium uppercase"
+              style={{
+                fontSize: roleSize,
+                lineHeight: "var(--resume-line-height)",
+                color: theme.palette.titleText || theme.palette.mutedText,
+                letterSpacing: "0.08em",
+              }}
+            >
+              {data.role}
+            </p>
+          ) : null}
+        </div>
+
+        {theme.showHeaderContact !== false && contactItems.length > 0 ? (
+          <ResumeContactRow
+            items={contactItems}
+            align={theme.headerLayout === "split" ? "right" : "left"}
+            color={theme.palette.mutedText}
+            compactMode={compactMode}
+            densityMode={densityMode}
+          />
+        ) : null}
+      </div>
+
+      {theme.summaryInHeader && hasText(summaryText) ? (
+        <div className="mt-4">
+          {theme.summaryStyle === "plain" ? (
+            <p className="resume-body-copy">{summaryText}</p>
+          ) : (
+            <div className="resume-summary-box">
+              <p className="resume-body-copy">{summaryText}</p>
+            </div>
+          )}
+        </div>
+      ) : null}
+    </header>
+  );
+};
+
+export const ResumeSidebar = ({
+  children,
+  theme,
+  compactMode = false,
+}: {
+  children: ReactNode;
+  theme: ResumeTemplateTheme;
+  compactMode?: boolean;
+}) => (
+  <aside
+    className="self-stretch"
+    style={{
+      background: theme.palette.sidebarBg || theme.palette.accentSoft,
+      color: theme.palette.sidebarText || theme.palette.text,
+      padding: scalePxString(theme.sidebarPadding || "28px 22px", compactMode ? 0.82 : 1),
+    }}
+  >
+    {children}
+  </aside>
+);
+
+export const ResumeAccentStrip = ({
+  theme,
+}: {
+  theme: ResumeTemplateTheme;
+}) => (
+  <div
+    aria-hidden="true"
+    style={{
+      position: "absolute",
+      left: "0",
+      top: "0",
+      width: "6px",
+      height: "100%",
+      background: theme.palette.accent,
+    }}
+  />
+);
+
+export const ResumeBulletList = ({
+  items,
+  fallbackText,
+  className = "",
+}: {
+  items: string[];
+  fallbackText?: string;
+  className?: string;
+}) => {
+  const filteredItems = items.filter(Boolean);
+  if (filteredItems.length === 0 && !hasText(fallbackText)) return null;
+
+  if (filteredItems.length <= 1 && hasText(fallbackText)) {
+    return <p className={`resume-body-copy ${className}`.trim()}>{fallbackText}</p>;
+  }
+
+  return (
+    <ul className={`resume-bullet-list ${className}`.trim()}>
+      {filteredItems.map((item, index) => (
+        <li key={`${item}-${index}`}>{item}</li>
+      ))}
+    </ul>
+  );
+};
+
+export const ResumeTagList = ({
+  items,
+}: {
+  items: string[];
+}) => {
+  const filteredItems = uniqueItems(items.filter(Boolean));
+  if (filteredItems.length === 0) return null;
+
+  return <p className="resume-body-copy resume-skills">{filteredItems.join(", ")}</p>;
+};
+
+export const ResumeMetaBlock = ({
+  title,
+  subtitle,
+  meta,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  meta?: string;
+  children?: ReactNode;
+}) => (
+  <div className="resume-meta-block break-inside-avoid">
+    <h3 className="resume-item-title">{title}</h3>
+    {hasText(subtitle) ? <p className="resume-item-subtitle mt-1">{subtitle}</p> : null}
+    {hasText(meta) ? <p className="resume-item-meta mt-1.5">{meta}</p> : null}
+    {children ? <div className="mt-2.5">{children}</div> : null}
+  </div>
+);
+
+export const ResumeTwoColumnLayout = ({
+  sidebar,
+  main,
+  theme,
+}: {
+  sidebar: ReactNode;
+  main: ReactNode;
+  theme: ResumeTemplateTheme;
+}) => {
+  const sidebarWidth = theme.sidebarWidth || "30%";
+  const mainWidth = `calc(100% - ${sidebarWidth})`;
+
+  return (
+    <div className="resume-two-column-layout flex h-full items-stretch">
+      <div className="resume-sidebar" style={{ width: sidebarWidth, flex: `0 0 ${sidebarWidth}` }}>
+        {sidebar}
+      </div>
+      <main className="resume-main" style={{ width: mainWidth }}>
+        {main}
+      </main>
+    </div>
+  );
+};
 
 const renderSections = ({
   keys,

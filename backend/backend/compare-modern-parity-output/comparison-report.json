@@ -1,0 +1,397 @@
+[
+  {
+    "templateId": 1,
+    "themeName": "Clean Single Column",
+    "sharedMetrics": {
+      "pageCount": 0,
+      "sectionTitles": [
+        "Professional Summary",
+        "Skills",
+        "Work Experience",
+        "Education",
+        "Certifications",
+        "Projects",
+        "Achievements",
+        "Languages",
+        "Strengths",
+        "Hobbies / Interests",
+        "Additional Information"
+      ],
+      "contactItems": [
+        "isabella.thompson@example.com",
+        "+44 20 7946 0958",
+        "London, United Kingdom",
+        "linkedin.com/in/isabella-thompson",
+        "isabellathompson.design"
+      ],
+      "headerText": "Isabella ThompsonLead Product Design Managerisabella.thompson@example.com+44 20 7946 0958London, United Kingdomlinkedin.com/in/isabella-thompsonisabellathompson.design",
+      "nameFontSize": "33.86px",
+      "nameLineHeight": "47.404px",
+      "roleFontSize": "15.87px",
+      "roleLineHeight": "22.218px",
+      "sectionHeadingFontSize": "14.81px",
+      "bodyFontSize": "12.7px",
+      "summaryPadding": "8px 10px",
+      "containerGap": "normal",
+      "pagePadding": "27.16px 30.18px",
+      "sectionGap": "11px"
+    },
+    "modernMetrics": {
+      "pageCount": 0,
+      "sectionTitles": [
+        "Professional Summary",
+        "Skills",
+        "Work Experience",
+        "Education",
+        "Certifications",
+        "Projects",
+        "Achievements",
+        "Languages",
+        "Strengths",
+        "Hobbies / Interests",
+        "Additional Information"
+      ],
+      "contactItems": [
+        "isabella.thompson@example.com",
+        "+44 20 7946 0958",
+        "London, United Kingdom",
+        "linkedin.com/in/isabella-thompson",
+        "isabellathompson.design"
+      ],
+      "headerText": "Isabella ThompsonLead Product Design Managerisabella.thompson@example.com+44 20 7946 0958London, United Kingdomlinkedin.com/in/isabella-thompsonisabellathompson.design",
+      "nameFontSize": "33.86px",
+      "nameLineHeight": "47.404px",
+      "roleFontSize": "15.87px",
+      "roleLineHeight": "22.218px",
+      "sectionHeadingFontSize": "14.81px",
+      "bodyFontSize": "12.7px",
+      "summaryPadding": "8px 10px",
+      "containerGap": "normal",
+      "pagePadding": "36px 40px",
+      "sectionGap": "11px"
+    },
+    "diffs": {
+      "pagePadding": {
+        "shared": "27.16px 30.18px",
+        "modern": "36px 40px"
+      }
+    },
+    "screenshotMatch": false
+  },
+  {
+    "templateId": 3,
+    "themeName": "Colored Heading Corporate",
+    "sharedMetrics": {
+      "pageCount": 0,
+      "sectionTitles": [
+        "Professional Summary",
+        "Skills",
+        "Work Experience",
+        "Education",
+        "Certifications",
+        "Projects",
+        "Achievements",
+        "Languages",
+        "Strengths",
+        "Hobbies / Interests",
+        "Additional Information"
+      ],
+      "contactItems": [
+        "isabella.thompson@example.com",
+        "+44 20 7946 0958",
+        "London, United Kingdom",
+        "linkedin.com/in/isabella-thompson",
+        "isabellathompson.design"
+      ],
+      "headerText": "Isabella ThompsonLead Product Design Managerisabella.thompson@example.com+44 20 7946 0958London, United Kingdomlinkedin.com/in/isabella-thompsonisabellathompson.design",
+      "nameFontSize": "29.44px",
+      "nameLineHeight": "41.216px",
+      "roleFontSize": "13.8px",
+      "roleLineHeight": "19.32px",
+      "sectionHeadingFontSize": "12.88px",
+      "bodyFontSize": "11.04px",
+      "summaryPadding": "8px 10px",
+      "containerGap": "normal",
+      "pagePadding": "27.16px 24.14px",
+      "sectionGap": "11px"
+    },
+    "modernMetrics": {
+      "pageCount": 0,
+      "sectionTitles": [
+        "Professional Summary",
+        "Skills",
+        "Work Experience",
+        "Education",
+        "Certifications",
+        "Projects",
+        "Achievements",
+        "Languages",
+        "Strengths",
+        "Hobbies / Interests",
+        "Additional Information"
+      ],
+      "contactItems": [
+        "isabella.thompson@example.com",
+        "+44 20 7946 0958",
+        "London, United Kingdom",
+        "linkedin.com/in/isabella-thompson",
+        "isabellathompson.design"
+      ],
+      "headerText": "Isabella ThompsonLead Product Design Managerisabella.thompson@example.com+44 20 7946 0958London, United Kingdomlinkedin.com/in/isabella-thompsonisabellathompson.design",
+      "nameFontSize": "29.44px",
+      "nameLineHeight": "41.216px",
+      "roleFontSize": "13.8px",
+      "roleLineHeight": "19.32px",
+      "sectionHeadingFontSize": "12.88px",
+      "bodyFontSize": "11.04px",
+      "summaryPadding": "8px 10px",
+      "containerGap": "normal",
+      "pagePadding": "36px 32px",
+      "sectionGap": "11px"
+    },
+    "diffs": {
+      "pagePadding": {
+        "shared": "27.16px 24.14px",
+        "modern": "36px 32px"
+      }
+    },
+    "screenshotMatch": false
+  },
+  {
+    "templateId": 7,
+    "themeName": "Muted Coral Corporate",
+    "sharedMetrics": {
+      "pageCount": 0,
+      "sectionTitles": [
+        "Professional Summary",
+        "Skills",
+        "Work Experience",
+        "Education",
+        "Certifications",
+        "Projects",
+        "Achievements",
+        "Languages",
+        "Strengths",
+        "Hobbies / Interests",
+        "Additional Information"
+      ],
+      "contactItems": [
+        "isabella.thompson@example.com",
+        "+44 20 7946 0958",
+        "London, United Kingdom",
+        "linkedin.com/in/isabella-thompson",
+        "isabellathompson.design"
+      ],
+      "headerText": "Isabella ThompsonLead Product Design Managerisabella.thompson@example.com+44 20 7946 0958London, United Kingdomlinkedin.com/in/isabella-thompsonisabellathompson.design",
+      "nameFontSize": "29.44px",
+      "nameLineHeight": "41.216px",
+      "roleFontSize": "13.8px",
+      "roleLineHeight": "19.32px",
+      "sectionHeadingFontSize": "12.88px",
+      "bodyFontSize": "11.04px",
+      "summaryPadding": "8px 10px",
+      "containerGap": "normal",
+      "pagePadding": "27.16px 24.14px",
+      "sectionGap": "11px"
+    },
+    "modernMetrics": {
+      "pageCount": 0,
+      "sectionTitles": [
+        "Professional Summary",
+        "Skills",
+        "Work Experience",
+        "Education",
+        "Certifications",
+        "Projects",
+        "Achievements",
+        "Languages",
+        "Strengths",
+        "Hobbies / Interests",
+        "Additional Information"
+      ],
+      "contactItems": [
+        "isabella.thompson@example.com",
+        "+44 20 7946 0958",
+        "London, United Kingdom",
+        "linkedin.com/in/isabella-thompson",
+        "isabellathompson.design"
+      ],
+      "headerText": "Isabella ThompsonLead Product Design Managerisabella.thompson@example.com+44 20 7946 0958London, United Kingdomlinkedin.com/in/isabella-thompsonisabellathompson.design",
+      "nameFontSize": "29.44px",
+      "nameLineHeight": "41.216px",
+      "roleFontSize": "13.8px",
+      "roleLineHeight": "19.32px",
+      "sectionHeadingFontSize": "12.88px",
+      "bodyFontSize": "11.04px",
+      "summaryPadding": "8px 10px",
+      "containerGap": "normal",
+      "pagePadding": "36px 32px",
+      "sectionGap": "11px"
+    },
+    "diffs": {
+      "pagePadding": {
+        "shared": "27.16px 24.14px",
+        "modern": "36px 32px"
+      }
+    },
+    "screenshotMatch": false
+  },
+  {
+    "templateId": 10,
+    "themeName": "Blue Heading Corporate",
+    "sharedMetrics": {
+      "pageCount": 0,
+      "sectionTitles": [
+        "Professional Summary",
+        "Skills",
+        "Work Experience",
+        "Education",
+        "Certifications",
+        "Projects",
+        "Achievements",
+        "Languages",
+        "Strengths",
+        "Hobbies / Interests",
+        "Additional Information"
+      ],
+      "contactItems": [
+        "isabella.thompson@example.com",
+        "+44 20 7946 0958",
+        "London, United Kingdom",
+        "linkedin.com/in/isabella-thompson",
+        "isabellathompson.design"
+      ],
+      "headerText": "Isabella ThompsonLead Product Design Managerisabella.thompson@example.com+44 20 7946 0958London, United Kingdomlinkedin.com/in/isabella-thompsonisabellathompson.design",
+      "nameFontSize": "29.44px",
+      "nameLineHeight": "41.216px",
+      "roleFontSize": "13.8px",
+      "roleLineHeight": "19.32px",
+      "sectionHeadingFontSize": "12.88px",
+      "bodyFontSize": "11.04px",
+      "summaryPadding": "8px 10px",
+      "containerGap": "normal",
+      "pagePadding": "27.16px 24.14px",
+      "sectionGap": "11px"
+    },
+    "modernMetrics": {
+      "pageCount": 0,
+      "sectionTitles": [
+        "Professional Summary",
+        "Skills",
+        "Work Experience",
+        "Education",
+        "Certifications",
+        "Projects",
+        "Achievements",
+        "Languages",
+        "Strengths",
+        "Hobbies / Interests",
+        "Additional Information"
+      ],
+      "contactItems": [
+        "isabella.thompson@example.com",
+        "+44 20 7946 0958",
+        "London, United Kingdom",
+        "linkedin.com/in/isabella-thompson",
+        "isabellathompson.design"
+      ],
+      "headerText": "Isabella ThompsonLead Product Design Managerisabella.thompson@example.com+44 20 7946 0958London, United Kingdomlinkedin.com/in/isabella-thompsonisabellathompson.design",
+      "nameFontSize": "29.44px",
+      "nameLineHeight": "41.216px",
+      "roleFontSize": "13.8px",
+      "roleLineHeight": "19.32px",
+      "sectionHeadingFontSize": "12.88px",
+      "bodyFontSize": "11.04px",
+      "summaryPadding": "8px 10px",
+      "containerGap": "normal",
+      "pagePadding": "36px 32px",
+      "sectionGap": "11px"
+    },
+    "diffs": {
+      "pagePadding": {
+        "shared": "27.16px 24.14px",
+        "modern": "36px 32px"
+      }
+    },
+    "screenshotMatch": false
+  },
+  {
+    "templateId": 12,
+    "themeName": "Soft Green Corporate",
+    "sharedMetrics": {
+      "pageCount": 0,
+      "sectionTitles": [
+        "Professional Summary",
+        "Skills",
+        "Work Experience",
+        "Education",
+        "Certifications",
+        "Projects",
+        "Achievements",
+        "Languages",
+        "Strengths",
+        "Hobbies / Interests",
+        "Additional Information"
+      ],
+      "contactItems": [
+        "isabella.thompson@example.com",
+        "+44 20 7946 0958",
+        "London, United Kingdom",
+        "linkedin.com/in/isabella-thompson",
+        "isabellathompson.design"
+      ],
+      "headerText": "Isabella ThompsonLead Product Design Managerisabella.thompson@example.com+44 20 7946 0958London, United Kingdomlinkedin.com/in/isabella-thompsonisabellathompson.design",
+      "nameFontSize": "29.44px",
+      "nameLineHeight": "41.216px",
+      "roleFontSize": "13.8px",
+      "roleLineHeight": "19.32px",
+      "sectionHeadingFontSize": "12.88px",
+      "bodyFontSize": "11.04px",
+      "summaryPadding": "8px 10px",
+      "containerGap": "normal",
+      "pagePadding": "27.16px 24.14px",
+      "sectionGap": "11px"
+    },
+    "modernMetrics": {
+      "pageCount": 0,
+      "sectionTitles": [
+        "Professional Summary",
+        "Skills",
+        "Work Experience",
+        "Education",
+        "Certifications",
+        "Projects",
+        "Achievements",
+        "Languages",
+        "Strengths",
+        "Hobbies / Interests",
+        "Additional Information"
+      ],
+      "contactItems": [
+        "isabella.thompson@example.com",
+        "+44 20 7946 0958",
+        "London, United Kingdom",
+        "linkedin.com/in/isabella-thompson",
+        "isabellathompson.design"
+      ],
+      "headerText": "Isabella ThompsonLead Product Design Managerisabella.thompson@example.com+44 20 7946 0958London, United Kingdomlinkedin.com/in/isabella-thompsonisabellathompson.design",
+      "nameFontSize": "29.44px",
+      "nameLineHeight": "41.216px",
+      "roleFontSize": "13.8px",
+      "roleLineHeight": "19.32px",
+      "sectionHeadingFontSize": "12.88px",
+      "bodyFontSize": "11.04px",
+      "summaryPadding": "8px 10px",
+      "containerGap": "normal",
+      "pagePadding": "36px 32px",
+      "sectionGap": "11px"
+    },
+    "diffs": {
+      "pagePadding": {
+        "shared": "27.16px 24.14px",
+        "modern": "36px 32px"
+      }
+    },
+    "screenshotMatch": false
+  }
+]

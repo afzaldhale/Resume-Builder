@@ -1,9 +1,0 @@
-{
-  "url": "http://127.0.0.1:8080/print/resume?mode=pdf",
-  "mode": "pdf",
-  "bodyClasses": "resume-print-mode",
-  "htmlClasses": "resume-pdf-mode pdf-render-mode resume-print-ready",
-  "hasResumeDocument": true,
-  "hasThemedTemplate": true,
-  "pdfRenderMode": true
-}

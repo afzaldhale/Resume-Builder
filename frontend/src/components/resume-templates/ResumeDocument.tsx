@@ -53,6 +53,11 @@ const ResumeDocumentStyles = () => (
       -webkit-line-clamp: unset !important;
       text-overflow: clip !important;
     }
+
+    .resume-page-body-offset {
+      padding-top: 48px;
+    }
+
     .page {
       width: ${A4_WIDTH_PX}px;
       min-height: ${A4_HEIGHT_PX}px;
@@ -208,6 +213,10 @@ const ResumeDocumentComponent = ({
 
       const createPageBody = (page: HTMLElement) => {
         const body = pageBodyTemplate.cloneNode(false) as HTMLElement;
+        if (pages.length > 1) {
+          body.classList.add("resume-page-body-offset");
+          // spacing is provided via single CSS rule `.resume-page-body-offset` (48px)
+        }
         page.appendChild(body);
         return body;
       };
@@ -380,7 +389,8 @@ const ResumeDocumentComponent = ({
 
       pageElements.forEach((page) => {
         const sections = Array.from(page.querySelectorAll<HTMLElement>(".resume-section"));
-        if (sections.length === 0 && page.scrollHeight < 140) {
+        // remove pages that contain no sections (including spacer-only pages)
+        if (sections.length === 0) {
           page.remove();
           return;
         }
