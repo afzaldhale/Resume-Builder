@@ -1,0 +1,372 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Resume - Isabella Thompson</title>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  /* ===== A4 LOCK ===== */
+  body {
+    width: 794px;
+    height: 1123px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, #111827, #1f2937, #111827);
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .background-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.05;
+  }
+
+  .dot-pattern {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 25px 25px, rgba(255,255,255,0.2) 2%, transparent 0%);
+    background-size: 100px 100px;
+  }
+
+  .top-line, .bottom-line {
+    position: absolute;
+    width: 100%;
+    height: 1px;
+  }
+
+  .top-line {
+    top: 0;
+    background: linear-gradient(90deg, #3b82f6, #10b981);
+  }
+
+  .bottom-line {
+    bottom: 0;
+    background: linear-gradient(90deg, #10b981, #3b82f6);
+  }
+
+  .container {
+    position: relative;
+    z-index: 10;
+    height: 1123px;
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    text-align: center;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .name {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .role {
+    font-size: 15px;
+    color: #d1d5db;
+    margin-bottom: 12px;
+    letter-spacing: 0.8px;
+  }
+
+  .contact-info {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .contact-label {
+    font-size: 9px;
+    color: #9ca3af;
+    letter-spacing: 1px;
+  }
+
+  .contact-value {
+    font-size: 11px;
+    color: #e5e7eb;
+  }
+
+  .social-links {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 6px;
+  }
+
+  .social-link {
+    font-size: 10px;
+    color: #93c5fd;
+    text-decoration: none;
+  }
+
+  /* ===== SUMMARY ===== */
+  .summary-card {
+    background: rgba(31,41,55,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .summary-content {
+    font-size: 11px;
+    line-height: 1.45;
+    text-align: center;
+    color: #d1d5db;
+  }
+
+  /* ===== GRID ===== */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    flex: 1;
+  }
+
+  .section {
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(59,130,246,0.5);
+    padding-bottom: 3px;
+  }
+
+  /* ===== SKILLS ===== */
+  .skill-item {
+    font-size: 11px;
+    padding-left: 12px;
+    position: relative;
+    margin-bottom: 4px;
+  }
+
+  .skill-bullet {
+    width: 6px;
+    height: 6px;
+    background: #3b82f6;
+    border-radius: 50%;
+    position: absolute;
+    left: 0;
+    top: 4px;
+  }
+
+  /* ===== CARDS ===== */
+  .education-card,
+  .exp-card,
+  .project-card,
+  .cert-card,
+  .strength-card {
+    background: rgba(31,41,55,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 12px;
+  }
+
+  .edu-degree,
+  .exp-title,
+  .project-name {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .edu-school,
+  .exp-company {
+    font-size: 11px;
+    color: #d1d5db;
+  }
+
+  .exp-description,
+  .project-description {
+    font-size: 11px;
+    line-height: 1.45;
+  }
+
+  .tech-tag {
+    font-size: 9px;
+    padding: 3px 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+  }
+
+  .strengths-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .hobby-tag {
+    font-size: 11px;
+    padding: 6px 10px;
+    background: rgba(31,41,55,0.5);
+    border-radius: 6px;
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+    font-size: 10px;
+    color: #9ca3af;
+  }
+
+  @media print {
+    body { background: #111827; }
+    .background-pattern { display: none; }
+  }
+
+  
+  .resume-extra-section,
+  .resume-additional-section {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .resume-extra-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .resume-extra-item {
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+
+  .resume-extra-custom-block + .resume-extra-custom-block {
+    margin-top: 8px;
+  }
+
+  .resume-extra-custom-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  @media print {
+    .page,
+    .section,
+    .resume-extra-section,
+    .resume-additional-section {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+  }
+
+</style>
+</head>
+
+<body>
+<div class="page">
+<div class="background-pattern">
+  <div class="dot-pattern"></div>
+  <div class="top-line"></div>
+  <div class="bottom-line"></div>
+</div>
+
+<div class="container">
+
+<header class="header">
+  <h1 class="name">Isabella Thompson</h1>
+  <div class="role">Lead Product Design Manager</div>
+
+  <div class="contact-info">
+    <div><div class="contact-label">EMAIL</div><div class="contact-value">isabella.thompson@example.com</div></div>
+    <div><div class="contact-label">PHONE</div><div class="contact-value">+44 20 7946 0958</div></div>
+    <div><div class="contact-label">LOCATION</div><div class="contact-value">London, United Kingdom</div></div>
+  </div>
+
+  
+  <div class="social-links">
+    <a class="social-link" href="https://linkedin.com/in/isabella-thompson">LinkedIn</a><a class="social-link" href="https://isabellathompson.design">Portfolio</a><a class="social-link" href="https://dribbble.com/isabella-thompson">Dribbble</a>
+  </div>
+</header>
+
+
+<section class="section">
+  <h2 class="section-title text-center">PROFESSIONAL SUMMARY</h2>
+  <div class="summary-card">
+    <div class="summary-content">Design leader with 12+ years of experience delivering digital products across fintech, healthcare, and enterprise SaaS. Expert at scaling design systems, collaborating with cross-functional teams, and turning product strategy into data-driven customer experiences.</div>
+  </div>
+</section>
+
+<div class="main-grid">
+
+<div>
+  <section class="section"><h2 class="section-title">SKILLS</h2><div class="skill-item"><span class="skill-bullet"></span>Design Systems</div><div class="skill-item"><span class="skill-bullet"></span>Product Strategy</div><div class="skill-item"><span class="skill-bullet"></span>UX Research</div><div class="skill-item"><span class="skill-bullet"></span>Accessibility</div><div class="skill-item"><span class="skill-bullet"></span>Figma</div><div class="skill-item"><span class="skill-bullet"></span>Prototyping</div><div class="skill-item"><span class="skill-bullet"></span>Stakeholder Alignment</div><div class="skill-item"><span class="skill-bullet"></span>Agile Collaboration</div><div class="skill-item"><span class="skill-bullet"></span>Service Design</div><div class="skill-item"><span class="skill-bullet"></span>Design Operations</div><div class="skill-item"><span class="skill-bullet"></span>Mentoring</div><div class="skill-item"><span class="skill-bullet"></span>Cross-functional Leadership</div></section>
+  <section class="section"><h2 class="section-title">EDUCATION</h2><div class="education-card"><div class="edu-degree">M.Sc. Human-Computer Interaction</div><div class="edu-school">University College London</div></div><div class="education-card"><div class="edu-degree">B.A. Graphic Design</div><div class="edu-school">Goldsmiths, University of London</div></div><div class="education-card"><div class="edu-degree">Executive Certificate in Product Strategy</div><div class="edu-school">London Business School</div></div></section>
+  <section class="section"><h2 class="section-title">LANGUAGES</h2><div class="education-card"><div class="edu-degree">English</div><div class="edu-school">Native</div></div><div class="education-card"><div class="edu-degree">French</div><div class="edu-school">Fluent</div></div><div class="education-card"><div class="edu-degree">German</div><div class="edu-school">Intermediate</div></div><div class="education-card"><div class="edu-degree">Spanish</div><div class="edu-school">Conversational</div></div></section>
+</div>
+
+<div>
+  <section class="section"><h2 class="section-title">EXPERIENCE</h2><div class="exp-card"><div class="exp-title">Lead Product Design Manager</div><div class="exp-company">FinTech Edge</div><div class="exp-description">Oversee a team of 14 designers and researchers, delivering omnichannel product experiences for retail banking and wealth management.
+Introduced a modular design system, improved iteration speed by 45%, and aligned product roadmaps across 5 business units.
+Led stakeholder workshops, coached senior designers, and defined UX metrics used across the organisation.</div></div><div class="exp-card"><div class="exp-title">Senior UX Designer</div><div class="exp-company">Healthwave Labs</div><div class="exp-description">Designed patient-facing mobile and web applications for chronic care management.
+Partnered with product, engineering, and clinical teams to deliver compliant interfaces that increased active user retention by 28%.
+Created research plans, personas, and accessibility guidelines for inclusive care journeys.</div></div><div class="exp-card"><div class="exp-title">UX Designer</div><div class="exp-company">Studio Interactive</div><div class="exp-description">Delivered digital product experiences for high-growth startups and global brands.
+Owned information architecture, interaction design, prototyping, usability testing, and design system governance.
+Collaborated with clients to translate business goals into clear product concepts and visual strategy.</div></div><div class="exp-card"><div class="exp-title">Product Design Consultant</div><div class="exp-company">Independent</div><div class="exp-description">Supported early-stage companies with product discovery, brand systems, and interface audits.
+Helped launch MVPs, define product direction, and establish usable component patterns for internal teams.</div></div></section>
+  <section class="section"><h2 class="section-title">PROJECTS</h2><div class="project-card"><div class="project-name">Global Launch Experience</div><div class="project-description">Led the end-to-end design work for a global product launch, coordinating multi-market localization, legal reviews, and cross-team validation. Resulted in a 24% increase in conversion for international users.</div></div><div class="project-card"><div class="project-name">Design System Transformation</div><div class="project-description">Developed a scalable component library and design tokens system used by product, engineering, and marketing teams. Reduced duplicate work and design inconsistencies across seven products.</div></div><div class="project-card"><div class="project-name">Clinical Care Journey Redesign</div><div class="project-description">Redesigned core onboarding and care-plan workflows for a healthcare product used by patients, caregivers, and clinical teams across multiple regions.</div></div></section>
+  <section class="section"><h2 class="section-title">CERTIFICATIONS</h2><div class="project-card"><div class="project-name">Certified Scrum Product Owner</div><div class="project-description">Scrum Alliance • 2022</div></div><div class="project-card"><div class="project-name">Nielsen Norman Group UX Certification</div><div class="project-description">NNG • 2020</div></div><div class="project-card"><div class="project-name">Accessibility Professional Certificate</div><div class="project-description">Deque • 2021</div></div><div class="project-card"><div class="project-name">Design Leadership Masterclass</div><div class="project-description">IDEO U • 2023</div></div></section>
+  <section class="section"><h2 class="section-title">STRENGTHS</h2><div class="strengths-grid"><div class="strength-item"><span class="strength-bullet">•</span>Empathy-driven design</div><div class="strength-item"><span class="strength-bullet">•</span>Cross-functional leadership</div><div class="strength-item"><span class="strength-bullet">•</span>Data-informed decision making</div><div class="strength-item"><span class="strength-bullet">•</span>Design mentorship</div><div class="strength-item"><span class="strength-bullet">•</span>Systems thinking</div></div></section>
+  <section class="section"><h2 class="section-title">HOBBIES</h2><div class="hobbies-content">Landscape photography, Cycling, Creative writing, Travel sketching</div></section>
+  
+      <section class="section resume-extra-section">
+        <h2 class="section-title">Achievements</h2>
+        <ul class="resume-extra-list">
+          <li class="resume-extra-item">Delivered 3 major product launches within 18 months.</li><li class="resume-extra-item">Reduced design debt by 30% through component reuse.</li><li class="resume-extra-item">Built a design leadership guild spanning 5 product areas.</li>
+        </ul>
+      </section>
+    
+      <section class="section resume-extra-section">
+        <h2 class="section-title">References</h2>
+        <ul class="resume-extra-list">
+          <li class="resume-extra-item">Available on request</li><li class="resume-extra-item">Senior leaders and stakeholders available upon request</li>
+        </ul>
+      </section>
+    
+        <section class="section resume-extra-section">
+          <h2 class="section-title">Additional Information</h2>
+          
+    <div class="resume-extra-custom-block">
+      <div class="resume-extra-custom-title">Selected Thought Leadership</div>
+      <div class="resume-extra-item">Published articles on design systems, product culture, and accessibility in leading industry publications. Regular speaker at UX conferences and internal design summits., Designing for scale in regulated industries, Building design operations for faster delivery</div>
+    </div>
+  
+    <div class="resume-extra-custom-block">
+      <div class="resume-extra-custom-title">Community</div>
+      <div class="resume-extra-item">Volunteer mentor for early-career designers and host of a monthly peer critique circle focused on portfolio storytelling., ADPList mentor, Portfolio workshop facilitator</div>
+    </div>
+  
+        </section>
+      
+</div>
+
+</div>
+
+</div>
+</div>
+</body>
+</html>

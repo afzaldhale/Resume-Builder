@@ -118,7 +118,7 @@ const ResumeBuilder = () => {
     }
   };
 
-  const renderTemplate = () => {
+  const renderPreview = () => {
     const templates = {
       1: Template1,
       2: Template2,
@@ -348,7 +348,7 @@ const ResumeBuilder = () => {
           <Card className="p-6 sticky top-8">
             {formData.fullName ? (
               <div ref={resumeRef} className="scale-75 origin-top">
-                {renderTemplate()}
+                {renderPreview()}
               </div>
             ) : (
               <EmptyTemplate />

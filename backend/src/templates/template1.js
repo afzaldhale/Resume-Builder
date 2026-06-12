@@ -1,4 +1,4 @@
-// === HELPER FUNCTIONS (previously from templateShared.js) ===
+// === HELPER FUNCTIONS (template-local) ===
 const asArray = (value) => (Array.isArray(value) ? value : []);
 
 const joinParts = (parts, separator = " | ") => parts.filter(Boolean).join(separator);

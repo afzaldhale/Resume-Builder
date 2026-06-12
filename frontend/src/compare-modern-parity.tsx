@@ -1,7 +1,11 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { renderTemplate } from "@/components/resume-templates/shared";
 import ModernLayout from "@/components/resume-layouts/ModernLayout";
+import Template1 from "@/components/resume-templates/Template1";
+import Template3 from "@/components/resume-templates/Template3";
+import Template7 from "@/components/resume-templates/Template7";
+import Template10 from "@/components/resume-templates/Template10";
+import Template12 from "@/components/resume-templates/Template12";
 import { templateThemes } from "@/components/resume-templates/templateThemes";
 
 const payload = {
@@ -127,6 +131,14 @@ const payload = {
 
 const templateIds = [1, 3, 7, 10, 12];
 
+const templateComponentMap = {
+  1: Template1,
+  3: Template3,
+  7: Template7,
+  10: Template10,
+  12: Template12,
+} as const;
+
 const getTextContent = (el: Element | null) => (el?.textContent || "").trim();
 
 const getMetrics = (container: HTMLElement) => {
@@ -181,6 +193,7 @@ const renderAndCompare = async () => {
 
   for (const templateId of templateIds) {
     const theme = templateThemes[templateId];
+    const TemplateComponent = templateComponentMap[templateId as keyof typeof templateComponentMap];
     const wrapper = document.createElement("div");
     wrapper.style.marginBottom = "64px";
     wrapper.innerHTML = `<h1 style='font-family:system-ui; margin-bottom:16px'>Template ${templateId} — ${theme.name}</h1>`;
@@ -203,7 +216,7 @@ const renderAndCompare = async () => {
 
     app.appendChild(wrapper);
 
-    createRoot(sharedContainer).render(renderTemplate(payload, theme));
+    createRoot(sharedContainer).render(<TemplateComponent data={payload} />);
     createRoot(modernContainer).render(<ModernLayout data={payload} theme={theme} />);
     await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
     await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));

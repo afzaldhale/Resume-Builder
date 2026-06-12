@@ -1,5 +1,5 @@
 import type { ResumeData } from "@/components/resume-templates/types";
-import type { ResumeTemplateTheme } from "@/components/resume-templates/shared";
+import type { ResumeTemplateTheme } from "@/components/resume-templates/templateThemeTypes";
 import { getSummaryConfig } from "@/components/resume-templates/templatePolicy";
 import { ResumeTypography } from "@/constants/resumeDesignSystem";
 

@@ -1,5 +1,5 @@
 import type { ResumeData } from "./types";
-import type { ResumeTemplateTheme } from "./shared";
+import type { ResumeTemplateTheme } from "./templateThemeTypes";
 import { templateThemes } from "./templateThemes";
 
 export type TemplateColorKey =

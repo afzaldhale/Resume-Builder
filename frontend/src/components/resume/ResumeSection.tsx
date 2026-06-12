@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { ResumeTemplateTheme } from "@/components/resume-templates/shared";
+import type { ResumeTemplateTheme } from "@/components/resume-templates/templateThemeTypes";
 import { ResumeTypography } from "@/constants/resumeDesignSystem";
 
 export type ResumeSectionHeadingVariant =

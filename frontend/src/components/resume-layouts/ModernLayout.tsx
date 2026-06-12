@@ -11,8 +11,8 @@ import {
   type ResumeSectionKey,
 } from "@/components/resume-templates/resumeSections";
 import type { ResumeData } from "@/components/resume-templates/types";
-import type { ResumeTemplateTheme } from "@/components/resume-templates/shared";
-import { ResumePage, ResumePageStyles } from "@/components/resume-templates/shared";
+import type { ResumeTemplateTheme } from "@/components/resume-templates/templateThemeTypes";
+import { ResumePage, ResumePageStyles } from "@/components/resume-templates/templatePrimitives";
 import { ResumeSection } from "@/components/resume/ResumeSection";
 import ResumeHeader from "@/components/resume-shared/ResumeHeader";
 import { ResumeTypography } from "@/components/resume-shared/ResumeTypography";

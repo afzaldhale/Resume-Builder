@@ -3,17 +3,16 @@ import { ResumeSection } from "@/components/resume/ResumeSection";
 import {
   ResumePage,
   ResumePageStyles,
-  ResumeHeader,
   ResumeSidebar,
   ResumeTwoColumnLayout,
-  ResumeContactRow,
   ResumeAccentStrip,
   ResumeBulletList,
   ResumeTagList,
   ResumeMetaBlock,
   ResumeSidebarContactCard,
-  type ResumeTemplateTheme,
-} from "./shared";
+} from "./templatePrimitives";
+import ResumeHeader, { ResumeContactRow } from "@/components/resume-shared/ResumeHeader";
+import type { ResumeTemplateTheme } from "./templateThemeTypes";
 import { template1Theme } from "./templateThemes";
 import { getCompactMode, getDensityMode, getSummaryConfig } from "./templatePolicy";
 import {

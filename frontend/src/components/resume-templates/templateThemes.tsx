@@ -1,4 +1,4 @@
-import type { ResumeTemplateTheme } from "./shared";
+import type { ResumeTemplateTheme } from "./templateThemeTypes";
 
 const singleColumnOrder = [
   "summary",
