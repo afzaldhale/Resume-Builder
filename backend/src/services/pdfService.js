@@ -25,6 +25,8 @@ const TEMPLATE_NAMES = {
   15: "Corporate Clean",
 };
 
+const TEMPLATE_WITH_CUSTOM_PDF_MARGIN = new Set([1, 2]);
+
 const normalizeResumeData = (resumeData = {}) => ({
   ...resumeData,
   fullName: resumeData.fullName || "",
@@ -152,12 +154,20 @@ export const generateResumePDF = async (resumeData, templateId, options = {}) =>
       format: "A4",
       printBackground: true,
       preferCSSPageSize: true,
-      margin: {
-        top: "0px",
-        bottom: "0px",
-        left: "0px",
-        right: "0px",
-      },
+      margin:
+        TEMPLATE_WITH_CUSTOM_PDF_MARGIN.has(safeTemplateId)
+          ? {
+              top: "12mm",
+              bottom: "12mm",
+              left: "12mm",
+              right: "12mm",
+            }
+          : {
+              top: "0px",
+              bottom: "0px",
+              left: "0px",
+              right: "0px",
+            },
       scale: 1,
     });
 

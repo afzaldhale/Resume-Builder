@@ -1,7 +1,107 @@
 // Helper functions copied into this template for self-contained rendering
 const asArray = (value) => (Array.isArray(value) ? value : []);
+const hasText = (value) => Boolean(value && String(value).trim());
+const TEMPLATE2_BULLET = "\u2022";
+const TEMPLATE2_MONTH_INDEX = {
+  jan: "01",
+  january: "01",
+  feb: "02",
+  february: "02",
+  mar: "03",
+  march: "03",
+  apr: "04",
+  april: "04",
+  may: "05",
+  jun: "06",
+  june: "06",
+  jul: "07",
+  july: "07",
+  aug: "08",
+  august: "08",
+  sep: "09",
+  sept: "09",
+  september: "09",
+  oct: "10",
+  october: "10",
+  nov: "11",
+  november: "11",
+  dec: "12",
+  december: "12",
+};
 
 const joinParts = (parts, separator = " | ") => parts.filter(Boolean).join(separator);
+
+const formatTemplate2MonthYear = (value) => {
+  const rawValue = String(value || "").trim();
+  if (!rawValue) return "";
+
+  if (/^(present|current|now)$/i.test(rawValue)) {
+    return "Present";
+  }
+
+  const mmYyyyMatch = rawValue.match(/^(\d{1,2})[-/](\d{4})$/);
+  if (mmYyyyMatch) {
+    return `${mmYyyyMatch[1].padStart(2, "0")}-${mmYyyyMatch[2]}`;
+  }
+
+  const yyyyMmMatch = rawValue.match(/^(\d{4})[-/](\d{1,2})(?:[-/]\d{1,2})?$/);
+  if (yyyyMmMatch) {
+    return `${yyyyMmMatch[2].padStart(2, "0")}-${yyyyMmMatch[1]}`;
+  }
+
+  const monthNameMatch = rawValue.match(/^([A-Za-z]+)\s+(\d{4})$/);
+  if (monthNameMatch) {
+    const month = TEMPLATE2_MONTH_INDEX[monthNameMatch[1].toLowerCase()];
+    if (month) {
+      return `${month}-${monthNameMatch[2]}`;
+    }
+  }
+
+  const parsed = new Date(rawValue);
+  if (!Number.isNaN(parsed.getTime())) {
+    return `${`${parsed.getMonth() + 1}`.padStart(2, "0")}-${parsed.getFullYear()}`;
+  }
+
+  return rawValue;
+};
+
+const formatTemplate2Range = (start, end) =>
+  [formatTemplate2MonthYear(start), formatTemplate2MonthYear(end)]
+    .filter(Boolean)
+    .join(" \u2013 ");
+
+const toTemplate2BulletItems = (value) => {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item || "").trim()).filter(Boolean);
+  }
+
+  if (!hasText(value)) return [];
+
+  return String(value)
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
+
+const renderTemplate2BulletList = (items, className = "template2-bullet-list") => {
+  const bulletItems = toTemplate2BulletItems(items);
+  if (!bulletItems.length) return "";
+
+  return `
+    <ul class="${className}">
+      ${bulletItems.map((item) => `<li><span class="template2-bullet-marker">${TEMPLATE2_BULLET}</span><span>${item}</span></li>`).join("")}
+    </ul>
+  `;
+};
+
+const renderTemplate2StructuredEntry = ({ title, subtitle, meta, bullets }) => `
+  <div class="template2-entry">
+    <h3>${title}</h3>
+    ${hasText(subtitle) ? `<div class="muted template2-subtitle">${subtitle}</div>` : ""}
+    ${hasText(meta) ? `<div class="muted">${meta}</div>` : ""}
+    ${renderTemplate2BulletList(bullets)}
+  </div>
+`;
 
 const formatAchievement = (achievement) => {
   if (!achievement) return "";
@@ -62,7 +162,7 @@ const getSummaryConfig = (data) => {
     summaryText: isFresher
       ? data.careerObjective || data.summary
       : data.summary || data.careerObjective,
-    summaryTitle: isFresher ? "Career Objective" : "Professional Summary",
+    summaryTitle: isFresher ? "Career Objective" : "Profile Summary",
   };
 };
 
@@ -80,10 +180,8 @@ const renderSupplementarySections = (
   if (include.includes("strengths") && asArray(data.strengths).length) {
     sections.push(`
       <section class="${sectionClass}">
-        <${headingTag} class="${titleClass}">Strengths</${headingTag}>
-        <ul class="resume-extra-list">
-          ${formatSimpleList(data.strengths, (item) => item)}
-        </ul>
+        <${headingTag} class="${titleClass}">STRENGTHS</${headingTag}>
+        ${renderTemplate2BulletList(data.strengths, "template2-support-list")}
       </section>
     `);
   }
@@ -91,10 +189,8 @@ const renderSupplementarySections = (
   if (include.includes("achievements") && asArray(data.achievements).length) {
     sections.push(`
       <section class="${sectionClass}">
-        <${headingTag} class="${titleClass}">Achievements</${headingTag}>
-        <ul class="resume-extra-list">
-          ${formatSimpleList(data.achievements, formatAchievement)}
-        </ul>
+        <${headingTag} class="${titleClass}">ACHIEVEMENTS</${headingTag}>
+        ${renderTemplate2BulletList(asArray(data.achievements).map(formatAchievement), "template2-support-list")}
       </section>
     `);
   }
@@ -102,10 +198,8 @@ const renderSupplementarySections = (
   if (include.includes("references") && asArray(data.references).length) {
     sections.push(`
       <section class="${sectionClass}">
-        <${headingTag} class="${titleClass}">References</${headingTag}>
-        <ul class="resume-extra-list">
-          ${formatSimpleList(data.references, formatReference)}
-        </ul>
+        <${headingTag} class="${titleClass}">REFERENCES</${headingTag}>
+        ${renderTemplate2BulletList(asArray(data.references).map(formatReference), "template2-support-list")}
       </section>
     `);
   }
@@ -119,7 +213,7 @@ const renderSupplementarySections = (
     if (customMarkup) {
       sections.push(`
         <section class="${sectionClass}">
-          <${headingTag} class="${titleClass}">Additional Information</${headingTag}>
+          <${headingTag} class="${titleClass}">ADDITIONAL INFORMATION</${headingTag}>
           ${customMarkup}
         </section>
       `);
@@ -132,8 +226,8 @@ const renderSupplementarySections = (
 const sharedTemplateStyles = `
   .resume-extra-section,
   .resume-additional-section {
-    page-break-inside: avoid;
-    break-inside: avoid;
+    page-break-inside: auto;
+    break-inside: auto;
   }
 
   .resume-extra-list {
@@ -163,16 +257,14 @@ const sharedTemplateStyles = `
     .section,
     .resume-extra-section,
     .resume-additional-section {
-      page-break-inside: avoid;
-      break-inside: avoid;
+      page-break-inside: auto;
+      break-inside: auto;
     }
   }
 `;
 
 export function template2HTML(data) {
-  const skillPercent = (i) => Math.min(95, 65 + i * 10);
-  const { summaryText, isFresher } = getSummaryConfig(data);
-  const summaryTitle = isFresher ? "Career Objective" : "Profile Summary";
+  const { summaryText, summaryTitle } = getSummaryConfig(data);
   const supplementarySections = renderSupplementarySections(data, {
     include: ["strengths", "achievements", "references", "customSections"],
   });
@@ -185,6 +277,11 @@ export function template2HTML(data) {
 <title>Resume</title>
 
 <style>
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
   body {
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
@@ -193,11 +290,12 @@ export function template2HTML(data) {
 
   .page {
     width: 794px;
-    height: 1123px;
+    min-height: 1123px;
     display: flex;
+    border: none;
+    box-shadow: none;
   }
 
-  /* LEFT SIDEBAR */
   .sidebar {
     width: 40%;
     background: linear-gradient(to bottom, #111827, #1f2937);
@@ -208,7 +306,7 @@ export function template2HTML(data) {
 
   .sidebar h1 {
     font-size: 28px;
-    margin-bottom: 4px;
+    margin: 0 0 4px 0;
     word-break: normal;
     overflow-wrap: break-word;
     hyphens: none;
@@ -225,39 +323,18 @@ export function template2HTML(data) {
     font-size: 13px;
     margin: 6px 0;
     color: #e5e7eb;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
   }
 
   .section-title {
     font-size: 16px;
-    margin: 28px 0 12px;
+    margin: 24px 0 10px;
     font-weight: bold;
     border-bottom: 1px solid #374151;
     padding-bottom: 4px;
   }
 
-  .skill {
-    margin-bottom: 10px;
-  }
-
-  .skill-name {
-    font-size: 13px;
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .bar {
-    height: 6px;
-    background: #374151;
-    border-radius: 4px;
-    overflow: hidden;
-  }
-
-  .bar-fill {
-    height: 6px;
-    background: linear-gradient(to right, #3b82f6, #22d3ee);
-  }
-
-  /* RIGHT CONTENT */
   .content {
     width: 60%;
     padding: 32px;
@@ -267,9 +344,11 @@ export function template2HTML(data) {
 
   .content h2 {
     font-size: 20px;
-    margin-bottom: 10px;
+    margin: 0 0 10px;
     border-left: 4px solid #2563eb;
     padding-left: 10px;
+    break-after: avoid;
+    page-break-after: avoid;
   }
 
   .box {
@@ -278,32 +357,57 @@ export function template2HTML(data) {
     border-radius: 8px;
     margin-bottom: 18px;
     font-size: 13px;
-    line-height: 1.6;
+    line-height: 1.55;
   }
 
-  .job {
-    margin-bottom: 20px;
+  .template2-entry {
+    margin-bottom: 18px;
+    break-inside: auto;
+    page-break-inside: auto;
   }
 
-  .job h3 {
+  .template2-entry h3 {
     font-size: 16px;
     margin: 0;
+    font-weight: 700;
+    break-after: avoid;
+    page-break-after: avoid;
   }
 
   .muted {
     font-size: 12px;
     color: #6b7280;
-    margin-bottom: 6px;
+    margin-top: 4px;
   }
 
-  .pill {
-    display: inline-block;
-    background: #e0f2fe;
-    color: #0369a1;
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 12px;
-    margin-right: 6px;
+  .template2-subtitle {
+    margin-bottom: 0;
+  }
+
+  .template2-bullet-list,
+  .template2-support-list {
+    margin: 8px 0 0 0;
+    padding-left: 0;
+    font-size: 13px;
+    line-height: 1.55;
+    list-style: none;
+  }
+
+  .template2-bullet-list li,
+  .template2-support-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .template2-bullet-list li + li,
+  .template2-support-list li + li {
+    margin-top: 4px;
+  }
+
+  .template2-bullet-marker {
+    flex: 0 0 auto;
+    line-height: 1.55;
   }
 
   ${sharedTemplateStyles}
@@ -313,7 +417,6 @@ export function template2HTML(data) {
 <body>
 <div class="page">
 
-  <!-- LEFT -->
   <div class="sidebar">
     <h1>${data.fullName || ""}</h1>
     ${data.role ? `<div class="role">${data.role}</div>` : ""}
@@ -322,26 +425,15 @@ export function template2HTML(data) {
       ${data.email ? `<p>Email: ${data.email}</p>` : ""}
       ${data.phone ? `<p>Phone: ${data.phone}</p>` : ""}
       ${data.address ? `<p>Location: ${data.address}</p>` : ""}
-      ${data.socialLinks?.length ? `<p>${data.socialLinks.map(link => `${link.platform}: ${link.url}`).join(' | ')}</p>` : ""}
+      ${data.socialLinks?.length ? `<p>${data.socialLinks.map((link) => `${link.platform}: ${link.url}`).join(" | ")}</p>` : ""}
     </div>
 
     ${data.skills?.length ? `
     <div class="section-title">SKILLS</div>
-    ${data.skills.map((s, i) => `
-      <div class="skill">
-        <div class="skill-name">
-          <span>${s}</span>
-          <span>${skillPercent(i)}%</span>
-        </div>
-        <div class="bar">
-          <div class="bar-fill" style="width:${skillPercent(i)}%"></div>
-        </div>
-      </div>
-    `).join("")}
+    ${renderTemplate2BulletList(data.skills, "template2-support-list")}
     ` : ""}
   </div>
 
-  <!-- RIGHT -->
   <div class="content">
 
     ${summaryText ? `
@@ -351,59 +443,75 @@ export function template2HTML(data) {
 
     ${data.experience?.length ? `
     <h2>WORK EXPERIENCE</h2>
-    ${data.experience.map(exp => `
-      <div class="job">
-        <h3>${exp.role} – ${exp.company}</h3>
-        <div class="muted">${exp.startDate} – ${exp.endDate}</div>
-        <div class="box">${exp.description}</div>
-      </div>
-    `).join("")}
+    ${data.experience.map((exp) =>
+      renderTemplate2StructuredEntry({
+        title: [exp.role, exp.company].filter(Boolean).join(" at "),
+        meta: formatTemplate2Range(exp.startDate, exp.endDate),
+        bullets: exp.description,
+      })
+    ).join("")}
     ` : ""}
 
     ${data.projects?.length ? `
     <h2>PROJECTS</h2>
-    ${data.projects.map(p => `
-      <div class="box">
-        <strong>${p.name}</strong>
-        <p>${p.description}</p>
-        ${p.technologies?.map(t => `<span class="pill">${t}</span>`).join("")}
-      </div>
-    `).join("")}
+    ${data.projects.map((project) =>
+      renderTemplate2StructuredEntry({
+        title: project.name,
+        bullets: [
+          ...toTemplate2BulletItems(project.description),
+          ...(asArray(project.technologies).length
+            ? [`Technologies: ${asArray(project.technologies).filter(Boolean).join(", ")}.`]
+            : []),
+        ],
+      })
+    ).join("")}
     ` : ""}
 
     ${data.education?.length ? `
     <h2>EDUCATION</h2>
-    ${data.education.map(edu => `
-      <div class="box">
-        <strong>${edu.degree || edu.school || ""}</strong>
-        <div class="muted">${edu.school || ""}${edu.startDate || edu.endDate ? ` • ${edu.startDate || ""}${edu.startDate && edu.endDate ? " – " : ""}${edu.endDate || ""}` : ""}</div>
-      </div>
-    `).join("")}
+    ${data.education.map((edu) =>
+      renderTemplate2StructuredEntry({
+        title: edu.degree || edu.school || "",
+        subtitle: edu.school || "",
+        meta: formatTemplate2Range(edu.startYear || edu.startDate, edu.endYear || edu.endDate),
+        bullets: [
+          ...(hasText(edu.gpa) ? [`GPA: ${edu.gpa}`] : []),
+          ...(hasText(edu.minor) ? [`Minor: ${edu.minor}`] : []),
+        ],
+      })
+    ).join("")}
     ` : ""}
 
     ${data.certifications?.length ? `
     <h2>CERTIFICATIONS</h2>
-    ${data.certifications.map(cert => `
-      <div class="box">
-        <strong>${typeof cert === "string" ? cert : cert.name || ""}</strong>
-        ${typeof cert === "object" && cert.issuer ? `<div class="muted">${cert.issuer}</div>` : ""}
-      </div>
-    `).join("")}
+    ${data.certifications.map((cert) =>
+      typeof cert === "string"
+        ? renderTemplate2StructuredEntry({
+            title: cert,
+            bullets: [],
+          })
+        : renderTemplate2StructuredEntry({
+            title: cert.name || "",
+            bullets: [
+              ...(hasText(cert.issuer) ? [`Issued by: ${cert.issuer}`] : []),
+              ...(hasText(cert.year) ? [`Date: ${formatTemplate2MonthYear(cert.year)}`] : []),
+            ],
+          })
+    ).join("")}
     ` : ""}
 
     ${data.languages?.length ? `
     <h2>LANGUAGES</h2>
-    <div class="box">
-      ${data.languages.map(lang => {
-        const value = typeof lang === "string" ? lang : `${lang.language || ""}${lang.level ? ` (${lang.level})` : ""}`;
-        return `<span class="pill">${value}</span>`;
-      }).join("")}
-    </div>
+    ${renderTemplate2BulletList(
+      data.languages.map((lang) =>
+        typeof lang === "string" ? lang : `${lang.language || ""}${lang.level ? ` (${lang.level})` : ""}`
+      )
+    )}
     ` : ""}
 
     ${data.hobbies?.length ? `
-    <h2>HOBBIES</h2>
-    <div class="box">${data.hobbies.join(", ")}</div>
+    <h2>HOBBIES / INTERESTS</h2>
+    ${renderTemplate2BulletList(data.hobbies)}
     ` : ""}
 
     ${supplementarySections}

@@ -1,5 +1,4 @@
 import React, { type CSSProperties, type ReactNode } from "react";
-import { ResumeSection } from "@/components/resume/ResumeSection";
 import {
   ResumePage,
   ResumePageStyles,
@@ -11,7 +10,6 @@ import {
   ResumeMetaBlock,
   ResumeSidebarContactCard,
 } from "./templatePrimitives";
-import ResumeHeader, { ResumeContactRow } from "@/components/resume-shared/ResumeHeader";
 import type { ResumeTemplateTheme } from "./templateThemeTypes";
 import { template1Theme } from "./templateThemes";
 import { getCompactMode, getDensityMode, getSummaryConfig } from "./templatePolicy";
@@ -36,6 +34,9 @@ interface Template1Props {
 
 // === Helper Functions (Template1-specific) ===
 
+const TEMPLATE1_BULLET = "\u2022";
+const TEMPLATE1_BULLET_INDENT = 12;
+
 const hasText = (value?: string | null) => Boolean(value && value.trim());
 
 const toBulletItems = (value?: string | null) =>
@@ -54,25 +55,300 @@ const scalePxString = (value: string, factor: number) =>
 
 const formatRange = (start?: string, end?: string) => {
   const parts = [formatMonthYear(start), formatMonthYear(end)].filter(Boolean);
-  return parts.join(" - ");
+  return parts.join(" \u2013 ");
 };
 
-const getContactItems = (data: ResumeData): { label: string; value: string }[] => {
-  const items: { label: string; value: string }[] = [];
+const toTemplate1BulletItems = (value?: string[] | string | null) => {
+  if (Array.isArray(value)) {
+    return value.map((item) => item?.trim()).filter(Boolean) as string[];
+  }
 
-  if (hasText(data.phone)) items.push({ label: "Phone", value: data.phone });
-  if (hasText(data.email)) items.push({ label: "Email", value: data.email });
-  if (hasText(data.address)) items.push({ label: "Location", value: data.address });
-
-  (data.socialLinks || []).forEach((link) => {
-    if (hasText(link.url)) {
-      const label = link.platform?.toLowerCase().includes("linkedin") ? "LinkedIn" : link.platform || "Website";
-      items.push({ label, value: link.url });
-    }
-  });
-
-  return items;
+  return toBulletItems(value);
 };
+
+const Template1BulletLine = ({
+  text,
+  title = false,
+}: {
+  text: string;
+  title?: boolean;
+}) => (
+  <div
+    style={{
+      display: "flex",
+      alignItems: "flex-start",
+      gap: "6px",
+    }}
+  >
+    <span
+      aria-hidden="true"
+      style={{
+        fontSize: "var(--resume-list-size)",
+        lineHeight: "1.34",
+        color: "var(--resume-page-text)",
+        flexShrink: 0,
+      }}
+    >
+      {TEMPLATE1_BULLET}
+    </span>
+    <div
+      className={title ? "resume-item-title" : "resume-body-copy"}
+      style={
+        title
+          ? {
+              flex: 1,
+              minWidth: 0,
+              fontWeight: 700,
+              color: "var(--resume-page-text)",
+            }
+          : {
+              flex: 1,
+              minWidth: 0,
+            }
+      }
+    >
+      {text}
+    </div>
+  </div>
+);
+
+const Template1BulletList = ({
+  items,
+  className = "",
+}: {
+  items: string[];
+  className?: string;
+}) => {
+  const filteredItems = items.filter(Boolean);
+  if (filteredItems.length === 0) return null;
+
+  return (
+    <div
+      className={className}
+      style={{
+        marginLeft: `${TEMPLATE1_BULLET_INDENT}px`,
+        paddingLeft: 0,
+        display: "grid",
+        rowGap: "2px",
+      }}
+    >
+      {filteredItems.map((item, index) => (
+        <Template1BulletLine key={`${item}-${index}`} text={item} />
+      ))}
+    </div>
+  );
+};
+
+const Template1StructuredEntry = ({
+  title,
+  subtitle,
+  meta,
+  bullets,
+}: {
+  title: string;
+  subtitle?: string;
+  meta?: string;
+  bullets?: string[];
+}) => (
+  <div className="resume-meta-block break-inside-avoid">
+    <Template1BulletLine text={title} title />
+    <div style={{ marginLeft: `${TEMPLATE1_BULLET_INDENT}px` }}>
+      {hasText(subtitle) ? <p className="resume-item-subtitle mt-1">{subtitle}</p> : null}
+      {hasText(meta) ? <p className="resume-item-meta mt-1.5">{meta}</p> : null}
+    </div>
+    {bullets && bullets.length > 0 ? (
+      <div className="mt-2.5">
+        <Template1BulletList items={bullets} />
+      </div>
+    ) : null}
+  </div>
+);
+
+const Template1Header = ({
+  data,
+  theme,
+}: {
+  data: ResumeData;
+  theme: ResumeTemplateTheme;
+}) => {
+  const normalizedRole = (data.role || "").trim().toLowerCase();
+  const subtitle =
+    data.candidateType === "fresher" && !normalizedRole.includes("fresher")
+      ? "(FRESHER)"
+      : "";
+  const headerContacts = [
+    hasText(data.phone) ? { label: "Mobile", value: data.phone } : null,
+    hasText(data.email) ? { label: "Email ID", value: data.email } : null,
+    hasText(data.address) ? { label: "Address", value: data.address } : null,
+    ...(data.socialLinks || [])
+      .filter((link) => hasText(link.url))
+      .map((link) => ({
+        label: hasText(link.platform) ? link.platform : "Link",
+        value: link.url,
+      })),
+  ].filter(Boolean) as { label: string; value: string }[];
+
+  return (
+    <header
+      className="break-inside-avoid"
+      style={{
+        margin: "-12px -20px 0",
+        padding: "24px 28px 16px",
+        borderBottom: `1px solid ${theme.palette.border}`,
+      }}
+    >
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 1fr) minmax(220px, 320px)",
+          columnGap: "20px",
+          alignItems: "flex-start",
+        }}
+      >
+        <div
+          className="min-w-0"
+          style={{
+            display: "grid",
+            rowGap: "4px",
+            alignContent: "start",
+          }}
+        >
+          <h1
+            style={{
+              margin: 0,
+              fontSize: "28px",
+              fontWeight: 800,
+              letterSpacing: "0.5px",
+              textTransform: "uppercase",
+              color: "#000000",
+              lineHeight: 1.1,
+            }}
+          >
+            {data.fullName}
+          </h1>
+          {hasText(data.role) ? (
+            <p
+              style={{
+                margin: "2px 0 0",
+                fontSize: "22px",
+                fontWeight: 300,
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+                color: "#111111",
+                lineHeight: 1.15,
+              }}
+            >
+              {data.role}
+            </p>
+          ) : null}
+          {hasText(subtitle) ? (
+            <p
+              style={{
+                margin: 0,
+                fontSize: "22px",
+                fontWeight: 300,
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+                color: "#111111",
+                lineHeight: 1.15,
+              }}
+            >
+              {subtitle}
+            </p>
+          ) : null}
+        </div>
+
+        {headerContacts.length > 0 ? (
+          <div
+            style={{
+              display: "grid",
+              rowGap: "4px",
+              alignContent: "start",
+              minWidth: 0,
+              justifyItems: "stretch",
+              alignSelf: "start",
+            }}
+          >
+            {headerContacts.map((item, index) => (
+              <div
+                key={`${item.label}-${item.value}-${index}`}
+                style={{
+                  maxWidth: "100%",
+                  display: "grid",
+                  gridTemplateColumns: "95px 1fr",
+                  alignItems: "start",
+                  columnGap: "6px",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    color: "#666666",
+                    textAlign: "right",
+                    lineHeight: 1.35,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {item.label}
+                </span>
+                <span
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    color: "#666666",
+                    lineHeight: 1.35,
+                    wordBreak: "break-word",
+                    overflowWrap: "anywhere",
+                    minWidth: 0,
+                  }}
+                >
+                  : {item.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </header>
+  );
+};
+
+const Template1Section = ({
+  title,
+  summaryTitle,
+  children,
+}: {
+  title: string;
+  summaryTitle: string;
+  children: ReactNode;
+}) => (
+  <section className="resume-section break-inside-avoid" style={{ color: template1Theme.palette.text }}>
+    <h2
+      className="resume-section-title"
+      style={{
+        margin: "12px 0 8px",
+        padding: "6px 10px",
+        background: template1Theme.palette.accent,
+        color: "#000000",
+        fontSize: "11pt",
+        fontWeight: 700,
+        textTransform: "uppercase",
+        letterSpacing: "0.75pt",
+        lineHeight: 1.2,
+      }}
+    >
+      {title}
+    </h2>
+    <div
+      className={`resume-section-content ${
+        title === summaryTitle ? "resume-section-summary-plain" : ""
+      }`.trim()}
+    >
+      {children}
+    </div>
+  </section>
+);
 
 const getSectionLabel = (key: SectionKey, summaryTitle: string) => {
   switch (key) {
@@ -167,30 +443,34 @@ const buildSectionMap = (data: ResumeData) => {
     experience:
       experience.length > 0 ? (
         <div className="space-y-3.5">
-          {experience.map((item, index) => (
-            <ResumeMetaBlock
-              key={`${item.company}-${item.role}-${index}`}
-              title={item.role}
-              subtitle={item.company}
-              meta={formatRange(item.startDate, item.endDate)}
-            >
-              <ResumeBulletList items={toBulletItems(item.description)} fallbackText={item.description} />
-            </ResumeMetaBlock>
-          ))}
+          {experience.map((item, index) => {
+            const title = [item.role, item.company].filter(hasText).join(" at ");
+            const responsibilities = toTemplate1BulletItems(
+              item.description as string | string[] | null | undefined
+            );
+
+            return (
+              <Template1StructuredEntry
+                key={`${item.company}-${item.role}-${index}`}
+                title={title}
+                meta={formatRange(item.startDate, item.endDate)}
+                bullets={responsibilities}
+              />
+            );
+          })}
         </div>
       ) : null,
     education:
       education.length > 0 ? (
         <div className="space-y-3.5">
           {education.map((item, index) => (
-            <ResumeMetaBlock
+            <Template1StructuredEntry
               key={`${item.school}-${item.degree}-${index}`}
               title={item.degree}
               subtitle={item.school}
               meta={formatRange(item.startYear, item.endYear)}
-            >
-              {hasText(item.gpa) ? <p className="resume-item-meta">GPA: {item.gpa}</p> : null}
-            </ResumeMetaBlock>
+              bullets={hasText(item.gpa) ? [`GPA: ${item.gpa}`] : undefined}
+            />
           ))}
         </div>
       ) : null,
@@ -215,7 +495,7 @@ const buildSectionMap = (data: ResumeData) => {
       certifications.length > 0 ? (
         <div className="space-y-3">
           {certifications.map((item, index) => (
-            <ResumeMetaBlock
+            <Template1StructuredEntry
               key={`${item.name}-${item.issuer}-${index}`}
               title={item.name}
               subtitle={item.issuer}
@@ -267,32 +547,23 @@ const renderSections = ({
   keys,
   sections,
   summaryTitle,
-  theme,
-  compactMode = false,
-  sidebar = false,
 }: {
   keys: SectionKey[];
   sections: Record<SectionKey, ReactNode>;
   summaryTitle: string;
-  theme: ResumeTemplateTheme;
-  compactMode?: boolean;
-  sidebar?: boolean;
 }) =>
   keys.map((key) => {
     const content = sections[key];
     if (!content) return null;
 
     return (
-      <ResumeSection
-        key={`${sidebar ? "sidebar" : "main"}-${key}`}
+      <Template1Section
+        key={`main-${key}`}
         title={getSectionLabel(key, summaryTitle)}
-        theme={theme}
-        sidebar={sidebar}
-        compactMode={compactMode}
         summaryTitle={summaryTitle}
       >
         {content}
-      </ResumeSection>
+      </Template1Section>
     );
   });
 
@@ -361,50 +632,6 @@ const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
     ),
   };
 
-  const sidebarIntro = (
-    <div className="break-inside-avoid space-y-2.5">
-      <h1
-        className="font-bold tracking-[0.02em] uppercase"
-        style={{
-          fontSize: "var(--resume-name-size)",
-          lineHeight: "var(--resume-line-height)",
-          color: theme.palette.sidebarText || theme.palette.text,
-        }}
-      >
-        {data.fullName}
-      </h1>
-      {hasText(data.role) ? (
-        <p
-          style={{
-            fontSize: "var(--resume-role-size)",
-            lineHeight: "var(--resume-line-height)",
-            color:
-              theme.palette.titleText ||
-              theme.palette.sidebarMutedText ||
-              theme.palette.sidebarText ||
-              theme.palette.mutedText,
-            letterSpacing: "0.07em",
-            textTransform: "uppercase",
-          }}
-        >
-          {data.role}
-        </p>
-      ) : null}
-      {getContactItems(data).length > 0 ? (
-        <ResumeContactRow
-          items={getContactItems(data)}
-          color={
-            theme.palette.sidebarMutedText ||
-            theme.palette.sidebarText ||
-            theme.palette.mutedText
-          }
-          compactMode={compactMode}
-          densityMode={densityMode}
-        />
-      ) : null}
-    </div>
-  );
-
   const fresherSectionKeys = [
     ...getResumeSectionOrder("fresher").filter(
       (key): key is SectionKey => key !== "header"
@@ -457,6 +684,7 @@ const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
       theme={theme}
       style={{
         ...pageStyle,
+        border: "none",
         ...({
           "--resume-page-bg": theme.palette.page,
           "--resume-page-text": theme.palette.text,
@@ -513,11 +741,7 @@ const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
 
       {theme.layout === "single" ? (
         <div className="flex h-full flex-col" style={{ gap: `${sectionGap}px` }}>
-          <ResumeHeader
-            data={data}
-            theme={theme}
-            compactMode={compactMode}
-          />
+          <Template1Header data={data} theme={theme} />
           <div
             className="flex flex-col"
             style={{ gap: `${sectionGap}px` }}
@@ -528,8 +752,6 @@ const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                 : theme.mainSections || DEFAULT_SINGLE_ORDER,
               sections,
               summaryTitle,
-              theme,
-              compactMode,
             })}
           </div>
         </div>
@@ -547,7 +769,6 @@ const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                   />
                 ) : (
                   <>
-                    {sidebarIntro}
                     {renderSections({
                       keys: fresherResume
                         ? fresherSidebarKeys
@@ -569,22 +790,13 @@ const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                 className="flex flex-col"
                 style={{ gap: `${sectionGap}px` }}
               >
-                {theme.summaryInHeader ? null : (
-                  <ResumeHeader
-                    data={data}
-                    theme={theme}
-                    compactMode={compactMode}
-                    densityMode={densityMode}
-                  />
-                )}
+                {theme.summaryInHeader ? null : <Template1Header data={data} theme={theme} />}
                 {renderSections({
                   keys: fresherResume
                     ? fresherMainKeys
                     : experiencedMainKeys,
                   sections,
                   summaryTitle,
-                  theme,
-                  compactMode,
                 })}
               </div>
             </div>

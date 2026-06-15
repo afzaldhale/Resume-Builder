@@ -1,116 +1,19 @@
-import React from "react";
-import type { CSSProperties, ReactNode } from "react";
+import React, { type CSSProperties } from "react";
 import type { ResumeData } from "./types";
 import { templateThemes } from "./templateThemes";
 import { getCompactMode, getDensityMode, getSummaryConfig } from "./templatePolicy";
 import {
   formatMonthYear,
-  getResumeSectionOrder,
-  hasSectionData,
   isFresherResume,
   sortCertificationsReverseChronological,
   sortEducationReverseChronological,
   sortExperienceReverseChronological,
-  type ResumeSectionKey,
 } from "./resumeSections";
-import { ResumeSection } from "@/components/resume/ResumeSection";
-import ResumeHeader, { ResumeContactRow } from "@/components/resume-shared/ResumeHeader";
 import { ResumeTypography } from "@/constants/resumeDesignSystem";
 
-type HeadingStyle = "bar" | "underline" | "accent";
-type HeaderLayout = "stacked" | "split";
-type SidebarTone = "dark" | "light";
-type SectionKey = Exclude<ResumeSectionKey, "header">;
-
-interface Palette {
-  page: string;
-  text: string;
-  mutedText: string;
-  accent: string;
-  accentSoft: string;
-  accentText: string;
-  border: string;
-  nameText?: string;
-  titleText?: string;
-  headingText?: string;
-  accentBorder?: string;
-  divider?: string;
-  sidebarBg?: string;
-  sidebarText?: string;
-  sidebarMutedText?: string;
-  sidebarBorder?: string;
-  sidebarAccentSoft?: string;
-  headerBg?: string;
+interface Template5Props {
+  data: ResumeData;
 }
-
-export interface ResumeTemplateTheme {
-  name: string;
-  layout: "single" | "two-column";
-  headerLayout: HeaderLayout;
-  headingStyle: HeadingStyle;
-  fontFamily?: string;
-  palette: Palette;
-  sidebarWidth?: string;
-  sidebarTone?: SidebarTone;
-  sidebarSections?: SectionKey[];
-  mainSections?: SectionKey[];
-  sectionSpacing?: number;
-  pagePadding?: string;
-  contentPadding?: string;
-  sidebarPadding?: string;
-  mainPadding?: string;
-  layoutType?: "single-column" | "sidebar";
-  headingVariant?: "full-width-bar" | "label-bar" | "underline" | "plain";
-  headingInset?: boolean;
-  typographyScale?: number;
-  spacingScale?: number;
-  headerDivider?: boolean;
-  headerBand?: boolean;
-  topAccentBar?: boolean;
-  leftAccentLine?: boolean;
-  summaryInHeader?: boolean;
-  summaryStyle?: "boxed" | "plain";
-  sidebarMode?: "profile" | "contact-only";
-  sidebarHeading?: string;
-  fresherMainSections?: SectionKey[];
-  showHeaderContact?: boolean;
-}
-
-const DEFAULT_SINGLE_ORDER: SectionKey[] = [
-  "summary",
-  "skills",
-  "experience",
-  "education",
-  "certifications",
-  "projects",
-  "achievements",
-  "languages",
-  "strengths",
-  "hobbies",
-  "references",
-  "custom",
-];
-
-const DEFAULT_EXPERIENCED_SIDEBAR: SectionKey[] = [
-  "skills",
-  "certifications",
-  "languages",
-  "strengths",
-  "hobbies",
-];
-
-const DEFAULT_EXPERIENCED_MAIN: SectionKey[] = [
-  "summary",
-  "experience",
-  "education",
-  "projects",
-  "achievements",
-  "references",
-  "custom",
-];
-
-const DEFAULT_FRESHER_SIDEBAR: SectionKey[] = ["languages", "strengths", "hobbies"];
-const DEFAULT_FRESHER_MAIN: SectionKey[] = ["summary", "skills", "experience", "education", "certifications"];
 
 const hasText = (value?: string | null) => Boolean(value && value.trim());
 
@@ -122,622 +25,612 @@ const toBulletItems = (value?: string | null) =>
 
 const uniqueItems = (items: string[]) => [...new Set(items.filter(Boolean))];
 
-const scalePxString = (value: string, factor: number) =>
-  value.replace(/(\d+(?:\.\d+)?)px/g, (_, amount: string) => {
-    const scaled = Math.max(8, Number.parseFloat(amount) * factor);
-    return `${Math.round(scaled * 100) / 100}px`;
-  });
-
 const formatRange = (start?: string, end?: string) => {
   const parts = [formatMonthYear(start), formatMonthYear(end)].filter(Boolean);
-  return parts.join(" - ");
+  return parts.join(" \u2013 ");
 };
 
 const getContactItems = (data: ResumeData) => {
   const items: { label: string; value: string }[] = [];
 
-  if (hasText(data.phone)) items.push({ label: "Phone", value: data.phone });
   if (hasText(data.email)) items.push({ label: "Email", value: data.email });
+  if (hasText(data.phone)) items.push({ label: "Phone", value: data.phone });
   if (hasText(data.address)) items.push({ label: "Location", value: data.address });
 
   (data.socialLinks || []).forEach((link) => {
     if (hasText(link.url)) {
-      const label = link.platform?.toLowerCase().includes("linkedin") ? "LinkedIn" : link.platform || "Website";
-      items.push({ label, value: link.url });
+      items.push({
+        label: link.platform?.toLowerCase().includes("linkedin")
+          ? "LinkedIn"
+          : link.platform || "Link",
+        value: link.url,
+      });
     }
   });
 
   return items;
 };
 
-const getSectionLabel = (key: SectionKey, summaryTitle: string) => {
-  switch (key) {
-    case "summary":
-      return summaryTitle;
-    case "skills":
-      return "Skills";
-    case "experience":
-      return "Work Experience";
-    case "education":
-      return "Education";
-    case "projects":
-      return "Projects";
-    case "certifications":
-      return "Certifications";
-    case "achievements":
-      return "Achievements";
-    case "languages":
-      return "Languages";
-    case "strengths":
-      return "Strengths";
-    case "hobbies":
-      return "Hobbies / Interests";
-    case "references":
-      return "References";
-    case "custom":
-      return "Additional Information";
-    default:
-      return "";
-  }
-};
-
-const ResumePage = ({ children, theme, style }: { children: ReactNode; theme: ResumeTemplateTheme; style?: CSSProperties }) => (
-  <div
-    className={`resume-theme-root resume-page ${theme.layout === "single" ? "single-column" : "sidebar-layout"}`}
-    style={{
-      width: "794px",
-      height: "1123px",
-      background: theme.palette.page,
-      color: theme.palette.text,
-      position: "relative",
-      overflow: "visible",
-      border: `1px solid ${theme.palette.border}`,
-      fontFamily: theme.fontFamily || "var(--resume-font-family, Inter, Arial, Helvetica, sans-serif)",
-      margin: "0 auto",
-      ...style,
-    }}
-  >
-    {children}
-  </div>
-);
-
-const ResumePageStyles = () => (
+const Template5Styles = () => (
   <style>{`
-    .resume-theme-root {
-      background: var(--resume-page-bg);
-      color: var(--resume-page-text);
-      height: 1123px;
-    }
-
-    .resume-page,
-    .resume-page,
-    .resume-page * {
+    .template5-page,
+    .template5-page * {
       box-sizing: border-box;
     }
 
-    .resume-page {
-      width: var(--resume-page-width);
-      height: var(--resume-page-height);
+    .template5-page {
+      width: var(--resume-page-width, 794px);
+      height: var(--resume-page-height, 1123px);
+      min-height: var(--resume-page-height, 1123px);
+      background: #ffffff;
+      color: #0f172a;
+      position: relative;
       overflow: visible;
       page-break-after: always;
       break-after: page;
-      font-family: var(--resume-font-family, Inter, Arial, Helvetica, sans-serif);
-    }
-    .resume-page.single-column {
-      padding: var(--resume-page-padding-y) var(--resume-page-padding-x);
-    }
-    .resume-page.sidebar-layout {
-      padding: 0;
     }
 
-    .resume-page p,
-    .resume-page div,
-    .resume-page span,
-    .resume-page li {
-      white-space: normal;
-      overflow-wrap: break-word;
-      word-break: normal;
+    .template5-shell {
+      position: relative;
+      min-height: 1123px;
+      padding: 28px 28px 24px 34px;
+      background: #ffffff;
+    }
+
+    .template5-shell::before {
+      content: "";
+      position: absolute;
+      left: 18px;
+      top: 28px;
+      bottom: 24px;
+      width: 6px;
+      background: linear-gradient(180deg, #2563eb 0%, #0ea5e9 100%);
+      border-radius: 999px;
+    }
+
+    .template5-grid {
+      display: grid;
+      grid-template-columns: 228px minmax(0, 1fr);
+      gap: 18px;
+      margin-left: 10px;
+    }
+
+    .template5-sidebar {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      padding-right: 4px;
+    }
+
+    .template5-main {
+      display: grid;
+      align-content: start;
+      gap: 12px;
       min-width: 0;
-      max-width: 100%;
     }
 
-    .resume-page a,
-    .resume-contact-item,
-    .resume-long-text {
-      overflow-wrap: anywhere;
-      word-break: break-word;
+    .template5-name {
+      margin: 0;
+      font-size: 27px;
+      line-height: 1.08;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #0f172a;
+      text-transform: uppercase;
+      overflow-wrap: break-word;
     }
 
-    .resume-heading {
-      font-size: var(--resume-heading-size);
-      line-height: 1.2;
+    .template5-role {
+      margin: 4px 0 0;
+      font-size: 14px;
+      line-height: 1.45;
       font-weight: 700;
       letter-spacing: 0.12em;
+      color: #64748b;
       text-transform: uppercase;
     }
 
-    .resume-body-copy {
-      font-size: var(--resume-body-size);
-      line-height: 1.34;
+    .template5-sidebar-card,
+    .template5-main-card,
+    .template5-summary-card {
+      border-radius: 12px;
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
 
-    .resume-item-title {
-      font-size: var(--resume-item-title-size);
-      line-height: 1.35;
-      font-weight: 700;
+    .template5-sidebar-card {
+      background: #f8fafc;
+      border: 1px solid #dbe4ee;
+      padding: 10px 11px;
     }
 
-    .resume-item-subtitle {
-      font-size: var(--resume-item-subtitle-size);
-      line-height: 1.32;
-      color: var(--resume-page-text);
+    .template5-main-card {
+      background: #ffffff;
+      border: 1px solid #dbe4ee;
+      padding: 12px 13px;
     }
 
-    .resume-item-meta {
-      font-size: var(--resume-item-meta-size);
-      line-height: 1.3;
-      color: var(--resume-muted-text);
+    .template5-summary-card {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 14px 15px;
     }
 
-    .resume-section-title {
-      display: block;
-      font-size: var(--resume-heading-size);
+    .template5-section-title {
+      margin: 0 0 7px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
       line-height: 1.2;
-      font-weight: 700;
-      letter-spacing: 0.08em;
+      color: #0f172a;
+    }
+
+    .template5-contact-list,
+    .template5-link-list,
+    .template5-mini-list,
+    .template5-stack {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .template5-contact-row {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .template5-contact-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      margin: 0 0 0.35em;
+      color: #64748b;
     }
 
-    .resume-bullet-list {
-      margin: 0;
-      padding-left: var(--resume-list-indent, 18px);
-      font-size: var(--resume-list-size);
-      line-height: 1.34;
+    .template5-contact-value,
+    .template5-body,
+    .template5-item-text {
+      font-size: 10.9px;
+      line-height: 1.45;
+      color: #334155;
+      overflow-wrap: anywhere;
     }
 
-    .resume-bullet-list li + li {
-      margin-top: 2px;
+    .template5-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
     }
 
-    .resume-summary-box {
-      border-left: 4px solid var(--resume-accent);
-      background: var(--resume-accent-soft);
-      padding: var(--resume-summary-box-padding, 10px 12px);
-    }
-
-    .resume-section-summary-plain .resume-summary-box {
-      border-left: none;
-      background: transparent;
-      padding: 0;
-    }
-
-    .resume-contact-item {
+    .template5-chip {
       display: inline-flex;
       align-items: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 10.1px;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .template5-chip-skill {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .template5-chip-strength {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .template5-chip-interest {
+      background: #fce7f3;
+      color: #9d174d;
+    }
+
+    .template5-item-title {
+      margin: 0;
+      font-size: 12px;
       line-height: 1.35;
-      min-width: 0;
+      font-weight: 700;
+      color: #0f172a;
     }
 
-    .resume-contact-item:not(:last-child)::after {
-      content: "|";
-      margin-left: var(--resume-contact-separator-gap, 8px);
-      color: var(--resume-muted-text);
+    .template5-item-sub {
+      margin: 2px 0 0;
+      font-size: 10.7px;
+      line-height: 1.35;
+      font-weight: 600;
+      color: #64748b;
     }
 
-    .resume-meta-block + .resume-meta-block {
-      margin-top: 8px;
+    .template5-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+      margin-top: 4px;
+      font-size: 10.4px;
+      line-height: 1.35;
+      color: #64748b;
     }
 
-    .break-inside-avoid {
-      break-inside: avoid;
-      page-page-inside: avoid;
+    .template5-meta-row span:not(:last-child)::after {
+      content: "•";
+      margin-left: 10px;
+      color: #94a3b8;
     }
 
-    .resume-two-column-layout {
-      width: 100%;
-      min-width: 0;
+    .template5-timeline {
+      position: relative;
+      padding-left: 14px;
     }
 
-    .resume-sidebar {
-      min-width: 0;
+    .template5-timeline::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 2px;
+      bottom: 2px;
+      width: 2px;
+      background: linear-gradient(180deg, #2563eb 0%, #10b981 100%);
+      border-radius: 999px;
     }
 
-    .resume-main,
-    .resume-section,
-    .resume-section-content,
-    .resume-summary-box,
-    .resume-skills,
-    .resume-meta-block {
-      min-width: 0;
-      max-width: 100%;
+    .template5-date {
+      float: right;
+      margin-left: 10px;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.35;
+      color: #475569;
     }
 
-    .resume-section {
+    .template5-project-tech {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 5px;
+    }
+
+    .template5-project-tech span {
+      font-size: 9.6px;
+      font-weight: 700;
+      line-height: 1.15;
+      color: #991b1b;
+      background: #fee2e2;
+      padding: 3px 6px;
+      border-radius: 999px;
+    }
+
+    .template5-split-grid {
       display: grid;
-      row-gap: var(--resume-section-vertical-gap, 8px);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      min-width: 0;
     }
   `}</style>
 );
 
-const ResumeSidebar = ({ children, theme, compactMode = false }: { children: ReactNode; theme: ResumeTemplateTheme; compactMode?: boolean }) => (
-  <aside
-    className="self-stretch"
-    style={{
-      background: theme.palette.sidebarBg || theme.palette.accentSoft,
-      color: theme.palette.sidebarText || theme.palette.text,
-      padding: scalePxString(theme.sidebarPadding || "28px 22px", compactMode ? 0.82 : 1),
-    }}
-  >
-    {children}
-  </aside>
-);
-
-const ResumeAccentStrip = ({ theme }: { theme: ResumeTemplateTheme }) => (
-  <div
-    aria-hidden="true"
-    style={{
-      position: "absolute",
-      left: "0",
-      top: "0",
-      width: "6px",
-      height: "100%",
-      background: theme.palette.accent,
-    }}
-  />
-);
-
-const ResumeBulletList = ({ items, fallbackText, className = "" }: { items: string[]; fallbackText?: string; className?: string }) => {
-  const filteredItems = items.filter(Boolean);
-  if (filteredItems.length === 0 && !hasText(fallbackText)) return null;
-
-  if (filteredItems.length <= 1 && hasText(fallbackText)) {
-    return <p className={`resume-body-copy ${className}`.trim()}>{fallbackText}</p>;
-  }
+const Template5Section = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => {
+  if (!children) return null;
 
   return (
-    <ul className={`resume-bullet-list ${className}`.trim()}>
-      {filteredItems.map((item, index) => (
-        <li key={`${item}-${index}`}>{item}</li>
-      ))}
-    </ul>
+    <section className="resume-section break-inside-avoid">
+      <h2 className="template5-section-title resume-section-title">{title}</h2>
+      <div className="resume-section-content">{children}</div>
+    </section>
   );
 };
 
-const ResumeTagList = ({ items }: { items: string[] }) => {
-  const filteredItems = uniqueItems(items.filter(Boolean));
-  if (filteredItems.length === 0) return null;
-
-  return <p className="resume-body-copy resume-skills">{filteredItems.join(", ")}</p>;
-};
-
-const ResumeMetaBlock = ({ title, subtitle, meta, children }: { title: string; subtitle?: string; meta?: string; children?: ReactNode }) => (
-  <div className="resume-meta-block break-inside-avoid">
-    <h3 className="resume-item-title">{title}</h3>
-    {hasText(subtitle) ? <p className="resume-item-subtitle mt-1">{subtitle}</p> : null}
-    {hasText(meta) ? <p className="resume-item-meta mt-1.5">{meta}</p> : null}
-    {children ? <div className="mt-2.5">{children}</div> : null}
-  </div>
-);
-
-const ResumeTwoColumnLayout = ({ sidebar, main, theme }: { sidebar: ReactNode; main: ReactNode; theme: ResumeTemplateTheme }) => {
-  const sidebarWidth = theme.sidebarWidth || "30%";
-  const mainWidth = `calc(100% - ${sidebarWidth})`;
-
-  return (
-    <div className="resume-two-column-layout flex h-full items-stretch">
-      <div className="resume-sidebar" style={{ width: sidebarWidth, flex: `0 0 ${sidebarWidth}` }}>
-        {sidebar}
-      </div>
-      <main className="resume-main" style={{ width: mainWidth }}>
-        {main}
-      </main>
-    </div>
-  );
-};
-
-const renderSections = ({ keys, sections, summaryTitle, theme, compactMode = false, sidebar = false }: { keys: SectionKey[]; sections: Record<SectionKey, ReactNode>; summaryTitle: string; theme: ResumeTemplateTheme; compactMode?: boolean; sidebar?: boolean; }) =>
-  keys.map((key) => {
-    const content = sections[key];
-    if (!content) return null;
-
-    return (
-      <ResumeSection
-        key={`${sidebar ? "sidebar" : "main"}-${key}`}
-        title={getSectionLabel(key, summaryTitle)}
-        theme={theme}
-        sidebar={sidebar}
-        compactMode={compactMode}
-        summaryTitle={summaryTitle}
-      >
-        {content}
-      </ResumeSection>
-    );
-  });
-
-const buildSectionMap = (data: ResumeData) => {
+const template5Render = (data: ResumeData) => {
+  const theme = templateThemes[5];
   const { summaryText, summaryTitle } = getSummaryConfig(data);
+  const compactMode = getCompactMode(data);
+  const densityMode = getDensityMode(data);
+  const _fresherResume = isFresherResume(data);
+  void _fresherResume;
+
   const experience = sortExperienceReverseChronological(data.experience || []);
   const education = sortEducationReverseChronological(data.education || []);
   const certifications = sortCertificationsReverseChronological(data.certifications || []);
+  const contacts = getContactItems(data);
 
-  const sections: Record<SectionKey, ReactNode> = {
-    summary: hasText(summaryText) ? (
-      <div className="resume-summary-box">
-        <p className="resume-body-copy">{summaryText}</p>
-      </div>
-    ) : null,
-    skills: data.skills.length > 0 ? <ResumeTagList items={data.skills} /> : null,
-    experience:
-      experience.length > 0 ? (
-        <div className="space-y-3.5">
-          {experience.map((item, index) => (
-            <ResumeMetaBlock
-              key={`${item.company}-${item.role}-${index}`}
-              title={item.role}
-              subtitle={item.company}
-              meta={formatRange(item.startDate, item.endDate)}
-            >
-              <ResumeBulletList items={toBulletItems(item.description)} fallbackText={item.description} />
-            </ResumeMetaBlock>
-          ))}
-        </div>
-      ) : null,
-    education:
-      education.length > 0 ? (
-        <div className="space-y-3.5">
-          {education.map((item, index) => (
-            <ResumeMetaBlock
-              key={`${item.school}-${item.degree}-${index}`}
-              title={item.degree}
-              subtitle={item.school}
-              meta={formatRange(item.startYear, item.endYear)}
-            >
-              {hasText(item.gpa) ? <p className="resume-item-meta">GPA: {item.gpa}</p> : null}
-            </ResumeMetaBlock>
-          ))}
-        </div>
-      ) : null,
-    projects:
-      data.projects.length > 0 ? (
-        <div className="space-y-3.5">
-          {data.projects.map((project, index) => (
-            <ResumeMetaBlock key={`${project.name}-${index}`} title={project.name} meta={hasText(project.link) ? project.link : undefined}>
-              {hasText(project.description) ? <p className="resume-body-copy">{project.description}</p> : null}
-              {project.technologies.length > 0 ? (
-                <p className="resume-item-meta mt-2">{uniqueItems(project.technologies).join(", ")}</p>
-              ) : null}
-            </ResumeMetaBlock>
-          ))}
-        </div>
-      ) : null,
-    certifications:
-      certifications.length > 0 ? (
-        <div className="space-y-3">
-          {certifications.map((item, index) => (
-            <ResumeMetaBlock key={`${item.name}-${item.issuer}-${index}`} title={item.name} subtitle={item.issuer} meta={formatMonthYear(item.year)} />
-          ))}
-        </div>
-      ) : null,
-    achievements: (data.achievements || []).length > 0 ? <ResumeBulletList items={data.achievements || []} /> : null,
-    languages:
-      data.languages.length > 0 ? (
-        <ResumeTagList items={data.languages.map((item) => (hasText(item.level) ? `${item.language} (${item.level})` : item.language))} />
-      ) : null,
-    strengths: (data.strengths || []).length > 0 ? <ResumeTagList items={data.strengths || []} /> : null,
-    hobbies: (data.hobbies || []).length > 0 ? <ResumeTagList items={data.hobbies || []} /> : null,
-    references: (data.references || []).length > 0 ? <ResumeBulletList items={data.references || []} /> : null,
-    custom:
-      (data.customSections || []).length > 0 ? (
-        <div className="space-y-3.5">
-          {data.customSections.map((section, index) => {
-            const hasItems = (section.items || []).length > 0;
-            const hasDescription = hasText(section.description);
-
-            if (!hasText(section.title) || (!hasDescription && !hasItems && !hasText(section.date))) {
-              return null;
-            }
-
-            return (
-              <ResumeMetaBlock key={`${section.title}-${index}`} title={section.title} meta={section.date}>
-                {hasDescription ? <p className="resume-body-copy">{section.description}</p> : null}
-                {hasItems ? <ResumeBulletList items={section.items || []} className="mt-2" /> : null}
-              </ResumeMetaBlock>
-            );
-          })}
-        </div>
-      ) : null,
-  };
-
-  return { sections, summaryTitle };
-};
-
-const template5Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
-  const { sections, summaryTitle } = buildSectionMap(data);
-  const fresherResume = isFresherResume(data);
-  const compactMode = getCompactMode(data);
-  const densityMode = getDensityMode(data);
-  const compactLevel = data.compactLevel || 0;
-  const densityFactor = densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.88 : 0.82;
-  const baseSpacingFactor = compactMode ? 0.92 : 1;
-  const compactSpacingFactor = compactLevel === 1 ? 0.9 : compactLevel >= 2 ? 0.8 : 1;
-  const rawGap = Math.round((theme.sectionSpacing || 22) * densityFactor * baseSpacingFactor * compactSpacingFactor * (theme.spacingScale || 1));
-  const minSectionGap = densityMode === "comfortable" && compactLevel === 0 ? 12 : 10;
-  const sectionGap = Math.max(minSectionGap, Math.min(16, rawGap));
-
-  const clampPadding = (padding: string) => {
-    try {
-      const parts = padding.trim().split(/\s+/).map((p) => parseInt(p, 10) || 0);
-      let vert = parts.length === 4 ? parts[0] + parts[2] : parts[0] || 36;
-      let horiz = parts.length === 4 ? parts[1] + parts[3] : parts[1] || parts[0] || 32;
-      vert = Math.round(vert / (parts.length === 4 ? 2 : 1));
-      horiz = Math.round(horiz / (parts.length === 4 ? 2 : 1));
-      const minPadding = densityMode === "comfortable" && compactLevel === 0 ? 32 : densityMode === "compact" || compactLevel >= 1 ? 28 : 24;
-      vert = Math.max(minPadding, Math.min(40, vert));
-      horiz = Math.max(minPadding, Math.min(40, horiz));
-      return `${vert}px ${horiz}px`;
-    } catch {
-      return "36px 32px";
-    }
-  };
+  const densityScale =
+    densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.95 : 0.92;
+  const typScale = theme.typographyScale || 1;
+  const bodySize = Math.max(10.2, ResumeTypography.body * typScale * densityScale);
 
   const pageStyle: CSSProperties = {
-    padding:
-      theme.layout === "single"
-        ? scalePxString(clampPadding(theme.pagePadding || "36px 32px"), densityFactor * baseSpacingFactor * compactSpacingFactor)
-        : "0",
+    fontFamily: theme.fontFamily || "Inter, Arial, Helvetica, sans-serif",
+    ["--template5-body-size" as string]: `${bodySize.toFixed(2)}px`,
   };
-
-  const mainStyle: CSSProperties = {
-    padding: scalePxString(clampPadding(theme.mainPadding || theme.contentPadding || "36px 32px"), densityFactor * baseSpacingFactor * compactSpacingFactor),
-  };
-
-  const sidebarIntro = (
-    <div className="break-inside-avoid space-y-2.5">
-      <h1
-        className="font-bold tracking-[0.02em] uppercase"
-        style={{
-          fontSize: "var(--resume-name-size)",
-          lineHeight: "var(--resume-line-height)",
-          color: theme.palette.sidebarText || theme.palette.text,
-        }}
-      >
-        {data.fullName}
-      </h1>
-      {hasText(data.role) ? (
-        <p
-          style={{
-            fontSize: "var(--resume-role-size)",
-            lineHeight: "var(--resume-line-height)",
-            color: theme.palette.titleText || theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText,
-            letterSpacing: "0.07em",
-            textTransform: "uppercase",
-          }}
-        >
-          {data.role}
-        </p>
-      ) : null}
-      {getContactItems(data).length > 0 ? (
-        <ResumeContactRow items={getContactItems(data)} color={theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText} compactMode={compactMode} densityMode={densityMode} />
-      ) : null}
-    </div>
-  );
-
-  const fresherSectionKeys = [
-    ...getResumeSectionOrder("fresher").filter((key): key is SectionKey => key !== "header"),
-    "projects" as SectionKey,
-    "achievements" as SectionKey,
-    "references" as SectionKey,
-    "custom" as SectionKey,
-  ].filter((key, index, items) => items.indexOf(key) === index && hasSectionData(key as ResumeSectionKey, data));
-
-  const fresherSidebarKeys = (theme.sidebarSections || DEFAULT_FRESHER_SIDEBAR).filter((key: SectionKey) => fresherSectionKeys.includes(key));
-  const fresherMainKeys = (theme.fresherMainSections || DEFAULT_FRESHER_MAIN).filter((key) => hasSectionData(key, data));
-
-  const experiencedSidebarKeys = theme.sidebarSections || DEFAULT_EXPERIENCED_SIDEBAR;
-  const experiencedMainKeys = theme.mainSections || DEFAULT_EXPERIENCED_MAIN;
-
-  const densityScale = densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.95 : 0.92;
-
-  const typScale = theme.typographyScale || 1;
-
-  const nameBase = ResumeTypography.name * typScale;
-  const roleBase = ResumeTypography.role * typScale;
-  const headingBase = ResumeTypography.heading * typScale;
-  const bodyBase = ResumeTypography.body * typScale;
-  const smallBase = ResumeTypography.small * typScale;
-  const lineHeight = ResumeTypography.lineHeight || 1.4;
-
-  const nameSize = nameBase * densityScale;
-  const roleSize = roleBase * densityScale;
-  const headingSize = headingBase * densityScale;
-  const bodySize = Math.max(10.5, bodyBase * densityScale);
-  const titleSize = Math.max(11, (ResumeTypography.role || 15) * typScale * densityScale);
-  const subtitleSize = Math.max(10.2, (ResumeTypography.body || 12) * typScale * densityScale);
-  const metaSize = Math.max(10.5, smallBase * densityScale);
-  const listSize = Math.max(10, (ResumeTypography.body || 12) * typScale * densityScale);
 
   return (
-    <ResumePage
-      theme={theme}
-      style={{
-        ...pageStyle,
-        ...({
-          "--resume-page-bg": theme.palette.page,
-          "--resume-page-text": theme.palette.text,
-          "--resume-muted-text": theme.palette.mutedText,
-          "--resume-border": theme.palette.border,
-          "--resume-accent": theme.palette.accent,
-          "--resume-accent-soft": theme.palette.accentSoft,
-          "--resume-accent-text": theme.palette.accentText,
-          "--resume-heading-size": `${headingSize.toFixed(2)}px`,
-          "--resume-body-size": `${bodySize.toFixed(2)}px`,
-          "--resume-item-title-size": `${titleSize.toFixed(2)}px`,
-          "--resume-item-subtitle-size": `${subtitleSize.toFixed(2)}px`,
-          "--resume-item-meta-size": `${metaSize.toFixed(2)}px`,
-          "--resume-list-size": `${listSize.toFixed(2)}px`,
-          "--resume-name-size": `${Math.round(nameSize * 100) / 100}px`,
-          "--resume-role-size": `${Math.round(roleSize * 100) / 100}px`,
-          "--resume-line-height": `${lineHeight}`,
-          "--resume-summary-box-padding": compactMode || densityMode !== "comfortable" ? "8px 10px" : "10px 12px",
-          "--resume-list-indent": densityMode === "comfortable" ? "18px" : "16px",
-          "--resume-contact-separator-gap": densityMode === "comfortable" ? "8px" : "6px",
-          "--resume-section-vertical-gap": densityMode === "comfortable" && compactLevel === 0 ? "8px" : densityMode === "compact" ? "7px" : "6px",
-          "--resume-font-family": theme.fontFamily || "Inter, Arial, Helvetica, sans-serif",
-        } as CSSProperties),
-      }}
+    <div
+      className="resume-theme-root resume-page sidebar-layout template5-page"
+      style={pageStyle}
       data-density-mode={densityMode}
+      data-compact-mode={compactMode ? "true" : "false"}
     >
-      <ResumePageStyles />
+      <Template5Styles />
 
-      {theme.topAccentBar ? <div aria-hidden="true" style={{ position: "absolute", inset: "0 0 auto 0", height: "8px", background: theme.palette.accent }} /> : null}
+      <div className="template5-shell" data-resume-content="true">
+        <header style={{ display: "none" }} aria-hidden="true">
+          {data.fullName}
+        </header>
+        <div className="template5-grid">
+          <aside className="template5-sidebar">
+            <section className="break-inside-avoid">
+              <h1 className="template5-name">{data.fullName || "Your Name"}</h1>
+              {hasText(data.role) ? <p className="template5-role">{data.role}</p> : null}
+            </section>
 
-      {theme.leftAccentLine && theme.layout === "single" ? <ResumeAccentStrip theme={theme} /> : null}
-
-      {theme.layout === "single" ? (
-        <div className="flex h-full flex-col" style={{ gap: `${sectionGap}px` }}>
-          <ResumeHeader data={data} theme={theme} compactMode={compactMode} />
-          <div className="flex flex-col" style={{ gap: `${sectionGap}px` }}>
-            {renderSections({ keys: fresherResume ? fresherSectionKeys : theme.mainSections || DEFAULT_SINGLE_ORDER, sections, summaryTitle, theme, compactMode })}
-          </div>
-        </div>
-      ) : (
-        <ResumeTwoColumnLayout
-          theme={theme}
-          sidebar={
-            <ResumeSidebar theme={theme} compactMode={compactMode}>
-              <div className="flex flex-col" style={{ gap: `${sectionGap}px` }}>
-                {theme.sidebarMode === "contact-only" ? (
-                  <div className="break-inside-avoid">
-                    <ResumeContactRow items={getContactItems(data)} color={theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText} compactMode={compactMode} densityMode={densityMode} />
-                  </div>
-                ) : (
-                  <>
-                    {sidebarIntro}
-                    {renderSections({ keys: fresherResume ? fresherSidebarKeys : experiencedSidebarKeys, sections, summaryTitle, theme, compactMode, sidebar: true })}
-                  </>
-                )}
+            {contacts.length > 0 ? (
+              <div className="template5-sidebar-card break-inside-avoid">
+                <div className="template5-contact-list">
+                  {contacts.map((item, index) => (
+                    <div key={`${item.label}-${item.value}-${index}`} className="template5-contact-row">
+                      <span className="template5-contact-label">{item.label}</span>
+                      <span className="template5-contact-value">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </ResumeSidebar>
-          }
-          main={
-            <div style={mainStyle}>
-              <div className="flex flex-col" style={{ gap: `${sectionGap}px` }}>
-                {theme.summaryInHeader ? null : <ResumeHeader data={data} theme={theme} compactMode={compactMode} densityMode={densityMode} />}
-                {renderSections({ keys: fresherResume ? fresherMainKeys : experiencedMainKeys, sections, summaryTitle, theme, compactMode })}
+            ) : null}
+
+            {data.skills.length > 0 ? (
+              <Template5Section title="Skills">
+                <div className="template5-sidebar-card">
+                  <div className="template5-chip-list">
+                    {data.skills.map((skill, index) => (
+                      <span key={`${skill}-${index}`} className="template5-chip template5-chip-skill">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </Template5Section>
+            ) : null}
+
+            {certifications.length > 0 ? (
+              <Template5Section title="Certifications">
+                <div className="template5-sidebar-card template5-stack">
+                  {certifications.map((cert, index) => (
+                    <div key={`${cert.name}-${cert.issuer}-${index}`}>
+                      <p className="template5-item-title">{cert.name}</p>
+                      {hasText(cert.issuer) || hasText(cert.year) ? (
+                        <p className="template5-item-sub">
+                          {[cert.issuer, formatMonthYear(cert.year)].filter(Boolean).join(" • ")}
+                        </p>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              </Template5Section>
+            ) : null}
+
+            {data.languages.length > 0 ? (
+              <Template5Section title="Languages">
+                <div className="template5-sidebar-card template5-mini-list">
+                  {data.languages.map((lang, index) => (
+                    <div key={`${lang.language}-${index}`} className="template5-body">
+                      <strong>{lang.language}</strong>
+                      {hasText(lang.level) ? (
+                        <span style={{ color: "#64748b" }}> ({lang.level})</span>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              </Template5Section>
+            ) : null}
+
+            {(data.strengths || []).length > 0 ? (
+              <Template5Section title="Strengths">
+                <div className="template5-sidebar-card">
+                  <div className="template5-chip-list">
+                    {(data.strengths || []).map((item, index) => (
+                      <span key={`${item}-${index}`} className="template5-chip template5-chip-strength">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </Template5Section>
+            ) : null}
+
+            {(data.hobbies || []).length > 0 ? (
+              <Template5Section title="Interests">
+                <div className="template5-sidebar-card">
+                  <div className="template5-chip-list">
+                    {(data.hobbies || []).map((item, index) => (
+                      <span key={`${item}-${index}`} className="template5-chip template5-chip-interest">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </Template5Section>
+            ) : null}
+          </aside>
+
+          <main className="template5-main">
+            {hasText(summaryText) ? (
+              <Template5Section title={summaryTitle}>
+                <div className="template5-summary-card">
+                  <p className="template5-body" style={{ margin: 0 }}>
+                    {summaryText}
+                  </p>
+                </div>
+              </Template5Section>
+            ) : null}
+
+            {experience.length > 0 ? (
+              <Template5Section title="Professional Experience">
+                <div className="template5-main-card template5-stack">
+                  {experience.map((item, index) => (
+                    <div key={`${item.company}-${item.role}-${index}`} className="template5-timeline">
+                      <div className="template5-date">{formatRange(item.startDate, item.endDate)}</div>
+                      <p className="template5-item-title">{item.role}</p>
+                      {hasText(item.company) ? (
+                        <p className="template5-item-sub">{item.company}</p>
+                      ) : null}
+                      {(toBulletItems(item.description) || []).length > 0 ? (
+                        <ul
+                          style={{
+                            margin: "6px 0 0",
+                            paddingLeft: "16px",
+                            fontSize: "10.9px",
+                            lineHeight: 1.45,
+                            color: "#334155",
+                          }}
+                        >
+                          {toBulletItems(item.description).map((bullet, bulletIndex) => (
+                            <li key={`${bullet}-${bulletIndex}`}>{bullet}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              </Template5Section>
+            ) : null}
+
+            <div className="template5-split-grid">
+              <div className="template5-main">
+                {data.projects.length > 0 ? (
+                  <Template5Section title="Projects">
+                    <div className="template5-main-card template5-stack">
+                      {data.projects.map((project, index) => (
+                        <div key={`${project.name}-${index}`}>
+                          <p className="template5-item-title">{project.name}</p>
+                          {hasText(project.description) ? (
+                            <p className="template5-item-text">{project.description}</p>
+                          ) : null}
+                          {project.technologies.length > 0 ? (
+                            <div className="template5-project-tech">
+                              {uniqueItems(project.technologies).map((tech, techIndex) => (
+                                <span key={`${tech}-${techIndex}`}>{tech}</span>
+                              ))}
+                            </div>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  </Template5Section>
+                ) : null}
+
+                {(data.achievements || []).length > 0 ? (
+                  <Template5Section title="Achievements">
+                    <div className="template5-main-card">
+                      <ul
+                        style={{
+                          margin: 0,
+                          paddingLeft: "16px",
+                          fontSize: "10.9px",
+                          lineHeight: 1.45,
+                          color: "#334155",
+                        }}
+                      >
+                        {(data.achievements || []).map((item, index) => (
+                          <li key={`${item}-${index}`}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </Template5Section>
+                ) : null}
+              </div>
+
+              <div className="template5-main">
+                {education.length > 0 ? (
+                  <Template5Section title="Education">
+                    <div className="template5-main-card template5-stack">
+                      {education.map((item, index) => (
+                        <div key={`${item.school}-${item.degree}-${index}`}>
+                          <p className="template5-item-title">{item.degree}</p>
+                          {hasText(item.school) ? (
+                            <p className="template5-item-sub">{item.school}</p>
+                          ) : null}
+                          {hasText(item.startYear) || hasText(item.endYear) || hasText(item.gpa) ? (
+                            <div className="template5-meta-row">
+                              {hasText(item.startYear) || hasText(item.endYear) ? (
+                                <span>{formatRange(item.startYear, item.endYear)}</span>
+                              ) : null}
+                              {hasText(item.gpa) ? <span>GPA: {item.gpa}</span> : null}
+                            </div>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  </Template5Section>
+                ) : null}
+
+                {(data.references || []).length > 0 ? (
+                  <Template5Section title="References">
+                    <div className="template5-main-card template5-link-list">
+                      {(data.references || []).map((item, index) => (
+                        <div key={`${item}-${index}`} className="template5-body">
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </Template5Section>
+                ) : null}
+
+                {(data.customSections || []).length > 0 ? (
+                  <Template5Section title="Additional Information">
+                    <div className="template5-main-card template5-stack">
+                      {(data.customSections || []).map((section, index) => {
+                        const validItems = (section.items || []).filter(Boolean);
+                        if (!hasText(section.title) && !hasText(section.description) && validItems.length === 0) {
+                          return null;
+                        }
+
+                        return (
+                          <div key={`${section.title}-${index}`}>
+                            {hasText(section.title) ? (
+                              <p className="template5-item-title">{section.title}</p>
+                            ) : null}
+                            {hasText(section.description) ? (
+                              <p className="template5-item-text">{section.description}</p>
+                            ) : null}
+                            {validItems.length > 0 ? (
+                              <ul
+                                style={{
+                                  margin: "6px 0 0",
+                                  paddingLeft: "16px",
+                                  fontSize: "10.9px",
+                                  lineHeight: 1.45,
+                                  color: "#334155",
+                                }}
+                              >
+                                {validItems.map((item, itemIndex) => (
+                                  <li key={`${item}-${itemIndex}`}>{item}</li>
+                                ))}
+                              </ul>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Template5Section>
+                ) : null}
               </div>
             </div>
-          }
-        />
-      )}
-    </ResumePage>
+          </main>
+        </div>
+      </div>
+    </div>
   );
 };
 
-interface Template5Props {
-  data: ResumeData;
-}
-
-const Template5: React.FC<Template5Props> = ({ data }) => template5Render(data, templateThemes[5]);
+const Template5: React.FC<Template5Props> = ({ data }) => template5Render(data);
 
 export default Template5;

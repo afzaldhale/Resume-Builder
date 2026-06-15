@@ -137,8 +137,66 @@ const scalePxString = (value: string, factor: number) =>
 
 const formatRange = (start?: string, end?: string) => {
   const parts = [formatMonthYear(start), formatMonthYear(end)].filter(Boolean);
-  return parts.join(" - ");
+  return parts.join(" \u2013 ");
 };
+
+const toStructuredItems = (value?: string[] | string | null) => {
+  if (Array.isArray(value)) {
+    return value.map((item) => item?.trim()).filter(Boolean) as string[];
+  }
+
+  return toBulletItems(value);
+};
+
+const Template2BulletList = ({
+  items,
+  className = "",
+}: {
+  items: string[];
+  className?: string;
+}) => {
+  const filteredItems = items.filter(Boolean);
+  if (filteredItems.length === 0) return null;
+
+  return (
+    <ul
+      className={`resume-bullet-list ${className}`.trim()}
+      style={{
+        listStyleType: "disc",
+        listStylePosition: "outside",
+        paddingLeft: "18px",
+        margin: 0,
+      }}
+    >
+      {filteredItems.map((item, index) => (
+        <li key={`${item}-${index}`}>{item}</li>
+      ))}
+    </ul>
+  );
+};
+
+const Template2StructuredEntry = ({
+  title,
+  subtitle,
+  meta,
+  bullets,
+}: {
+  title: string;
+  subtitle?: string;
+  meta?: string;
+  bullets?: string[];
+}) => (
+  <div className="resume-meta-block">
+    <h3 className="resume-item-title">{title}</h3>
+    {hasText(subtitle) ? <p className="resume-item-subtitle mt-1">{subtitle}</p> : null}
+    {hasText(meta) ? <p className="resume-item-meta mt-1.5">{meta}</p> : null}
+    {bullets && bullets.length > 0 ? (
+      <div className="mt-2.5">
+        <Template2BulletList items={bullets} />
+      </div>
+    ) : null}
+  </div>
+);
 
 const getContactItems = (data: ResumeData): ContactItem[] => {
   const items: ContactItem[] = [];
@@ -197,6 +255,8 @@ const ResumeSidebarContactCard = ({
   theme: ResumeTemplateTheme;
   compactMode?: boolean;
 }) => {
+  void compactMode;
+
   const items = getContactItems(data);
 
   if (items.length === 0) return null;
@@ -281,14 +341,12 @@ const buildSectionMap = (data: ResumeData) => {
       experience.length > 0 ? (
         <div className="space-y-3.5">
           {experience.map((item, index) => (
-            <ResumeMetaBlock
+            <Template2StructuredEntry
               key={`${item.company}-${item.role}-${index}`}
-              title={item.role}
-              subtitle={item.company}
+              title={[item.role, item.company].filter(hasText).join(" at ")}
               meta={formatRange(item.startDate, item.endDate)}
-            >
-              <ResumeBulletList items={toBulletItems(item.description)} fallbackText={item.description} />
-            </ResumeMetaBlock>
+              bullets={toStructuredItems(item.description as string | string[] | null | undefined)}
+            />
           ))}
         </div>
       ) : null,
@@ -296,43 +354,49 @@ const buildSectionMap = (data: ResumeData) => {
       education.length > 0 ? (
         <div className="space-y-3.5">
           {education.map((item, index) => (
-            <ResumeMetaBlock
+            <Template2StructuredEntry
               key={`${item.school}-${item.degree}-${index}`}
               title={item.degree}
               subtitle={item.school}
               meta={formatRange(item.startYear, item.endYear)}
-            >
-              {hasText(item.gpa) ? <p className="resume-item-meta">GPA: {item.gpa}</p> : null}
-            </ResumeMetaBlock>
+              bullets={hasText(item.gpa) ? [`GPA: ${item.gpa}`] : undefined}
+            />
           ))}
         </div>
       ) : null,
     projects:
       data.projects.length > 0 ? (
         <div className="space-y-3.5">
-          {data.projects.map((project, index) => (
-            <ResumeMetaBlock
-              key={`${project.name}-${index}`}
-              title={project.name}
-              meta={hasText(project.link) ? project.link : undefined}
-            >
-              {hasText(project.description) ? <p className="resume-body-copy">{project.description}</p> : null}
-              {project.technologies.length > 0 ? (
-                <p className="resume-item-meta mt-2">{uniqueItems(project.technologies).join(", ")}</p>
-              ) : null}
-            </ResumeMetaBlock>
-          ))}
+          {data.projects.map((project, index) => {
+            const projectBullets = [
+              ...toStructuredItems(project.description),
+              ...(project.technologies.length > 0
+                ? [`Technologies: ${uniqueItems(project.technologies).join(", ")}.`]
+                : []),
+            ];
+
+            return (
+              <Template2StructuredEntry
+                key={`${project.name}-${index}`}
+                title={project.name}
+                meta={hasText(project.link) ? project.link : undefined}
+                bullets={projectBullets}
+              />
+            );
+          })}
         </div>
       ) : null,
     certifications:
       certifications.length > 0 ? (
         <div className="space-y-3">
           {certifications.map((item, index) => (
-            <ResumeMetaBlock
+            <Template2StructuredEntry
               key={`${item.name}-${item.issuer}-${index}`}
               title={item.name}
-              subtitle={item.issuer}
-              meta={formatMonthYear(item.year)}
+              bullets={[
+                ...(hasText(item.issuer) ? [`Issued by: ${item.issuer}`] : []),
+                ...(hasText(item.year) ? [`Date: ${formatMonthYear(item.year)}`] : []),
+              ]}
             />
           ))}
         </div>
@@ -341,14 +405,16 @@ const buildSectionMap = (data: ResumeData) => {
       (data.achievements || []).length > 0 ? <ResumeBulletList items={data.achievements || []} /> : null,
     languages:
       data.languages.length > 0 ? (
-        <ResumeTagList
+        <Template2BulletList
           items={data.languages.map((item) =>
             hasText(item.level) ? `${item.language} (${item.level})` : item.language
           )}
         />
       ) : null,
-    strengths: (data.strengths || []).length > 0 ? <ResumeTagList items={data.strengths || []} /> : null,
-    hobbies: (data.hobbies || []).length > 0 ? <ResumeTagList items={data.hobbies || []} /> : null,
+    strengths:
+      (data.strengths || []).length > 0 ? <Template2BulletList items={data.strengths || []} /> : null,
+    hobbies:
+      (data.hobbies || []).length > 0 ? <Template2BulletList items={data.hobbies || []} /> : null,
     references:
       (data.references || []).length > 0 ? <ResumeBulletList items={data.references || []} /> : null,
     custom:
@@ -394,7 +460,8 @@ const ResumePage = ({
       color: theme.palette.text,
       position: "relative",
       overflow: "visible",
-      border: `1px solid ${theme.palette.border}`,
+      border: "none",
+      boxShadow: "none",
       fontFamily: theme.fontFamily || "var(--resume-font-family, Inter, Arial, Helvetica, sans-serif)",
       margin: "0 auto",
       ...style,
@@ -760,7 +827,11 @@ const ResumeTagList = ({
   const filteredItems = uniqueItems(items.filter(Boolean));
   if (filteredItems.length === 0) return null;
 
-  return <p className="resume-body-copy resume-skills">{filteredItems.join(", ")}</p>;
+  return (
+    <p className="resume-body-copy resume-skills" style={{ lineHeight: 1.55 }}>
+      {filteredItems.join(", ")}
+    </p>
+  );
 };
 
 const ResumeMetaBlock = ({

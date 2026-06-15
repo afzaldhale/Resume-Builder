@@ -452,82 +452,6 @@ const ResumeBuilder = () => {
 
       <Card className="border-slate-200 p-5 shadow-sm">
         <div className="space-y-4">
-          <button
-            type="button"
-            className="flex w-full items-center justify-between text-left"
-            onClick={() => setIsThemePanelOpen((prev) => !prev)}
-          >
-            <div>
-              <h3 className="text-base font-semibold text-slate-900">Customize Colors</h3>
-              <p className="text-sm text-slate-500">
-                Adjust only the colors that apply to {selectedTemplateMeta.name}.
-              </p>
-            </div>
-            <ChevronDown
-              className={`h-4 w-4 text-slate-500 transition-transform ${
-                isThemePanelOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          {isThemePanelOpen ? (
-            <div className="space-y-5">
-              {themeConfig.editableColors.map((field) => (
-                <div key={field.key} className="space-y-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <Label htmlFor={`theme-${field.key}`}>{field.label}</Label>
-                    <span className="font-mono text-xs text-slate-500">
-                      {themeColors[field.key] || mergedThemeColors[field.key] || "#000000"}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <Input
-                      id={`theme-${field.key}`}
-                      type="color"
-                      value={mergedThemeColors[field.key] || "#000000"}
-                      onChange={(event) => handleThemeColorChange(field.key, event.target.value)}
-                      className="h-11 w-16 cursor-pointer p-1"
-                    />
-                    <Input
-                      value={themeColors[field.key] || mergedThemeColors[field.key] || "#000000"}
-                      onChange={(event) => handleThemeColorChange(field.key, event.target.value)}
-                      placeholder="#2563EB"
-                      className="font-mono"
-                    />
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {PROFESSIONAL_COLOR_PRESETS.map((preset) => (
-                      <button
-                        key={`${field.key}-${preset.value}`}
-                        type="button"
-                        className="h-8 w-8 rounded-full border border-slate-200 shadow-sm"
-                        style={{ backgroundColor: preset.value }}
-                        title={preset.label}
-                        onClick={() => handleThemeColorChange(field.key, preset.value)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-
-              {showThemeWarning ? (
-                <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-                  This color may reduce resume readability.
-                </p>
-              ) : null}
-
-              <Button type="button" variant="outline" size="sm" onClick={handleResetThemeColors}>
-                Reset to Default
-              </Button>
-            </div>
-          ) : null}
-        </div>
-      </Card>
-
-      <Card className="border-slate-200 p-5 shadow-sm">
-        <div className="space-y-4">
           <h3 className="text-base font-semibold text-slate-900">Personal Information</h3>
 
           <div className="space-y-2">
@@ -586,12 +510,12 @@ const ResumeBuilder = () => {
               placeholder="Your City / Location"
             />
           </div>
-        </div>
-      </Card>
 
-      <Card className="border-slate-200 p-5 shadow-sm">
-        <div className="space-y-4">
-          <h3 className="text-base font-semibold text-slate-900">Content Sections</h3>
+          <div className="border-t border-slate-200 pt-2">
+            <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+              Content Sections
+            </h4>
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="summary">
@@ -694,12 +618,12 @@ const ResumeBuilder = () => {
               </div>
             </>
           ) : null}
-        </div>
-      </Card>
 
-      <Card className="border-slate-200 p-5 shadow-sm">
-        <div className="space-y-5">
-          <h3 className="text-base font-semibold text-slate-900">Additional Information</h3>
+          <div className="border-t border-slate-200 pt-3">
+            <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+              Additional Information
+            </h4>
+          </div>
 
           <div className="space-y-3">
             <Label>Languages</Label>
@@ -857,6 +781,82 @@ const ResumeBuilder = () => {
               ))}
             </div>
           </div>
+        </div>
+      </Card>
+
+      <Card className="border-slate-200 p-5 shadow-sm">
+        <div className="space-y-4">
+          <button
+            type="button"
+            className="flex w-full items-center justify-between text-left"
+            onClick={() => setIsThemePanelOpen((prev) => !prev)}
+          >
+            <div>
+              <h3 className="text-base font-semibold text-slate-900">Customize Colors</h3>
+              <p className="text-sm text-slate-500">
+                Adjust only the colors that apply to {selectedTemplateMeta.name}.
+              </p>
+            </div>
+            <ChevronDown
+              className={`h-4 w-4 text-slate-500 transition-transform ${
+                isThemePanelOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {isThemePanelOpen ? (
+            <div className="space-y-5">
+              {themeConfig.editableColors.map((field) => (
+                <div key={field.key} className="space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <Label htmlFor={`theme-${field.key}`}>{field.label}</Label>
+                    <span className="font-mono text-xs text-slate-500">
+                      {themeColors[field.key] || mergedThemeColors[field.key] || "#000000"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Input
+                      id={`theme-${field.key}`}
+                      type="color"
+                      value={mergedThemeColors[field.key] || "#000000"}
+                      onChange={(event) => handleThemeColorChange(field.key, event.target.value)}
+                      className="h-11 w-16 cursor-pointer p-1"
+                    />
+                    <Input
+                      value={themeColors[field.key] || mergedThemeColors[field.key] || "#000000"}
+                      onChange={(event) => handleThemeColorChange(field.key, event.target.value)}
+                      placeholder="#2563EB"
+                      className="font-mono"
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {PROFESSIONAL_COLOR_PRESETS.map((preset) => (
+                      <button
+                        key={`${field.key}-${preset.value}`}
+                        type="button"
+                        className="h-8 w-8 rounded-full border border-slate-200 shadow-sm"
+                        style={{ backgroundColor: preset.value }}
+                        title={preset.label}
+                        onClick={() => handleThemeColorChange(field.key, preset.value)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              {showThemeWarning ? (
+                <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                  This color may reduce resume readability.
+                </p>
+              ) : null}
+
+              <Button type="button" variant="outline" size="sm" onClick={handleResetThemeColors}>
+                Reset to Default
+              </Button>
+            </div>
+          ) : null}
         </div>
       </Card>
 

@@ -1,56 +1,33 @@
-// Helper functions copied into this template for self-contained rendering
 const asArray = (value) => (Array.isArray(value) ? value : []);
 
-const joinParts = (parts, separator = " | ") => parts.filter(Boolean).join(separator);
+const hasText = (value) => Boolean(value && String(value).trim());
 
-const formatAchievement = (achievement) => {
-  if (!achievement) return "";
-  if (typeof achievement === "string") return achievement;
+const formatMonthYear = (value) => {
+  if (!value) return "";
 
-  return joinParts([
-    achievement.title || achievement.name,
-    achievement.issuer || achievement.organization,
-    achievement.year || achievement.date,
-    achievement.description,
-  ]);
+  const parsedDate = new Date(value);
+  if (!Number.isNaN(parsedDate.getTime())) {
+    return parsedDate.toLocaleDateString("en-US", {
+      month: "short",
+      year: "numeric",
+    });
+  }
+
+  return String(value);
 };
 
-const formatReference = (reference) => {
-  if (!reference) return "";
-  if (typeof reference === "string") return reference;
-
-  return joinParts([
-    reference.name,
-    reference.designation || reference.role,
-    reference.company || reference.organization,
-    reference.email,
-    reference.phone,
-  ]);
+const formatRange = (start, end) => {
+  const parts = [formatMonthYear(start), formatMonthYear(end)].filter(Boolean);
+  return parts.join(" - ");
 };
 
-const formatCustomSection = (section) => {
-  if (!section) return "";
-  if (typeof section === "string") return section;
+const uniqueItems = (items) => [...new Set(asArray(items).filter(Boolean))];
 
-  const items = asArray(section.items).filter(Boolean);
-  const content = [section.content, section.description, ...items].filter(Boolean).join(", ");
-
-  if (!section.title && !content) return "";
-
-  return `
-    <div class="resume-extra-custom-block">
-      ${section.title ? `<div class="resume-extra-custom-title">${section.title}</div>` : ""}
-      ${content ? `<div class="resume-extra-item">${content}</div>` : ""}
-    </div>
-  `;
-};
-
-const formatSimpleList = (items, formatter) =>
-  asArray(items)
-    .map(formatter)
-    .filter(Boolean)
-    .map((value) => `<li class="resume-extra-item">${value}</li>`)
-    .join("");
+const toBulletItems = (value) =>
+  String(value || "")
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
 
 const getSummaryConfig = (data) => {
   const isFresher =
@@ -58,7 +35,6 @@ const getSummaryConfig = (data) => {
     (!data.candidateType && asArray(data.experience).length === 0);
 
   return {
-    isFresher,
     summaryText: isFresher
       ? data.careerObjective || data.summary
       : data.summary || data.careerObjective,
@@ -66,115 +42,63 @@ const getSummaryConfig = (data) => {
   };
 };
 
-const renderSupplementarySections = (
-  data,
-  {
-    include = ["achievements", "references", "customSections"],
-    sectionClass = "section resume-extra-section",
-    titleClass = "section-title",
-    headingTag = "h2",
-  } = {}
-) => {
-  const sections = [];
+const sortByDateDesc = (items, startKey, endKey) =>
+  asArray(items).slice().sort((a, b) => {
+    const aDate = new Date(b?.[endKey] || b?.[startKey] || 0).getTime();
+    const bDate = new Date(a?.[endKey] || a?.[startKey] || 0).getTime();
+    return (Number.isNaN(aDate) ? 0 : aDate) - (Number.isNaN(bDate) ? 0 : bDate);
+  });
 
-  if (include.includes("strengths") && asArray(data.strengths).length) {
-    sections.push(`
-      <section class="${sectionClass}">
-        <${headingTag} class="${titleClass}">Strengths</${headingTag}>
-        <ul class="resume-extra-list">
-          ${formatSimpleList(data.strengths, (item) => item)}
-        </ul>
-      </section>
-    `);
+const renderBulletList = (items, fallbackText = "", tight = false) => {
+  const filteredItems = asArray(items).filter(Boolean);
+
+  if (!filteredItems.length) {
+    return hasText(fallbackText) ? `<p class="template3-copy">${fallbackText}</p>` : "";
   }
 
-  if (include.includes("achievements") && asArray(data.achievements).length) {
-    sections.push(`
-      <section class="${sectionClass}">
-        <${headingTag} class="${titleClass}">Achievements</${headingTag}>
-        <ul class="resume-extra-list">
-          ${formatSimpleList(data.achievements, formatAchievement)}
-        </ul>
-      </section>
-    `);
-  }
-
-  if (include.includes("references") && asArray(data.references).length) {
-    sections.push(`
-      <section class="${sectionClass}">
-        <${headingTag} class="${titleClass}">References</${headingTag}>
-        <ul class="resume-extra-list">
-          ${formatSimpleList(data.references, formatReference)}
-        </ul>
-      </section>
-    `);
-  }
-
-  if (include.includes("customSections") && asArray(data.customSections).length) {
-    const customMarkup = asArray(data.customSections)
-      .map(formatCustomSection)
-      .filter(Boolean)
-      .join("");
-
-    if (customMarkup) {
-      sections.push(`
-        <section class="${sectionClass}">
-          <${headingTag} class="${titleClass}">Additional Information</${headingTag}>
-          ${customMarkup}
-        </section>
-      `);
-    }
-  }
-
-  return sections.join("");
+  return `
+    <ul class="template3-list ${tight ? "template3-list-tight" : ""}">
+      ${filteredItems.map((item) => `<li>${item}</li>`).join("")}
+    </ul>
+  `;
 };
 
-const sharedTemplateStyles = `
-  .resume-extra-section,
-  .resume-additional-section {
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-
-  .resume-extra-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .resume-extra-item {
-    font-size: 12px;
-    line-height: 1.5;
-    margin-bottom: 4px;
-  }
-
-  .resume-extra-custom-block + .resume-extra-custom-block {
-    margin-top: 8px;
-  }
-
-  .resume-extra-custom-title {
-    font-size: 12.5px;
-    font-weight: 700;
-    margin-bottom: 2px;
-  }
-
-  @media print {
-    .page,
-    .section,
-    .resume-extra-section,
-    .resume-additional-section {
-      page-break-inside: avoid;
-      break-inside: avoid;
-    }
-  }
+const renderMetaBlock = ({ title, subtitle = "", date = "", body = "" }) => `
+  <div class="template3-meta-block">
+    <p class="template3-item-title">${title || ""}</p>
+    ${subtitle ? `<p class="template3-item-subtitle">${subtitle}</p>` : ""}
+    ${date ? `<p class="template3-item-date">${date}</p>` : ""}
+    ${body ? `<div class="template3-item-body">${body}</div>` : ""}
+  </div>
 `;
 
-// template3.js
+const renderSection = (title, content) =>
+  content
+    ? `
+    <section class="section resume-section template3-section">
+      <h2 class="section-title resume-section-title template3-section-title">${title}</h2>
+      <div class="resume-section-content">${content}</div>
+    </section>
+  `
+    : "";
+
 export function template3HTML(data) {
   const { summaryText, summaryTitle } = getSummaryConfig(data);
-  const supplementarySections = renderSupplementarySections(data, {
-    include: ["strengths", "achievements", "references", "customSections"],
-  });
+  const education = sortByDateDesc(data.education, "startYear", "endYear");
+  const experience = sortByDateDesc(data.experience, "startDate", "endDate");
+  const certifications = sortByDateDesc(data.certifications, "year", "year");
+  const projects = asArray(data.projects);
+  const languages = asArray(data.languages);
+  const strengths = uniqueItems(data.strengths);
+  const hobbies = uniqueItems(data.hobbies);
+  const references = asArray(data.references);
+  const customSections = asArray(data.customSections);
+  const skillsText = uniqueItems(data.skills).join(", ");
+  const contactItems = [
+    data.phone ? { label: "Mobile", value: data.phone, isLink: false } : null,
+    data.email ? { label: "Email ID", value: data.email, isLink: true } : null,
+    data.address ? { label: "Address", value: data.address, isLink: false } : null,
+  ].filter(Boolean);
 
   return `
 <!DOCTYPE html>
@@ -186,9 +110,9 @@ export function template3HTML(data) {
   body {
     margin: 0;
     padding: 0;
-    font-family: Arial, Helvetica, sans-serif;
     background: #ffffff;
-    color: #111827;
+    color: #111111;
+    font-family: Georgia, "Times New Roman", serif;
   }
 
   .page {
@@ -199,351 +123,331 @@ export function template3HTML(data) {
     background: #ffffff;
   }
 
+  .template-3-page,
+  .template-3-page * {
+    box-sizing: border-box;
+  }
+
   .template-3-page {
-    padding: 52px 48px 42px 48px;
-    overflow: hidden;
+    position: relative;
+    overflow: visible;
+  }
+
+  .template-3-shell {
+    position: relative;
+    min-height: 1123px;
+    padding: 36px 40px 40px 118px;
+    background: #ffffff;
+  }
+
+  .template-3-shell::before {
+    content: "";
+    position: absolute;
+    left: 36px;
+    top: 36px;
+    bottom: 36px;
+    width: 70px;
+    background: linear-gradient(180deg, #48b7a7 0%, #2d786c 100%);
   }
 
   .template-3-header {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 24px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 28px;
+    align-items: start;
+    padding: 6px 0 8px;
   }
 
-  .left-header {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .right-header {
-    width: 260px;
-    flex-shrink: 0;
-  }
-
-  .template-3-content {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  h1 {
-    font-size: 26px;
-    margin: 0 0 6px 0;
-    word-break: normal;
-    overflow-wrap: break-word;
-    hyphens: none;
-    word-spacing: normal;
-  }
-
-  h2 {
-    font-size: 15px;
-    margin: 20px 0 6px 0;
-    text-transform: uppercase;
-    font-weight: bold;
-    /* replaced underline with full-width colored bar via .section-heading-row/.section-heading-bar */
-  }
-
-  h3 {
-    font-size: 13px;
+  .template3-name {
     margin: 0;
-    font-weight: bold;
-  }
-
-  p {
-    font-size: 12.5px;
-    margin: 3px 0;
-  }
-
-  .contact p {
-    margin: 2px 0;
-  }
-
-  .header-divider {
-    border-bottom: 1px solid #d1d5db;
-    margin: 12px 0 16px 0;
-  }
-
-  .section {
-    margin-bottom: 12px;
-  }
-
-  /* Full-width section heading bar */
-  .section-heading-row {
-    width: 100%;
-    display: block;
-    margin-top: 18px;
-    margin-bottom: 10px;
-  }
-
-  .section-heading-bar {
-    background: var(--headingBarColor, #3b82f6); /* default, can be overridden per section */
-    color: var(--headingTextColor, #ffffff);
-    height: 34px;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    max-width: 100%;
-    padding-left: 12px;
-    padding-right: 12px;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 35px;
+    line-height: 1.02;
+    font-weight: 800;
+    letter-spacing: -0.7px;
     text-transform: uppercase;
-    box-sizing: border-box;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: #111111;
   }
 
-  ul {
-    margin: 4px 0 0 18px;
+  .template3-role {
+    margin: 4px 0 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 17px;
+    line-height: 1.1;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #111111;
+  }
+
+  .template3-contact {
+    display: grid;
+    gap: 2px;
+    padding-top: 2px;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .template3-contact-row {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 4px;
+    align-items: start;
+    font-size: 13px;
+    line-height: 1.35;
+    color: #7a7a7a;
+  }
+
+  .template3-contact-label {
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .template3-contact-value {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .template3-contact-link {
+    text-decoration: underline;
+  }
+
+  .template3-divider {
+    height: 1px;
+    background: rgba(17, 17, 17, 0.08);
+    margin: 8px 0 0;
+  }
+
+  .template3-body {
+    display: grid;
+    gap: 20px;
+    margin-top: 10px;
+  }
+
+  .template3-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .template3-section-title {
+    margin: 0 0 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    line-height: 1.08;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #111111;
+    letter-spacing: -0.2px;
+  }
+
+  .template3-copy,
+  .template3-item-subtitle,
+  .template3-item-date,
+  .template3-list {
+    font-size: 12.5px;
+    line-height: 1.32;
+    color: #303030;
+  }
+
+  .template3-copy {
+    margin: 0;
+  }
+
+  .template3-meta-block + .template3-meta-block {
+    margin-top: 14px;
+  }
+
+  .template3-item-title {
+    margin: 0;
+    font-size: 12.7px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: #3c3c3c;
+  }
+
+  .template3-item-subtitle,
+  .template3-item-date {
+    margin: 2px 0 0;
+    color: #474747;
+  }
+
+  .template3-item-body {
+    margin-top: 5px;
+  }
+
+  .template3-list {
+    margin: 4px 0 0 20px;
     padding: 0;
   }
 
-  li {
-    font-size: 12.5px;
-    margin-bottom: 3px;
+  .template3-list li {
+    margin-bottom: 2px;
   }
 
-  .muted {
-    font-size: 12px;
-    color: #374151;
+  .template3-list-tight li {
+    margin-bottom: 1px;
   }
 
-  /* Template 3 specific styles */
-  .two-column {
-    display: flex;
-    gap: 30px;
-    margin: 20px 0;
+  .template3-group-title {
+    margin: 0 0 4px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12.8px;
+    line-height: 1.2;
+    font-weight: 700;
+    color: #111111;
   }
 
-  .two-column > div {
-    flex: 1;
+  .section,
+  .resume-section {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
-
-  .skill-badge {
-    display: inline-block;
-    background: #f3f4f6;
-    padding: 4px 10px;
-    border-radius: 12px;
-    margin: 3px;
-    font-size: 12px;
-  }
-
-  .project-card {
-    border-left: 3px solid #3b82f6;
-    padding-left: 10px;
-    margin: 10px 0;
-  }
-
-  .cert-badge {
-    display: inline-block;
-    background: #dbeafe;
-    color: #1e40af;
-    padding: 3px 8px;
-    border-radius: 6px;
-    font-size: 11px;
-    margin-right: 5px;
-    margin-bottom: 5px;
-  }
-
-  .language-progress {
-    display: flex;
-    align-items: center;
-    margin: 5px 0;
-  }
-
-  .progress-bar {
-    width: 100px;
-    height: 6px;
-    background: #e5e7eb;
-    border-radius: 3px;
-    margin: 0 10px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: #10b981;
-  }
-
-  ${sharedTemplateStyles}
 </style>
 </head>
 
 <body>
 <div class="page template-3-page">
-
-  <!-- HEADER -->
-  <header>
-    <div class="template-3-header">
-      <div class="left-header">
-        <h1>${data.fullName || ""}</h1>
-        ${data.role ? `<p><strong>${data.role}</strong></p>` : ""}
+  <div class="template-3-shell">
+    <header class="template-3-header">
+      <div>
+        <h1 class="template3-name">${data.fullName || ""}</h1>
+        ${data.role ? `<p class="template3-role">${data.role}</p>` : ""}
       </div>
-      <div class="right-header">
-        <div class="contact">
-          ${data.email ? `<p>Email: ${data.email}</p>` : ""}
-          ${data.phone ? `<p>Phone: ${data.phone}</p>` : ""}
-          ${data.address ? `<p>Location: ${data.address}</p>` : ""}
-          ${data.socialLinks?.length ? `<p>${data.socialLinks.map(l => `${l.platform}: ${l.url}`).join(" | ")}</p>` : ""}
+      ${
+        contactItems.length
+          ? `
+        <div class="template3-contact">
+          ${contactItems
+            .map(
+              (item) => `
+            <div class="template3-contact-row">
+              <span class="template3-contact-label">${item.label}:</span>
+              <span class="template3-contact-value ${item.isLink ? "template3-contact-link" : ""}">${item.value}</span>
+            </div>
+          `
+            )
+            .join("")}
         </div>
-      </div>
-    </div>
-  </header>
+      `
+          : ""
+      }
+    </header>
 
-  <div class="header-divider"></div>
+    <div class="template3-divider"></div>
 
-  <div class="template-3-content">
-    <!-- Two Column Layout for Template 3 -->
-    <div class="two-column">
-    <!-- Left Column -->
-    <div>
-      <!-- SUMMARY -->
-      ${summaryText ? `
-      <section class="section">
-        <div class="section-heading-row">
-          <div class="section-heading-bar">${summaryTitle}</div>
-        </div>
-        <p>${summaryText}</p>
-      </section>
-      ` : ""}
+    <div class="template3-body">
+      ${renderSection(
+        summaryTitle,
+        summaryText ? `<p class="template3-copy">${summaryText}</p>` : ""
+      )}
 
-      <!-- SKILLS - Display as badges -->
-      ${data.skills?.length ? `
-      <section class="section">
-        <div class="section-heading-row">
-          <div class="section-heading-bar" style="background:#8b5cf6">Skills</div>
-        </div>
-        <div>
-          ${[...new Set(data.skills)].map(skill => `
-            <span class="skill-badge">${skill}</span>
-          `).join("")}
-        </div>
-      </section>
-      ` : ""}
+      ${renderSection(
+        "Skills",
+        skillsText ? `<p class="template3-copy">${skillsText}</p>` : ""
+      )}
 
-      <!-- EDUCATION -->
-      ${data.education?.length ? `
-      <section class="section">
-        <div class="section-heading-row">
-          <div class="section-heading-bar" style="background:#10b981">Education</div>
-        </div>
-        ${data.education.map(edu => `
-          <div>
-            <h3>${edu.degree} – ${edu.school}</h3>
-            <p class="muted">${edu.startYear || ""}${edu.endYear ? ` – ${edu.endYear}` : ""}</p>
-            ${edu.gpa ? `<p class="muted">GPA: ${edu.gpa}</p>` : ""}
-          </div>
-        `).join("")}
-      </section>
-      ` : ""}
-    </div>
+      ${renderSection(
+        "Work Experience",
+        experience
+          .map((item) =>
+            renderMetaBlock({
+              title: item.role,
+              subtitle: item.company,
+              date: formatRange(item.startDate, item.endDate),
+              body: renderBulletList(toBulletItems(item.description), item.description || ""),
+            })
+          )
+          .join("")
+      )}
 
-    <!-- Right Column -->
-    <div>
-      <!-- EXPERIENCE -->
-      ${data.experience?.length ? `
-      <section class="section">
-        <div class="section-heading-row">
-          <div class="section-heading-bar" style="background:#2563eb">Professional Experience</div>
-        </div>
-        ${data.experience.map(exp => `
-          <div class="project-card">
-            <h3>${exp.role}${exp.company ? ` – ${exp.company}` : ""}</h3>
-            <p class="muted">${exp.startDate || ""}${exp.endDate ? ` – ${exp.endDate}` : ""}</p>
+      ${renderSection(
+        "Education",
+        education
+          .map((item) =>
+            renderMetaBlock({
+              title: item.degree,
+              subtitle: item.school,
+              date: formatRange(item.startYear, item.endYear),
+              body: item.gpa ? `<p class="template3-copy">GPA: ${item.gpa}</p>` : "",
+            })
+          )
+          .join("")
+      )}
 
-            ${exp.description ? `
-            <ul>
-              ${exp.description
-                .split("\\n")
-                .filter(Boolean)
-                .map(line => `<li>${line}</li>`)
-                .join("")}
-            </ul>` : ""}
-          </div>
-        `).join("")}
-      </section>
-      ` : ""}
+      ${renderSection("Achievements", renderBulletList(asArray(data.achievements)))}
 
-      <!-- PROJECTS -->
-      ${data.projects?.length ? `
-      <section class="section">
-        <div class="section-heading-row">
-          <div class="section-heading-bar" style="background:#f59e0b">Projects</div>
-        </div>
-        ${data.projects.map(project => `
-          <div class="project-card">
-            <h3>${project.name}</h3>
-            <p>${project.description}</p>
-            ${project.technologies?.length ? `
-              <div style="margin-top: 5px;">
-                ${project.technologies.map(tech => `
-                  <span class="cert-badge">${tech}</span>
-                `).join("")}
+      ${renderSection(
+        "Projects",
+        projects
+          .map((project) =>
+            renderMetaBlock({
+              title: project.name,
+              date: project.link || "",
+              body: `
+                ${project.description ? `<p class="template3-copy">${project.description}</p>` : ""}
+                ${
+                  asArray(project.technologies).length
+                    ? `<p class="template3-copy"><strong>Technologies:</strong> ${uniqueItems(project.technologies).join(", ")}</p>`
+                    : ""
+                }
+              `,
+            })
+          )
+          .join("")
+      )}
+
+      ${renderSection(
+        "Certifications",
+        certifications
+          .map((item) =>
+            renderMetaBlock({
+              title: item.name,
+              subtitle: item.issuer,
+              date: formatMonthYear(item.year),
+            })
+          )
+          .join("")
+      )}
+
+      ${renderSection(
+        "Languages",
+        renderBulletList(
+          languages.map((item) => (item.level ? `${item.language} (${item.level})` : item.language)),
+          "",
+          true
+        )
+      )}
+
+      ${renderSection(
+        "Strengths",
+        strengths.length ? `<p class="template3-copy">${strengths.join(", ")}</p>` : ""
+      )}
+
+      ${renderSection(
+        "Hobbies & Interests",
+        hobbies.length ? `<p class="template3-copy">${hobbies.join(", ")}</p>` : ""
+      )}
+
+      ${renderSection("References", renderBulletList(references, "", true))}
+
+      ${renderSection(
+        "Additional Information",
+        customSections
+          .map((section) => {
+            const items = asArray(section.items).filter(Boolean);
+            if (!section.title && !section.description && !items.length) return "";
+
+            return `
+              <div class="template3-meta-block">
+                ${section.title ? `<p class="template3-group-title">${section.title}</p>` : ""}
+                ${section.description ? `<p class="template3-copy">${section.description}</p>` : ""}
+                ${items.length ? renderBulletList(items, "", true) : ""}
               </div>
-            ` : ""}
-          </div>
-        `).join("")}
-      </section>
-      ` : ""}
+            `;
+          })
+          .join("")
+      )}
     </div>
-  </div>
-
-  <!-- Bottom Sections -->
-  <div style="display: flex; gap: 30px; margin-top: 20px;">
-    <!-- CERTIFICATIONS -->
-    ${data.certifications?.length ? `
-    <div style="flex: 1;">
-      <div class="section-heading-row">
-        <div class="section-heading-bar" style="background:#ef4444">Certifications</div>
-      </div>
-      <ul>
-        ${data.certifications.map(cert => `
-          <li>${cert.name}${cert.issuer ? ` – ${cert.issuer}` : ""}${cert.year ? ` (${cert.year})` : ""}</li>
-        `).join("")}
-      </ul>
-    </div>
-    ` : ""}
-
-    <!-- LANGUAGES -->
-    ${data.languages?.length ? `
-    <div style="flex: 1;">
-      <div class="section-heading-row">
-        <div class="section-heading-bar" style="background:#14b8a6">Languages</div>
-      </div>
-      ${data.languages.map(lang => `
-        <div class="language-progress">
-          <span style="min-width: 80px;">${lang.language}</span>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: ${
-              lang.level === "Native" ? "100" :
-              lang.level === "Fluent" ? "90" :
-              lang.level === "Intermediate" ? "70" : "40"
-            }%"></div>
-          </div>
-          <span style="font-size: 11px; color: #6b7280;">${lang.level}</span>
-        </div>
-      `).join("")}
-    </div>
-    ` : ""}
-  </div>
-
-  <!-- HOBBIES -->
-  ${data.hobbies?.length ? `
-  <section class="section" style="margin-top: 20px;">
-    <div class="section-heading-row">
-      <div class="section-heading-bar" style="background:#f97316; color:#ffffff;">
-        Hobbies & Interests
-      </div>
-    </div>
-    <p>${data.hobbies.join(", ")}</p>
-  </section>
-  ` : ""}
-
-  ${supplementarySections}
-
   </div>
 </div>
 </body>

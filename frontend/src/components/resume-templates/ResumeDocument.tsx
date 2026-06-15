@@ -7,7 +7,20 @@ import { A4_HEIGHT_PX, A4_WIDTH_PX } from "@/constants/resumeDesignSystem";
 import { getSafeTemplateId } from "@/components/resume-templates/TemplateRegistry";
 import ThemedResumeTemplate from "./ThemedResumeTemplate";
 
-const ResumeDocumentStyles = () => (
+const TEMPLATE_PDF_MARGIN_MM = 12;
+const MM_TO_PX = 96 / 25.4;
+const TEMPLATE_PDF_MARGIN_PX = Math.round(TEMPLATE_PDF_MARGIN_MM * MM_TO_PX);
+const TEMPLATE_PRINTABLE_WIDTH_PX = A4_WIDTH_PX - TEMPLATE_PDF_MARGIN_PX * 2;
+const TEMPLATE_PRINTABLE_HEIGHT_PX = A4_HEIGHT_PX - TEMPLATE_PDF_MARGIN_PX * 2;
+const TEMPLATE1_CONTINUATION_TOP_OFFSET_PX = 40;
+const TEMPLATE2_CONTINUATION_TOP_OFFSET_PX = 0;
+const TEMPLATE_WITH_CUSTOM_PDF_MARGIN = new Set([1, 2]);
+
+const ResumeDocumentStyles = ({
+  useTemplatePdfMargins,
+}: {
+  useTemplatePdfMargins: boolean;
+}) => (
   <style>{`
     .resume-document-shell {
       -webkit-font-smoothing: antialiased;
@@ -62,11 +75,24 @@ const ResumeDocumentStyles = () => (
       padding-top: 104px;
     }
 
+    .resume-document-shell[data-template-id="1"] .resume-page-body-offset-template1 {
+      padding-top: ${TEMPLATE1_CONTINUATION_TOP_OFFSET_PX}px;
+    }
+
+    .resume-document-shell[data-template-id="2"] .resume-page-body-offset-template2 {
+      padding-top: ${TEMPLATE2_CONTINUATION_TOP_OFFSET_PX}px;
+    }
+
     .page {
       width: ${A4_WIDTH_PX}px;
       min-height: ${A4_HEIGHT_PX}px;
       box-sizing: border-box;
       page-break-after: always;
+    }
+
+    @page {
+      size: A4;
+      margin: ${useTemplatePdfMargins ? `${TEMPLATE_PDF_MARGIN_MM}mm` : "0"};
     }
   `}</style>
 );
@@ -113,6 +139,10 @@ const ResumeDocumentComponent = ({
   renderMode = "editor-preview",
 }: ResumeDocumentProps) => {
   const safeTemplateId = getSafeTemplateId(templateId);
+  const useTemplatePdfMargins =
+    renderMode === "pdf" && TEMPLATE_WITH_CUSTOM_PDF_MARGIN.has(safeTemplateId);
+  const pageWidthPx = useTemplatePdfMargins ? TEMPLATE_PRINTABLE_WIDTH_PX : A4_WIDTH_PX;
+  const pageHeightPx = useTemplatePdfMargins ? TEMPLATE_PRINTABLE_HEIGHT_PX : A4_HEIGHT_PX;
   const [compactLevel, setCompactLevel] = useState(0);
   const [measurements, setMeasurements] = useState({
     initialScrollHeight: 0,
@@ -154,7 +184,7 @@ const ResumeDocumentComponent = ({
     // Pagination-first splitting: measure and split into multiple .page containers.
     // Run once per render change to avoid infinite loops.
     const scrollHeight = pageElement.scrollHeight;
-    const overflow = scrollHeight > A4_HEIGHT_PX + 1;
+    const overflow = scrollHeight > pageHeightPx + 1;
 
     setMeasurements((previous) => ({
       initialScrollHeight:
@@ -164,6 +194,11 @@ const ResumeDocumentComponent = ({
         previous.initialScrollHeight > 0 ? previous.initialOverflow : overflow,
       finalOverflow: overflow,
     }));
+
+    if (!overflow) {
+      splitStateRef.current.splitDone = true;
+      return;
+    }
 
     if (!splitStateRef.current.splitDone) {
       splitStateRef.current.splitDone = true;
@@ -218,8 +253,13 @@ const ResumeDocumentComponent = ({
       const createPageBody = (page: HTMLElement) => {
         const body = pageBodyTemplate.cloneNode(false) as HTMLElement;
         if (pages.length > 1) {
-          body.classList.add("resume-page-body-offset");
-          // spacing is provided via single CSS rule `.resume-page-body-offset` (88px)
+          body.classList.add(
+            safeTemplateId === 1
+              ? "resume-page-body-offset-template1"
+              : safeTemplateId === 2
+              ? "resume-page-body-offset-template2"
+              : "resume-page-body-offset"
+          );
         }
         page.appendChild(body);
         return body;
@@ -292,7 +332,7 @@ const ResumeDocumentComponent = ({
             textContent,
             makePage,
             currentPageBody,
-            A4_HEIGHT_PX
+            pageHeightPx
           );
           return;
         }
@@ -305,7 +345,7 @@ const ResumeDocumentComponent = ({
           const hadBefore = currentPageBody.childNodes.length > 0;
           shallow.appendChild(childClone);
 
-          if (currentPageBody.scrollHeight > A4_HEIGHT_PX + 2) {
+          if (currentPageBody.scrollHeight > pageHeightPx + 2) {
             shallow.removeChild(childClone);
                 if (hadBefore) {
               moveToNewPage();
@@ -322,7 +362,7 @@ const ResumeDocumentComponent = ({
                     childClone.textContent.trim(),
                     makePage,
                     currentPageBody,
-                    A4_HEIGHT_PX
+                    pageHeightPx
                   );
                 } else {
                   appendToCurrent(childClone);
@@ -339,7 +379,7 @@ const ResumeDocumentComponent = ({
                   childClone.textContent.trim(),
                   makePage,
                   currentPageBody,
-                  A4_HEIGHT_PX
+                  pageHeightPx
                 );
               } else {
                 appendToCurrent(childClone);
@@ -357,7 +397,7 @@ const ResumeDocumentComponent = ({
         const hadContent = currentPageBody.childNodes.length > 0;
         appendToCurrent(sectionClone);
 
-        if (currentPageBody.scrollHeight <= A4_HEIGHT_PX + 2) {
+        if (currentPageBody.scrollHeight <= pageHeightPx + 2) {
           return;
         }
 
@@ -366,7 +406,7 @@ const ResumeDocumentComponent = ({
         if (hadContent) {
           moveToNewPage();
           appendToCurrent(sectionClone);
-          if (currentPageBody.scrollHeight <= A4_HEIGHT_PX + 2) {
+          if (currentPageBody.scrollHeight <= pageHeightPx + 2) {
             return;
           }
           currentPageBody.removeChild(sectionClone);
@@ -375,17 +415,218 @@ const ResumeDocumentComponent = ({
         splitLargeNode(sectionClone, sectionClone as HTMLElement);
       };
 
+      const getMeaningfulChildren = (element: HTMLElement) =>
+        Array.from(element.children).filter((child) => {
+          if (!(child instanceof HTMLElement)) {
+            return false;
+          }
+          return Boolean(child.textContent?.trim()) || child.children.length > 0;
+        }) as HTMLElement[];
+
+      const getTemplate1SectionContent = (sectionSource: HTMLElement) =>
+        sectionSource.querySelector<HTMLElement>(".resume-section-content");
+
+      const createStructuredSection = (sectionSource: HTMLElement) => {
+        const section = sectionSource.cloneNode(false) as HTMLElement;
+        const title = sectionSource.querySelector<HTMLElement>(".resume-section-title");
+        if (title) {
+          section.appendChild(title.cloneNode(true));
+        }
+
+        const contentSource = getTemplate1SectionContent(sectionSource);
+        const content = contentSource
+          ? (contentSource.cloneNode(false) as HTMLElement)
+          : document.createElement("div");
+        if (!content.classList.contains("resume-section-content")) {
+          content.classList.add("resume-section-content");
+        }
+
+        section.appendChild(content);
+        appendToCurrent(section);
+
+        return { section, content };
+      };
+
+      const startStructuredSection = (sectionSource: HTMLElement) => {
+        if (currentPageBody.childNodes.length > 0) {
+          const minimumSection = sectionSource.cloneNode(false) as HTMLElement;
+          const title = sectionSource.querySelector<HTMLElement>(".resume-section-title");
+          const contentSource = getTemplate1SectionContent(sectionSource);
+          const content = contentSource
+            ? (contentSource.cloneNode(false) as HTMLElement)
+            : document.createElement("div");
+
+          if (title) {
+            minimumSection.appendChild(title.cloneNode(true));
+          }
+
+          const directChildren = contentSource ? getMeaningfulChildren(contentSource) : [];
+          if (directChildren.length > 0) {
+            const firstChild = directChildren[0];
+            if (firstChild.matches("ul, ol")) {
+              const listClone = firstChild.cloneNode(false) as HTMLElement;
+              const firstItem = firstChild.firstElementChild;
+              if (firstItem) {
+                listClone.appendChild(firstItem.cloneNode(true));
+              }
+              content.appendChild(listClone);
+            } else if (firstChild.children.length > 1 && !firstChild.matches(".resume-summary-box")) {
+              const wrapperClone = firstChild.cloneNode(false) as HTMLElement;
+              const firstUnit = firstChild.firstElementChild;
+              if (firstUnit) {
+                wrapperClone.appendChild(firstUnit.cloneNode(true));
+              }
+              content.appendChild(wrapperClone);
+            } else {
+              content.appendChild(firstChild.cloneNode(true));
+            }
+          }
+
+          minimumSection.appendChild(content);
+          appendToCurrent(minimumSection);
+          const fits = currentPage.scrollHeight <= pageHeightPx + 2;
+          currentPageBody.removeChild(minimumSection);
+
+          if (!fits) {
+            moveToNewPage();
+          }
+        }
+
+        return createStructuredSection(sectionSource);
+      };
+
+      const appendStructuredMetaBlocks = (sectionSource: HTMLElement) => {
+        const contentSource = getTemplate1SectionContent(sectionSource);
+        const wrapperSource = contentSource?.firstElementChild as HTMLElement | null;
+        if (!contentSource || !wrapperSource) {
+          appendSection(sectionSource);
+          return;
+        }
+
+        let { content } = startStructuredSection(sectionSource);
+        let wrapperTarget = wrapperSource.cloneNode(false) as HTMLElement;
+        content.appendChild(wrapperTarget);
+
+        for (const block of getMeaningfulChildren(wrapperSource)) {
+          const blockClone = block.cloneNode(true);
+          wrapperTarget.appendChild(blockClone);
+
+          if (currentPage.scrollHeight <= pageHeightPx + 2) {
+            continue;
+          }
+
+          wrapperTarget.removeChild(blockClone);
+          moveToNewPage();
+          ({ content } = createStructuredSection(sectionSource));
+          wrapperTarget = wrapperSource.cloneNode(false) as HTMLElement;
+          content.appendChild(wrapperTarget);
+          wrapperTarget.appendChild(blockClone);
+
+          if (currentPage.scrollHeight > pageHeightPx + 2) {
+            wrapperTarget.removeChild(blockClone);
+            content.parentElement?.remove();
+            appendSection(sectionSource);
+            return;
+          }
+        }
+      };
+
+      const appendStructuredListSection = (sectionSource: HTMLElement) => {
+        const contentSource = getTemplate1SectionContent(sectionSource);
+        const listSource = contentSource?.querySelector<HTMLElement>("ul, ol");
+        if (!contentSource || !listSource) {
+          appendSection(sectionSource);
+          return;
+        }
+
+        let { content } = startStructuredSection(sectionSource);
+        let listTarget = listSource.cloneNode(false) as HTMLElement;
+        content.appendChild(listTarget);
+
+        for (const item of getMeaningfulChildren(listSource)) {
+          const itemClone = item.cloneNode(true);
+          listTarget.appendChild(itemClone);
+
+          if (currentPage.scrollHeight <= pageHeightPx + 2) {
+            continue;
+          }
+
+          listTarget.removeChild(itemClone);
+          moveToNewPage();
+          ({ content } = createStructuredSection(sectionSource));
+          listTarget = listSource.cloneNode(false) as HTMLElement;
+          content.appendChild(listTarget);
+          listTarget.appendChild(itemClone);
+
+          if (currentPage.scrollHeight > pageHeightPx + 2) {
+            listTarget.removeChild(itemClone);
+            content.parentElement?.remove();
+            appendSection(sectionSource);
+            return;
+          }
+        }
+      };
+
+      const appendStructuredSimpleSection = (sectionSource: HTMLElement) => {
+        const contentSource = getTemplate1SectionContent(sectionSource);
+        const directChildren = contentSource ? getMeaningfulChildren(contentSource) : [];
+        if (!contentSource || directChildren.length === 0) {
+          appendSection(sectionSource);
+          return;
+        }
+
+        const { content } = startStructuredSection(sectionSource);
+        directChildren.forEach((child) => {
+          content.appendChild(child.cloneNode(true));
+        });
+
+        if (currentPage.scrollHeight <= pageHeightPx + 2) {
+          return;
+        }
+
+        const section = content.parentElement;
+        section?.remove();
+        appendSection(sectionSource);
+      };
+
+      const appendStructuredSection = (sectionEl: Element) => {
+        const sectionSource = sectionEl as HTMLElement;
+        const contentSource = getTemplate1SectionContent(sectionSource);
+        const directChildren = contentSource ? getMeaningfulChildren(contentSource) : [];
+        const firstChild = directChildren[0];
+
+        if (firstChild?.matches("ul, ol")) {
+          appendStructuredListSection(sectionSource);
+          return;
+        }
+
+        if (
+          firstChild &&
+          firstChild.children.length > 1 &&
+          getMeaningfulChildren(firstChild).every((child) => child.classList.contains("resume-meta-block"))
+        ) {
+          appendStructuredMetaBlocks(sectionSource);
+          return;
+        }
+
+        appendStructuredSimpleSection(sectionSource);
+      };
+
       headerNodes.forEach((node) => {
         appendToCurrent(node.cloneNode(true));
       });
 
-      sectionElements.forEach((sectionEl) => appendSection(sectionEl));
+      sectionElements.forEach((sectionEl) =>
+        safeTemplateId === 1 || safeTemplateId === 2
+          ? appendStructuredSection(sectionEl)
+          : appendSection(sectionEl)
+      );
 
       const pageElements = Array.from(pageParent.querySelectorAll<HTMLElement>(".resume-theme-root.resume-page"));
       pageElements.forEach((page, index) => {
-        if (page.scrollHeight > A4_HEIGHT_PX + 2) {
+        if (page.scrollHeight > pageHeightPx + 2) {
           console.warn(
-            `[resume-pagination] Page ${index + 1} exceeds A4 height: ${page.scrollHeight}px > ${A4_HEIGHT_PX}px`,
+            `[resume-pagination] Page ${index + 1} exceeds printable height: ${page.scrollHeight}px > ${pageHeightPx}px`,
             page
           );
         }
@@ -415,7 +656,7 @@ const ResumeDocumentComponent = ({
 
       // post-pagination instrumentation removed for production
     }
-  }, [renderMode, fittedData, compactLevel]);
+  }, [renderMode, fittedData, compactLevel, pageHeightPx, safeTemplateId]);
 
   return (
     <div
@@ -431,12 +672,17 @@ const ResumeDocumentComponent = ({
       data-final-overflow={measurements.finalOverflow ? "true" : "false"}
       data-render-mode={renderMode}
       style={{
-        width: `${A4_WIDTH_PX}px`,
-        minHeight: `${A4_HEIGHT_PX}px`,
+        width: `${pageWidthPx}px`,
+        minHeight: `${pageHeightPx}px`,
+        ["--resume-page-width" as string]: `${pageWidthPx}px`,
+        ["--resume-page-height" as string]: `${pageHeightPx}px`,
       }}
     >
-      <ResumeDocumentStyles />
-      <div className="resume-document-scale" style={{ width: `${A4_WIDTH_PX}px`, minHeight: `${A4_HEIGHT_PX}px` }}>
+      <ResumeDocumentStyles useTemplatePdfMargins={useTemplatePdfMargins} />
+      <div
+        className="resume-document-scale"
+        style={{ width: `${pageWidthPx}px`, minHeight: `${pageHeightPx}px` }}
+      >
         <ThemedResumeTemplate templateId={safeTemplateId} data={fittedData} />
       </div>
     </div>
