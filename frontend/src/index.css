@@ -343,6 +343,13 @@ All colors MUST be HSL.
   line-clamp: unset !important;
 }
 
+.pdf-render-mode .resume-page {
+  width: var(--resume-page-width) !important;
+  height: var(--resume-page-height) !important;
+  min-height: var(--resume-page-height) !important;
+  position: relative !important;
+}
+
 .resume-print-root .resume-document-shell {
     width: var(--resume-page-width) !important;
     min-height: var(--resume-page-height) !important;

@@ -117,7 +117,15 @@ const DEFAULT_EXPERIENCED_MAIN: SectionKey[] = [
 ];
 
 const DEFAULT_FRESHER_SIDEBAR: SectionKey[] = ["languages", "strengths", "hobbies"];
-const DEFAULT_FRESHER_MAIN: SectionKey[] = ["summary", "skills", "experience", "education", "certifications"];
+const DEFAULT_FRESHER_MAIN: SectionKey[] = [
+  "summary",
+  "skills",
+  "experience",
+  "education",
+  "certifications",
+  "strengths",
+  "hobbies",
+];
 
 const hasText = (value?: string | null) => Boolean(value && value.trim());
 
@@ -127,7 +135,41 @@ const toBulletItems = (value?: string | null) =>
     .map((item) => item.trim())
     .filter(Boolean);
 
+const buildCertificationBullets = ({
+  issuer,
+  year,
+  credentialId,
+}: {
+  issuer?: string | null;
+  year?: string | null;
+  credentialId?: string | null;
+}) => {
+  const items: string[] = [];
+  if (hasText(issuer)) items.push(`Issued by: ${issuer}`);
+  if (hasText(year)) items.push(`Completed: ${formatMonthYear(year)}`);
+  if (hasText(credentialId)) items.push(`Credential ID: ${credentialId}`);
+  return items;
+};
+
 const uniqueItems = (items: string[]) => [...new Set(items.filter(Boolean))];
+
+const normalizeListEntries = (value?: string[] | string | null) => {
+  if (Array.isArray(value)) {
+    return value
+      .flatMap((item) => `${item ?? ""}`.split(/\r?\n|,/))
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(/\r?\n|,/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
 
 const scalePxString = (value: string, factor: number) =>
   value.replace(/(\d+(?:\.\d+)?)px/g, (_, amount: string) => {
@@ -202,12 +244,19 @@ const ResumeSidebarContactCard = ({
   if (items.length === 0) return null;
 
   return (
-    <section className="break-inside-avoid">
+    <section
+      className="break-inside-avoid"
+      style={{
+        marginTop: "0",
+      }}
+    >
       <h2
         className="resume-heading"
         style={{
           color: theme.palette.sidebarText || theme.palette.text,
           marginBottom: "8px",
+          fontSize: compactMode ? "17px" : "19px",
+          letterSpacing: "0.14em",
         }}
       >
         {theme.sidebarHeading || "Contact"}
@@ -237,7 +286,7 @@ const ResumeSidebarContactCard = ({
             <div className="space-y-0">
               <p
                 style={{
-                  fontSize: "var(--resume-item-meta-size)",
+                  fontSize: compactMode ? "12px" : "13px",
                   lineHeight: "var(--resume-line-height)",
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
@@ -248,8 +297,8 @@ const ResumeSidebarContactCard = ({
               </p>
               <p
                 style={{
-                  fontSize: "var(--resume-body-size)",
-                  lineHeight: "var(--resume-line-height)",
+                  fontSize: compactMode ? "13px" : "14.5px",
+                  lineHeight: "1.45",
                   color: theme.palette.sidebarText || theme.palette.text,
                   wordBreak: "break-word",
                 }}
@@ -294,16 +343,15 @@ const buildSectionMap = (data: ResumeData) => {
       ) : null,
     education:
       education.length > 0 ? (
-        <div className="space-y-3.5">
+        <div className="space-y-2.5">
           {education.map((item, index) => (
-            <ResumeMetaBlock
+            <ResumeEducationBlock
               key={`${item.school}-${item.degree}-${index}`}
               title={item.degree}
-              subtitle={item.school}
-              meta={formatRange(item.startYear, item.endYear)}
-            >
-              {hasText(item.gpa) ? <p className="resume-item-meta">GPA: {item.gpa}</p> : null}
-            </ResumeMetaBlock>
+              school={item.school}
+              date={formatRange(item.startYear, item.endYear)}
+              gpa={item.gpa}
+            />
           ))}
         </div>
       ) : null,
@@ -316,7 +364,10 @@ const buildSectionMap = (data: ResumeData) => {
               title={project.name}
               meta={hasText(project.link) ? project.link : undefined}
             >
-              {hasText(project.description) ? <p className="resume-body-copy">{project.description}</p> : null}
+              <ResumeBulletList
+                items={toBulletItems(project.description)}
+                fallbackText={project.description}
+              />
               {project.technologies.length > 0 ? (
                 <p className="resume-item-meta mt-2">{uniqueItems(project.technologies).join(", ")}</p>
               ) : null}
@@ -331,9 +382,15 @@ const buildSectionMap = (data: ResumeData) => {
             <ResumeMetaBlock
               key={`${item.name}-${item.issuer}-${index}`}
               title={item.name}
-              subtitle={item.issuer}
-              meta={formatMonthYear(item.year)}
-            />
+            >
+              <ResumeBulletList
+                items={buildCertificationBullets({
+                  issuer: item.issuer,
+                  year: item.year,
+                  credentialId: item.credentialId,
+                })}
+              />
+            </ResumeMetaBlock>
           ))}
         </div>
       ) : null,
@@ -347,8 +404,14 @@ const buildSectionMap = (data: ResumeData) => {
           )}
         />
       ) : null,
-    strengths: (data.strengths || []).length > 0 ? <ResumeTagList items={data.strengths || []} /> : null,
-    hobbies: (data.hobbies || []).length > 0 ? <ResumeTagList items={data.hobbies || []} /> : null,
+    strengths:
+      normalizeListEntries(data.strengths).length > 0 ? (
+        <ResumeParagraphList items={normalizeListEntries(data.strengths)} />
+      ) : null,
+    hobbies:
+      normalizeListEntries(data.hobbies).length > 0 ? (
+        <ResumeParagraphList items={normalizeListEntries(data.hobbies)} />
+      ) : null,
     references:
       (data.references || []).length > 0 ? <ResumeBulletList items={data.references || []} /> : null,
     custom:
@@ -394,7 +457,7 @@ const ResumePage = ({
       color: theme.palette.text,
       position: "relative",
       overflow: "visible",
-      border: `1px solid ${theme.palette.border}`,
+      border: theme.sidebarMode === "contact-only" ? "none" : `1px solid ${theme.palette.border}`,
       fontFamily: theme.fontFamily || "var(--resume-font-family, Inter, Arial, Helvetica, sans-serif)",
       margin: "0 auto",
       ...style,
@@ -461,25 +524,32 @@ const ResumePageStyles = () => (
 
     .resume-body-copy {
       font-size: var(--resume-body-size);
-      line-height: 1.34;
+      line-height: 1.42;
     }
 
     .resume-item-title {
       font-size: var(--resume-item-title-size);
-      line-height: 1.35;
-      font-weight: 700;
+      line-height: 1.3;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      color: var(--resume-page-text);
+      margin: 0;
     }
 
     .resume-item-subtitle {
       font-size: var(--resume-item-subtitle-size);
-      line-height: 1.32;
+      line-height: 1.34;
       color: var(--resume-page-text);
+      font-weight: 400;
+      margin: 0;
     }
 
     .resume-item-meta {
       font-size: var(--resume-item-meta-size);
-      line-height: 1.3;
+      line-height: 1.34;
       color: var(--resume-muted-text);
+      font-weight: 400;
+      margin: 0;
     }
 
     .resume-section-title {
@@ -487,20 +557,58 @@ const ResumePageStyles = () => (
       font-size: var(--resume-heading-size);
       line-height: 1.2;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      margin: 0 0 0.35em;
+      margin: 0 0 0.5em;
     }
 
     .resume-bullet-list {
-      margin: 0;
-      padding-left: var(--resume-list-indent, 18px);
+      margin: 4px 0 0;
+      padding-left: 0;
       font-size: var(--resume-list-size);
-      line-height: 1.34;
+      line-height: 1.42;
+      list-style: none;
+      overflow: visible;
+    }
+
+    .resume-bullet-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      margin-bottom: 3px;
+      overflow: visible;
+    }
+
+    .resume-bullet-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: currentColor;
+      font-size: 1em;
+      line-height: 1.42;
     }
 
     .resume-bullet-list li + li {
-      margin-top: 2px;
+      margin-top: 4px;
+    }
+
+    .resume-bullet-list li::before {
+      content: none;
+    }
+
+    .resume-bullet-glyph {
+      color: currentColor;
+      font-size: 1em;
+      line-height: 1.42;
+      flex: 0 0 8px;
+      display: inline-block;
+      text-align: left;
+    }
+
+    .resume-bullet-text {
+      flex: 1;
+      min-width: 0;
     }
 
     .resume-summary-box {
@@ -529,7 +637,12 @@ const ResumePageStyles = () => (
     }
 
     .resume-meta-block + .resume-meta-block {
-      margin-top: 8px;
+      margin-top: 10px;
+    }
+
+    .resume-meta-block {
+      display: grid;
+      row-gap: 4px;
     }
 
     .break-inside-avoid {
@@ -544,6 +657,7 @@ const ResumePageStyles = () => (
 
     .resume-sidebar {
       min-width: 0;
+      align-self: stretch;
     }
 
     .resume-main,
@@ -567,16 +681,16 @@ const ResumeContactRow = ({
   items,
   align = "left",
   color,
-  compactMode: _compactMode = false,
+  compactMode = false,
   densityMode = "comfortable",
 }: {
   items: ContactItem[];
   align?: "left" | "right";
   color: string;
-  _compactMode?: boolean;
+  compactMode?: boolean;
   densityMode?: "comfortable" | "compact" | "ultra-compact";
 }) => {
-  void _compactMode;
+  void compactMode;
 
   const gapX = densityMode === "ultra-compact" ? 10 : densityMode === "compact" ? 12 : 14;
   const gapY = densityMode === "ultra-compact" ? 4 : densityMode === "compact" ? 6 : 8;
@@ -700,9 +814,19 @@ const ResumeSidebar = ({
   <aside
     className="self-stretch"
     style={{
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "flex-start",
+      flex: 1,
       background: theme.palette.sidebarBg || theme.palette.accentSoft,
       color: theme.palette.sidebarText || theme.palette.text,
-      padding: scalePxString(theme.sidebarPadding || "28px 22px", compactMode ? 0.82 : 1),
+      minHeight: "100%",
+      height: "100%",
+      alignSelf: "stretch",
+      padding:
+        theme.sidebarMode === "contact-only"
+          ? scalePxString(compactMode ? "150px 18px 24px" : "190px 18px 24px", 1)
+          : scalePxString(theme.sidebarPadding || "28px 22px", compactMode ? 0.82 : 1),
     }}
   >
     {children}
@@ -738,15 +862,18 @@ const ResumeBulletList = ({
 }) => {
   const filteredItems = items.filter(Boolean);
   if (filteredItems.length === 0 && !hasText(fallbackText)) return null;
-
-  if (filteredItems.length <= 1 && hasText(fallbackText)) {
-    return <p className={`resume-body-copy ${className}`.trim()}>{fallbackText}</p>;
-  }
+  const resolvedItems = filteredItems.length > 0 ? filteredItems : hasText(fallbackText) ? [fallbackText!.trim()] : [];
+  if (resolvedItems.length === 0) return null;
 
   return (
     <ul className={`resume-bullet-list ${className}`.trim()}>
-      {filteredItems.map((item, index) => (
-        <li key={`${item}-${index}`}>{item}</li>
+      {resolvedItems.map((item, index) => (
+        <li key={`${item}-${index}`}>
+          <span className="resume-bullet-glyph" aria-hidden="true">
+            {"\u2022"}
+          </span>
+          <span className="resume-bullet-text">{item}</span>
+        </li>
       ))}
     </ul>
   );
@@ -761,6 +888,17 @@ const ResumeTagList = ({
   if (filteredItems.length === 0) return null;
 
   return <p className="resume-body-copy resume-skills">{filteredItems.join(", ")}</p>;
+};
+
+const ResumeParagraphList = ({
+  items,
+}: {
+  items: string[];
+}) => {
+  const filteredItems = uniqueItems(items.filter(Boolean));
+  if (filteredItems.length === 0) return null;
+
+  return <p className="resume-body-copy">{filteredItems.join(", ")}</p>;
 };
 
 const ResumeMetaBlock = ({
@@ -782,6 +920,49 @@ const ResumeMetaBlock = ({
   </div>
 );
 
+const ResumeEducationBlock = ({
+  title,
+  school,
+  date,
+  gpa,
+}: {
+  title: string;
+  school?: string;
+  date?: string;
+  gpa?: string;
+}) => (
+  <div
+    className="resume-meta-block break-inside-avoid"
+    style={{
+      rowGap: "2px",
+    }}
+  >
+    <h3 className="resume-item-title">{title}</h3>
+    {hasText(school) || hasText(date) ? (
+      <p
+        style={{
+          margin: 0,
+          lineHeight: 1.34,
+        }}
+      >
+        {hasText(school) ? <span className="resume-item-subtitle">{school}</span> : null}
+        {hasText(school) && hasText(date) ? <span className="resume-item-meta"> | </span> : null}
+        {hasText(date) ? <span className="resume-item-meta">{date}</span> : null}
+      </p>
+    ) : null}
+    {hasText(gpa) ? (
+      <p
+        className="resume-body-copy"
+        style={{
+          margin: "2px 0 0",
+        }}
+      >
+        GPA: {gpa}
+      </p>
+    ) : null}
+  </div>
+);
+
 const ResumeTwoColumnLayout = ({
   sidebar,
   main,
@@ -795,11 +976,27 @@ const ResumeTwoColumnLayout = ({
   const mainWidth = `calc(100% - ${sidebarWidth})`;
 
   return (
-    <div className="resume-two-column-layout flex h-full items-stretch">
-      <div className="resume-sidebar" style={{ width: sidebarWidth, flex: `0 0 ${sidebarWidth}` }}>
+    <div
+      className="resume-two-column-layout flex h-full items-stretch"
+      style={{
+        minHeight: "var(--resume-page-height)",
+        height: "100%",
+        background: `linear-gradient(to right, ${theme.palette.sidebarBg || theme.palette.accentSoft} 0, ${theme.palette.sidebarBg || theme.palette.accentSoft} ${sidebarWidth}, ${theme.palette.page} ${sidebarWidth}, ${theme.palette.page} 100%)`,
+      }}
+    >
+      <div
+        className="resume-sidebar"
+        style={{
+          width: sidebarWidth,
+          flex: `0 0 ${sidebarWidth}`,
+          minHeight: "var(--resume-page-height)",
+          height: "100%",
+          display: "flex",
+        }}
+      >
         {sidebar}
       </div>
-      <main className="resume-main" style={{ width: mainWidth }}>
+      <main className="resume-main" style={{ width: mainWidth, background: theme.palette.page }}>
         {main}
       </main>
     </div>
@@ -959,12 +1156,12 @@ const template6Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
 
   const nameSize = nameBase * densityScale;
   const roleSize = roleBase * densityScale;
-  const headingSize = headingBase * densityScale;
-  const bodySize = Math.max(10.5, bodyBase * densityScale);
-  const titleSize = Math.max(11, (ResumeTypography.role || 15) * typScale * densityScale);
-  const subtitleSize = Math.max(10.2, (ResumeTypography.body || 12) * typScale * densityScale);
-  const metaSize = Math.max(10.5, smallBase * densityScale);
-  const listSize = Math.max(10, (ResumeTypography.body || 12) * typScale * densityScale);
+  const headingSize = Math.max(16, Math.min(18, headingBase * densityScale + 1.5));
+  const bodySize = Math.max(10.8, Math.min(12.2, bodyBase * densityScale));
+  const titleSize = Math.max(13, Math.min(14, bodyBase * densityScale + 2));
+  const subtitleSize = Math.max(11, Math.min(12, bodyBase * densityScale));
+  const metaSize = Math.max(11, Math.min(12, smallBase * densityScale * 1.08));
+  const listSize = Math.max(11, Math.min(12.2, bodyBase * densityScale));
 
   return (
     <ResumePage
@@ -1071,3 +1268,5 @@ const Template6: React.FC<Template6Props> = ({ data }) =>
   template6Render(data, templateThemes[6]);
 
 export default Template6;
+
+

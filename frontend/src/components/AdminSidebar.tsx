@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, ClipboardCheck, Users, LogOut, Shield, Menu } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Users, LogOut, Shield, Menu } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
@@ -18,7 +18,6 @@ const navItems = [
   { title: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
   { title: "Users", path: "/admin/users", icon: Users },
   { title: "Manage Requests", path: "/admin/requests", icon: ClipboardList },
-  { title: "Resume QA", path: "/admin/resume-qa", icon: ClipboardCheck },
 ];
 
 const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => {

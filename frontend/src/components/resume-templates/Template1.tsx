@@ -139,6 +139,21 @@ const Template1BulletList = ({
   );
 };
 
+const Template1TagList = ({
+  items,
+}: {
+  items: string[];
+}) => {
+  const filteredItems = uniqueItems(items.filter(Boolean));
+  if (filteredItems.length === 0) return null;
+
+  return (
+    <p className="resume-body-copy resume-skills" style={{ margin: 0 }}>
+      {filteredItems.join(", ")}
+    </p>
+  );
+};
+
 const Template1StructuredEntry = ({
   title,
   subtitle,
@@ -318,12 +333,17 @@ const Template1Section = ({
   title,
   summaryTitle,
   children,
+  avoidBreakInside = true,
 }: {
   title: string;
   summaryTitle: string;
   children: ReactNode;
+  avoidBreakInside?: boolean;
 }) => (
-  <section className="resume-section break-inside-avoid" style={{ color: template1Theme.palette.text }}>
+  <section
+    className={`resume-section${avoidBreakInside ? " break-inside-avoid" : ""}`}
+    style={{ color: template1Theme.palette.text }}
+  >
     <h2
       className="resume-section-title"
       style={{
@@ -508,13 +528,16 @@ const buildSectionMap = (data: ResumeData) => {
       (data.achievements || []).length > 0 ? <ResumeBulletList items={data.achievements || []} /> : null,
     languages:
       data.languages.length > 0 ? (
-        <ResumeTagList
+        <Template1BulletList
           items={data.languages.map((item) =>
             hasText(item.level) ? `${item.language} (${item.level})` : item.language
           )}
         />
       ) : null,
-    strengths: (data.strengths || []).length > 0 ? <ResumeTagList items={data.strengths || []} /> : null,
+    strengths:
+      (data.strengths || []).length > 0 ? (
+        <Template1TagList items={data.strengths || []} />
+      ) : null,
     hobbies: (data.hobbies || []).length > 0 ? <ResumeTagList items={data.hobbies || []} /> : null,
     references:
       (data.references || []).length > 0 ? <ResumeBulletList items={data.references || []} /> : null,
@@ -561,6 +584,7 @@ const renderSections = ({
         key={`main-${key}`}
         title={getSectionLabel(key, summaryTitle)}
         summaryTitle={summaryTitle}
+        avoidBreakInside={key !== "languages" && key !== "strengths"}
       >
         {content}
       </Template1Section>
@@ -775,9 +799,6 @@ const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                         : experiencedSidebarKeys,
                       sections,
                       summaryTitle,
-                      theme,
-                      compactMode,
-                      sidebar: true,
                     })}
                   </>
                 )}

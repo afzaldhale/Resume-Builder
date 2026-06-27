@@ -13,8 +13,6 @@ interface Template3Props {
   data: ResumeData;
 }
 
-const ACCENT_COLOR = "#42b3a2";
-
 const hasText = (value?: string | null) => Boolean(value && value.trim());
 
 const toBulletItems = (value?: string | null) =>
@@ -49,6 +47,7 @@ const Template3Styles = () => (
 
     .template3-page {
       width: var(--resume-page-width, 794px);
+      height: var(--resume-page-height, 1123px);
       min-height: var(--resume-page-height, 1123px);
       background: #ffffff;
       color: #111111;
@@ -56,24 +55,51 @@ const Template3Styles = () => (
       overflow: visible;
       page-break-after: always;
       break-after: page;
-      font-family: "Georgia", "Times New Roman", serif;
+      font-family: "Century Gothic", sans-serif;
     }
 
-    .template3-shell {
-      position: relative;
-      min-height: var(--resume-page-height, 1123px);
-      padding: 36px 40px 40px 118px;
-      background: #ffffff;
-    }
-
-    .template3-shell::before {
-      content: "";
+    .template3-sidebar-fill {
       position: absolute;
       left: 36px;
       top: 36px;
       bottom: 36px;
-      width: 70px;
-      background: linear-gradient(180deg, #48b7a7 0%, #2d786c 100%);
+      width: 80px;
+      min-height: calc(var(--resume-page-height, 1123px) - 72px);
+      background: linear-gradient(
+        180deg,
+        #57C5B6 0%,
+        #46B5A6 45%,
+        #1F6F63 100%
+      );
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .template3-shell {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      min-height: var(--resume-page-height, 1123px);
+      padding: 36px 40px 36px 156px;
+      background: transparent;
+    }
+
+    .resume-document-shell[data-render-mode="pdf"] .template3-page {
+      height: var(--resume-page-height, 1123px) !important;
+      min-height: var(--resume-page-height, 1123px) !important;
+      position: relative !important;
+    }
+
+    .resume-document-shell[data-render-mode="pdf"] .template3-shell {
+      height: var(--resume-page-height, 1123px) !important;
+      min-height: var(--resume-page-height, 1123px) !important;
+    }
+
+    .resume-document-shell[data-render-mode="pdf"] .template3-sidebar-fill {
+      top: 36px !important;
+      bottom: 36px !important;
+      height: auto !important;
+      min-height: 0 !important;
     }
 
     .template3-header {
@@ -86,22 +112,22 @@ const Template3Styles = () => (
 
     .template3-name {
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 35px;
+      font-family: Arial, sans-serif;
+      font-size: 24px;
       line-height: 1.02;
-      font-weight: 800;
-      letter-spacing: -0.7px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
       color: #111111;
     }
 
     .template3-role {
       margin: 4px 0 0;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 17px;
+      font-family: Arial, sans-serif;
+      font-size: 12pt;
       line-height: 1.1;
-      font-weight: 500;
-      letter-spacing: 0.06em;
+      font-weight: 600;
+      letter-spacing: 1px;
       text-transform: uppercase;
       color: #111111;
     }
@@ -110,27 +136,31 @@ const Template3Styles = () => (
       display: grid;
       gap: 2px;
       padding-top: 2px;
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: Arial, sans-serif;
     }
 
     .template3-contact-row {
       display: grid;
-      grid-template-columns: 96px 1fr;
-      gap: 4px;
+      grid-template-columns: max-content minmax(0, 1fr);
+      column-gap: 6px;
       align-items: start;
-      font-size: 13px;
+      font-size: 11pt;
       line-height: 1.35;
       color: #7a7a7a;
     }
 
     .template3-contact-label {
-      font-weight: 700;
-      text-align: right;
+      font-weight: 600;
+      text-align: left;
       white-space: nowrap;
+      word-break: normal;
+      overflow-wrap: normal;
+      flex-shrink: 0;
     }
 
     .template3-contact-value {
-      font-weight: 600;
+      font-weight: 400;
+      min-width: 0;
       overflow-wrap: anywhere;
     }
 
@@ -151,20 +181,22 @@ const Template3Styles = () => (
 
     .template3-section-title {
       margin: 0 0 12px;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 20px;
-      line-height: 1.08;
-      font-weight: 800;
+      font-family: Arial, sans-serif;
+      font-size: 14pt;
+      line-height: 1.2;
+      font-weight: 700;
       text-transform: uppercase;
       color: #111111;
-      letter-spacing: -0.2px;
+      letter-spacing: 0;
     }
 
     .template3-copy,
     .template3-meta,
     .template3-list {
-      font-size: 12.5px;
-      line-height: 1.32;
+      font-family: "Century Gothic", sans-serif;
+      font-size: 11pt;
+      line-height: 1.4;
+      font-weight: 400;
       color: #303030;
     }
 
@@ -178,8 +210,9 @@ const Template3Styles = () => (
 
     .template3-item-title {
       margin: 0;
-      font-size: 12.7px;
-      line-height: 1.3;
+      font-family: Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.2;
       font-weight: 700;
       color: #3c3c3c;
     }
@@ -187,8 +220,10 @@ const Template3Styles = () => (
     .template3-item-subtitle,
     .template3-item-date {
       margin: 2px 0 0;
-      font-size: 12.3px;
-      line-height: 1.28;
+      font-family: "Century Gothic", sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.4;
+      font-weight: 400;
       color: #474747;
     }
 
@@ -197,22 +232,46 @@ const Template3Styles = () => (
     }
 
     .template3-list {
-      margin: 4px 0 0 20px;
-      padding: 0;
+      list-style: disc outside !important;
+      padding-left: 20px;
+      margin-top: 6px;
+      margin-bottom: 4px;
     }
 
     .template3-list li {
+      display: list-item !important;
       margin-bottom: 2px;
+      line-height: 1.4;
     }
 
     .template3-list-tight li {
       margin-bottom: 1px;
     }
 
+    .template3-certification-item {
+      color: #303030;
+    }
+
+    .template3-certification-title {
+      font-family: Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.2;
+      font-weight: 700;
+      color: #3c3c3c;
+    }
+
+    .template3-certification-detail {
+      font-family: "Century Gothic", sans-serif;
+      font-size: 11pt;
+      line-height: 1.4;
+      font-weight: 400;
+      color: #303030;
+    }
+
     .template3-group-title {
       margin: 0 0 4px;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 12.8px;
+      font-family: Arial, sans-serif;
+      font-size: 11pt;
       line-height: 1.2;
       font-weight: 700;
       color: #111111;
@@ -286,6 +345,38 @@ const MetaBlock = ({
   </div>
 );
 
+const CertificationList = ({
+  items,
+}: {
+  items: ResumeData["certifications"];
+}) => (
+  <ul className="template3-list template3-list-tight">
+    {items.map((item, index) => {
+      const detailParts = [item.issuer, formatMonthYear(item.year)]
+        .filter(hasText)
+        .join(", ");
+      const credentialDetail = hasText(item.credentialId)
+        ? `, ${item.credentialId}`
+        : "";
+
+      return (
+        <li
+          key={`${item.name}-${item.issuer}-${index}`}
+          className="template3-certification-item"
+        >
+          <span className="template3-certification-title">{item.name}</span>
+          {(detailParts || credentialDetail) ? (
+            <span className="template3-certification-detail">
+              {detailParts ? `, ${detailParts}` : ""}
+              {credentialDetail}
+            </span>
+          ) : null}
+        </li>
+      );
+    })}
+  </ul>
+);
+
 const Template3: React.FC<Template3Props> = ({ data }) => {
   const { summaryText, summaryTitle } = getSummaryConfig(data);
   const education = sortEducationReverseChronological(data.education || []);
@@ -302,6 +393,7 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
   return (
     <div className="resume-theme-root resume-page template3-page" style={pageStyle}>
       <Template3Styles />
+      <div className="template3-sidebar-fill" aria-hidden="true" />
 
       <div className="template3-shell" data-resume-content="true">
         <header className="template3-header break-inside-avoid">
@@ -404,16 +496,7 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
 
           {certifications.length > 0 ? (
             <Section title="Certifications">
-              <div>
-                {certifications.map((item, index) => (
-                  <MetaBlock
-                    key={`${item.name}-${item.issuer}-${index}`}
-                    title={item.name}
-                    subtitle={item.issuer}
-                    date={formatMonthYear(item.year)}
-                  />
-                ))}
-              </div>
+              <CertificationList items={certifications} />
             </Section>
           ) : null}
 

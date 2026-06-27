@@ -15,6 +15,16 @@ export const fitResumeData = (
   resumeData: ResumeData,
   _options: FitResumeDataOptions = {}
 ): ResumeData => {
+  const normalizeList = (value?: string[] | string | null) =>
+    Array.isArray(value)
+      ? [...value]
+      : typeof value === "string"
+      ? value
+          .split(/\r?\n|,/)
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : [];
+
   return {
     ...resumeData,
     summary: resumeData.summary || "",
@@ -25,8 +35,8 @@ export const fitResumeData = (
     projects: Array.isArray(resumeData.projects) ? [...resumeData.projects] : [],
     certifications: Array.isArray(resumeData.certifications) ? [...resumeData.certifications] : [],
     languages: Array.isArray(resumeData.languages) ? [...resumeData.languages] : [],
-    strengths: Array.isArray(resumeData.strengths) ? [...resumeData.strengths] : [],
-    hobbies: Array.isArray(resumeData.hobbies) ? [...resumeData.hobbies] : [],
+    strengths: normalizeList(resumeData.strengths),
+    hobbies: normalizeList(resumeData.hobbies),
     achievements: Array.isArray(resumeData.achievements) ? [...resumeData.achievements] : [],
     references: Array.isArray(resumeData.references) ? [...resumeData.references] : [],
     customSections: Array.isArray(resumeData.customSections) ? [...resumeData.customSections] : [],
