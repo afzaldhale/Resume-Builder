@@ -13,7 +13,7 @@ import {
 import type { ResumeData } from "./types";
 import { ResumeSection } from "@/components/resume/ResumeSection";
 import { ResumeTypography } from "@/constants/resumeDesignSystem";
-import { templateThemes } from "./templateThemes";
+import { resolveTemplateTheme } from "./themeConfig";
 
 type HeadingStyle = "bar" | "underline" | "accent";
 type HeaderLayout = "stacked" | "split";
@@ -1068,6 +1068,6 @@ const template8Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
 };
 
 const Template8: React.FC<Template8Props> = ({ data }) =>
-  template8Render(data, templateThemes[8]);
+  template8Render(data, resolveTemplateTheme(8, data));
 
 export default Template8;

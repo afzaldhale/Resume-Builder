@@ -13,7 +13,7 @@ import {
 import type { ResumeData } from "./types";
 import { ResumeSection } from "@/components/resume/ResumeSection";
 import { ResumeTypography } from "@/constants/resumeDesignSystem";
-import { templateThemes } from "./templateThemes";
+import { resolveTemplateTheme } from "./themeConfig";
 
 type HeadingStyle = "bar" | "underline" | "accent";
 type HeaderLayout = "stacked" | "split";
@@ -271,18 +271,7 @@ const ResumeSidebarContactCard = ({
       />
       <div className="space-y-3">
         {items.map((item, index) => (
-          <div key={`${item.label}-${item.value}-${index}`} className="flex items-start gap-3">
-            <span
-              aria-hidden="true"
-              style={{
-                color: theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText,
-                fontSize: "1rem",
-                lineHeight: "1.2",
-                minWidth: "20px",
-              }}
-            >
-              {item.label === "Phone" ? "☎" : item.label === "Email" ? "✉" : item.label === "Location" ? "📍" : "🔗"}
-            </span>
+          <div key={`${item.label}-${item.value}-${index}`}>
             <div className="space-y-0">
               <p
                 style={{
@@ -668,6 +657,11 @@ const ResumePageStyles = () => (
     .resume-meta-block {
       min-width: 0;
       max-width: 100%;
+    }
+
+    .resume-main {
+      min-height: 100%;
+      height: 100%;
     }
 
     .resume-section {
@@ -1265,7 +1259,7 @@ const template6Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
 };
 
 const Template6: React.FC<Template6Props> = ({ data }) =>
-  template6Render(data, templateThemes[6]);
+  template6Render(data, resolveTemplateTheme(6, data));
 
 export default Template6;
 

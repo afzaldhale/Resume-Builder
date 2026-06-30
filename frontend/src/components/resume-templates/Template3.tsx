@@ -7,7 +7,9 @@ import {
   sortEducationReverseChronological,
   sortExperienceReverseChronological,
 } from "./resumeSections";
+import type { ResumeTemplateTheme } from "./templateThemeTypes";
 import type { ResumeData } from "./types";
+import { resolveTemplateTheme } from "./themeConfig";
 
 interface Template3Props {
   data: ResumeData;
@@ -38,7 +40,11 @@ const getContactItems = (data: ResumeData) => {
   return items;
 };
 
-const Template3Styles = () => (
+const Template3Styles = ({
+  theme,
+}: {
+  theme: ResumeTemplateTheme;
+}) => (
   <style>{`
     .template3-page,
     .template3-page * {
@@ -49,8 +55,8 @@ const Template3Styles = () => (
       width: var(--resume-page-width, 794px);
       height: var(--resume-page-height, 1123px);
       min-height: var(--resume-page-height, 1123px);
-      background: #ffffff;
-      color: #111111;
+      background: ${theme.palette.page};
+      color: ${theme.palette.text};
       position: relative;
       overflow: visible;
       page-break-after: always;
@@ -65,12 +71,7 @@ const Template3Styles = () => (
       bottom: 36px;
       width: 80px;
       min-height: calc(var(--resume-page-height, 1123px) - 72px);
-      background: linear-gradient(
-        180deg,
-        #57C5B6 0%,
-        #46B5A6 45%,
-        #1F6F63 100%
-      );
+      background: ${theme.palette.accent};
       z-index: 1;
       pointer-events: none;
     }
@@ -118,7 +119,7 @@ const Template3Styles = () => (
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
-      color: #111111;
+      color: ${theme.palette.nameText || theme.palette.text};
     }
 
     .template3-role {
@@ -129,7 +130,7 @@ const Template3Styles = () => (
       font-weight: 600;
       letter-spacing: 1px;
       text-transform: uppercase;
-      color: #111111;
+      color: ${theme.palette.titleText || theme.palette.mutedText};
     }
 
     .template3-contact {
@@ -146,7 +147,7 @@ const Template3Styles = () => (
       align-items: start;
       font-size: 11pt;
       line-height: 1.35;
-      color: #7a7a7a;
+      color: ${theme.palette.mutedText};
     }
 
     .template3-contact-label {
@@ -186,7 +187,7 @@ const Template3Styles = () => (
       line-height: 1.2;
       font-weight: 700;
       text-transform: uppercase;
-      color: #111111;
+      color: ${theme.palette.headingText || theme.palette.text};
       letter-spacing: 0;
     }
 
@@ -197,7 +198,7 @@ const Template3Styles = () => (
       font-size: 11pt;
       line-height: 1.4;
       font-weight: 400;
-      color: #303030;
+      color: ${theme.palette.text};
     }
 
     .template3-copy {
@@ -214,7 +215,7 @@ const Template3Styles = () => (
       font-size: 11pt;
       line-height: 1.2;
       font-weight: 700;
-      color: #3c3c3c;
+      color: ${theme.palette.headingText || theme.palette.text};
     }
 
     .template3-item-subtitle,
@@ -224,7 +225,7 @@ const Template3Styles = () => (
       font-size: 10.5pt;
       line-height: 1.4;
       font-weight: 400;
-      color: #474747;
+      color: ${theme.palette.mutedText};
     }
 
     .template3-item-body {
@@ -249,7 +250,7 @@ const Template3Styles = () => (
     }
 
     .template3-certification-item {
-      color: #303030;
+      color: ${theme.palette.text};
     }
 
     .template3-certification-title {
@@ -257,7 +258,7 @@ const Template3Styles = () => (
       font-size: 11pt;
       line-height: 1.2;
       font-weight: 700;
-      color: #3c3c3c;
+      color: ${theme.palette.headingText || theme.palette.text};
     }
 
     .template3-certification-detail {
@@ -265,7 +266,7 @@ const Template3Styles = () => (
       font-size: 11pt;
       line-height: 1.4;
       font-weight: 400;
-      color: #303030;
+      color: ${theme.palette.text};
     }
 
     .template3-group-title {
@@ -274,12 +275,12 @@ const Template3Styles = () => (
       font-size: 11pt;
       line-height: 1.2;
       font-weight: 700;
-      color: #111111;
+      color: ${theme.palette.headingText || theme.palette.text};
     }
 
     .template3-divider {
       height: 1px;
-      background: rgba(17, 17, 17, 0.08);
+      background: ${theme.palette.border};
       margin: 8px 0 0;
     }
   `}</style>
@@ -378,6 +379,7 @@ const CertificationList = ({
 );
 
 const Template3: React.FC<Template3Props> = ({ data }) => {
+  const theme = resolveTemplateTheme(3, data);
   const { summaryText, summaryTitle } = getSummaryConfig(data);
   const education = sortEducationReverseChronological(data.education || []);
   const experience = sortExperienceReverseChronological(data.experience || []);
@@ -392,7 +394,7 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
 
   return (
     <div className="resume-theme-root resume-page template3-page" style={pageStyle}>
-      <Template3Styles />
+      <Template3Styles theme={theme} />
       <div className="template3-sidebar-fill" aria-hidden="true" />
 
       <div className="template3-shell" data-resume-content="true">

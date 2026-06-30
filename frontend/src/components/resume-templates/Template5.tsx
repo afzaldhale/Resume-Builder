@@ -1,6 +1,5 @@
 import React, { type CSSProperties } from "react";
 import type { ResumeData } from "./types";
-import { templateThemes } from "./templateThemes";
 import { getCompactMode, getDensityMode, getSummaryConfig } from "./templatePolicy";
 import {
   formatMonthYear,
@@ -10,6 +9,8 @@ import {
   sortExperienceReverseChronological,
 } from "./resumeSections";
 import { ResumeTypography } from "@/constants/resumeDesignSystem";
+import type { ResumeTemplateTheme } from "./templateThemeTypes";
+import { resolveTemplateTheme } from "./themeConfig";
 
 interface Template5Props {
   data: ResumeData;
@@ -51,7 +52,11 @@ const getContactItems = (data: ResumeData) => {
   return items;
 };
 
-const Template5Styles = () => (
+const Template5Styles = ({
+  theme,
+}: {
+  theme: ResumeTemplateTheme;
+}) => (
   <style>{`
     .template5-page,
     .template5-page * {
@@ -62,8 +67,8 @@ const Template5Styles = () => (
       width: var(--resume-page-width, 794px);
       height: var(--resume-page-height, 1123px);
       min-height: var(--resume-page-height, 1123px);
-      background: #ffffff;
-      color: #0f172a;
+      background: ${theme.palette.page};
+      color: ${theme.palette.text};
       position: relative;
       overflow: visible;
       page-break-after: always;
@@ -72,9 +77,10 @@ const Template5Styles = () => (
 
     .template5-shell {
       position: relative;
+      height: 100%;
       min-height: 1123px;
       padding: 28px 28px 24px 34px;
-      background: #ffffff;
+      background: ${theme.palette.page};
     }
 
     .template5-shell::before {
@@ -84,7 +90,7 @@ const Template5Styles = () => (
       top: 28px;
       bottom: 24px;
       width: 6px;
-      background: linear-gradient(180deg, #2563eb 0%, #0ea5e9 100%);
+      background: ${theme.palette.accent};
       border-radius: 999px;
     }
 
@@ -93,13 +99,26 @@ const Template5Styles = () => (
       grid-template-columns: 228px minmax(0, 1fr);
       gap: 18px;
       margin-left: 10px;
+      min-height: 100%;
+      align-items: stretch;
     }
 
     .template5-sidebar {
-      display: grid;
-      align-content: start;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
       gap: 12px;
+      min-height: 100%;
+      height: 100%;
       padding-right: 4px;
+    }
+
+    .template5-contact-card {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      min-height: 0;
     }
 
     .template5-main {
@@ -115,7 +134,7 @@ const Template5Styles = () => (
       line-height: 1.08;
       font-weight: 800;
       letter-spacing: -0.5px;
-      color: #0f172a;
+      color: ${theme.palette.nameText || theme.palette.text};
       text-transform: uppercase;
       overflow-wrap: break-word;
     }
@@ -126,7 +145,7 @@ const Template5Styles = () => (
       line-height: 1.45;
       font-weight: 700;
       letter-spacing: 0.12em;
-      color: #64748b;
+      color: ${theme.palette.titleText || theme.palette.mutedText};
       text-transform: uppercase;
     }
 
@@ -139,20 +158,20 @@ const Template5Styles = () => (
     }
 
     .template5-sidebar-card {
-      background: #f8fafc;
-      border: 1px solid #dbe4ee;
+      background: ${theme.palette.sidebarBg || theme.palette.accentSoft};
+      border: 1px solid ${theme.palette.sidebarBorder || theme.palette.border};
       padding: 10px 11px;
     }
 
     .template5-main-card {
-      background: #ffffff;
-      border: 1px solid #dbe4ee;
+      background: ${theme.palette.page};
+      border: 1px solid ${theme.palette.border};
       padding: 12px 13px;
     }
 
     .template5-summary-card {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
+      background: ${theme.palette.accentSoft};
+      border: 1px solid ${theme.palette.accentBorder || theme.palette.accent};
       padding: 14px 15px;
     }
 
@@ -163,7 +182,7 @@ const Template5Styles = () => (
       text-transform: uppercase;
       letter-spacing: 0.18em;
       line-height: 1.2;
-      color: #0f172a;
+      color: ${theme.palette.headingText || theme.palette.text};
     }
 
     .template5-contact-list,
@@ -186,7 +205,7 @@ const Template5Styles = () => (
       font-weight: 800;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: #64748b;
+      color: ${theme.palette.sidebarMutedText || theme.palette.mutedText};
     }
 
     .template5-contact-value,
@@ -194,7 +213,7 @@ const Template5Styles = () => (
     .template5-item-text {
       font-size: 10.9px;
       line-height: 1.45;
-      color: #334155;
+      color: ${theme.palette.text};
       overflow-wrap: anywhere;
     }
 
@@ -215,18 +234,18 @@ const Template5Styles = () => (
     }
 
     .template5-chip-skill {
-      background: #fef3c7;
-      color: #92400e;
+      background: ${theme.palette.accentSoft};
+      color: ${theme.palette.accent};
     }
 
     .template5-chip-strength {
-      background: #e0f2fe;
-      color: #0369a1;
+      background: ${theme.palette.accentSoft};
+      color: ${theme.palette.accent};
     }
 
     .template5-chip-interest {
-      background: #fce7f3;
-      color: #9d174d;
+      background: ${theme.palette.accentSoft};
+      color: ${theme.palette.accent};
     }
 
     .template5-item-title {
@@ -234,7 +253,7 @@ const Template5Styles = () => (
       font-size: 12px;
       line-height: 1.35;
       font-weight: 700;
-      color: #0f172a;
+      color: ${theme.palette.headingText || theme.palette.text};
     }
 
     .template5-item-sub {
@@ -242,7 +261,7 @@ const Template5Styles = () => (
       font-size: 10.7px;
       line-height: 1.35;
       font-weight: 600;
-      color: #64748b;
+      color: ${theme.palette.mutedText};
     }
 
     .template5-meta-row {
@@ -252,13 +271,13 @@ const Template5Styles = () => (
       margin-top: 4px;
       font-size: 10.4px;
       line-height: 1.35;
-      color: #64748b;
+      color: ${theme.palette.mutedText};
     }
 
     .template5-meta-row span:not(:last-child)::after {
       content: "•";
       margin-left: 10px;
-      color: #94a3b8;
+      color: ${theme.palette.mutedText};
     }
 
     .template5-timeline {
@@ -273,7 +292,7 @@ const Template5Styles = () => (
       top: 2px;
       bottom: 2px;
       width: 2px;
-      background: linear-gradient(180deg, #2563eb 0%, #10b981 100%);
+      background: ${theme.palette.accent};
       border-radius: 999px;
     }
 
@@ -283,7 +302,7 @@ const Template5Styles = () => (
       font-size: 10px;
       font-weight: 700;
       line-height: 1.35;
-      color: #475569;
+      color: ${theme.palette.mutedText};
     }
 
     .template5-project-tech {
@@ -297,8 +316,8 @@ const Template5Styles = () => (
       font-size: 9.6px;
       font-weight: 700;
       line-height: 1.15;
-      color: #991b1b;
-      background: #fee2e2;
+      color: ${theme.palette.accent};
+      background: ${theme.palette.accentSoft};
       padding: 3px 6px;
       border-radius: 999px;
     }
@@ -310,20 +329,61 @@ const Template5Styles = () => (
       align-items: start;
       min-width: 0;
     }
+
+    .template5-section-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      align-items: stretch;
+      min-width: 0;
+      width: 100%;
+    }
+
+    .template5-section-grid-item {
+      display: grid;
+      align-content: start;
+      min-width: 0;
+      height: 100%;
+    }
+
+    .template5-section-grid-item .resume-section-content {
+      display: grid;
+      height: 100%;
+    }
+
+    .template5-section-grid-item .template5-sidebar-card {
+      height: 100%;
+    }
+
+    .template5-section-grid-item-full {
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 900px) {
+      .template5-section-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .template5-section-grid-item-full {
+        grid-column: auto;
+      }
+    }
   `}</style>
 );
 
 const Template5Section = ({
   title,
+  className,
   children,
 }: {
   title: string;
+  className?: string;
   children: React.ReactNode;
 }) => {
   if (!children) return null;
 
   return (
-    <section className="resume-section break-inside-avoid">
+    <section className={`resume-section break-inside-avoid${className ? ` ${className}` : ""}`}>
       <h2 className="template5-section-title resume-section-title">{title}</h2>
       <div className="resume-section-content">{children}</div>
     </section>
@@ -331,7 +391,7 @@ const Template5Section = ({
 };
 
 const template5Render = (data: ResumeData) => {
-  const theme = templateThemes[5];
+  const theme = resolveTemplateTheme(5, data);
   const { summaryText, summaryTitle } = getSummaryConfig(data);
   const compactMode = getCompactMode(data);
   const densityMode = getDensityMode(data);
@@ -347,7 +407,12 @@ const template5Render = (data: ResumeData) => {
     densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.95 : 0.92;
   const typScale = theme.typographyScale || 1;
   const bodySize = Math.max(10.2, ResumeTypography.body * typScale * densityScale);
-
+  const hasSectionGridContent =
+    data.skills.length > 0 ||
+    certifications.length > 0 ||
+    data.languages.length > 0 ||
+    (data.strengths || []).length > 0 ||
+    (data.hobbies || []).length > 0;
   const pageStyle: CSSProperties = {
     fontFamily: theme.fontFamily || "Inter, Arial, Helvetica, sans-serif",
     ["--template5-body-size" as string]: `${bodySize.toFixed(2)}px`,
@@ -360,7 +425,7 @@ const template5Render = (data: ResumeData) => {
       data-density-mode={densityMode}
       data-compact-mode={compactMode ? "true" : "false"}
     >
-      <Template5Styles />
+      <Template5Styles theme={theme} />
 
       <div className="template5-shell" data-resume-content="true">
         <header style={{ display: "none" }} aria-hidden="true">
@@ -374,7 +439,7 @@ const template5Render = (data: ResumeData) => {
             </section>
 
             {contacts.length > 0 ? (
-              <div className="template5-sidebar-card break-inside-avoid">
+              <div className="template5-sidebar-card template5-contact-card break-inside-avoid">
                 <div className="template5-contact-list">
                   {contacts.map((item, index) => (
                     <div key={`${item.label}-${item.value}-${index}`} className="template5-contact-row">
@@ -384,80 +449,6 @@ const template5Render = (data: ResumeData) => {
                   ))}
                 </div>
               </div>
-            ) : null}
-
-            {data.skills.length > 0 ? (
-              <Template5Section title="Skills">
-                <div className="template5-sidebar-card">
-                  <div className="template5-chip-list">
-                    {data.skills.map((skill, index) => (
-                      <span key={`${skill}-${index}`} className="template5-chip template5-chip-skill">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </Template5Section>
-            ) : null}
-
-            {certifications.length > 0 ? (
-              <Template5Section title="Certifications">
-                <div className="template5-sidebar-card template5-stack">
-                  {certifications.map((cert, index) => (
-                    <div key={`${cert.name}-${cert.issuer}-${index}`}>
-                      <p className="template5-item-title">{cert.name}</p>
-                      {hasText(cert.issuer) || hasText(cert.year) ? (
-                        <p className="template5-item-sub">
-                          {[cert.issuer, formatMonthYear(cert.year)].filter(Boolean).join(" • ")}
-                        </p>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-              </Template5Section>
-            ) : null}
-
-            {data.languages.length > 0 ? (
-              <Template5Section title="Languages">
-                <div className="template5-sidebar-card template5-mini-list">
-                  {data.languages.map((lang, index) => (
-                    <div key={`${lang.language}-${index}`} className="template5-body">
-                      <strong>{lang.language}</strong>
-                      {hasText(lang.level) ? (
-                        <span style={{ color: "#64748b" }}> ({lang.level})</span>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-              </Template5Section>
-            ) : null}
-
-            {(data.strengths || []).length > 0 ? (
-              <Template5Section title="Strengths">
-                <div className="template5-sidebar-card">
-                  <div className="template5-chip-list">
-                    {(data.strengths || []).map((item, index) => (
-                      <span key={`${item}-${index}`} className="template5-chip template5-chip-strength">
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </Template5Section>
-            ) : null}
-
-            {(data.hobbies || []).length > 0 ? (
-              <Template5Section title="Interests">
-                <div className="template5-sidebar-card">
-                  <div className="template5-chip-list">
-                    {(data.hobbies || []).map((item, index) => (
-                      <span key={`${item}-${index}`} className="template5-chip template5-chip-interest">
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </Template5Section>
             ) : null}
           </aside>
 
@@ -489,7 +480,7 @@ const template5Render = (data: ResumeData) => {
                             paddingLeft: "16px",
                             fontSize: "10.9px",
                             lineHeight: 1.45,
-                            color: "#334155",
+                            color: theme.palette.text,
                           }}
                         >
                           {toBulletItems(item.description).map((bullet, bulletIndex) => (
@@ -536,7 +527,7 @@ const template5Render = (data: ResumeData) => {
                           paddingLeft: "16px",
                           fontSize: "10.9px",
                           lineHeight: 1.45,
-                          color: "#334155",
+                          color: theme.palette.text,
                         }}
                       >
                         {(data.achievements || []).map((item, index) => (
@@ -608,7 +599,7 @@ const template5Render = (data: ResumeData) => {
                                   paddingLeft: "16px",
                                   fontSize: "10.9px",
                                   lineHeight: 1.45,
-                                  color: "#334155",
+                                  color: theme.palette.text,
                                 }}
                               >
                                 {validItems.map((item, itemIndex) => (
@@ -624,6 +615,87 @@ const template5Render = (data: ResumeData) => {
                 ) : null}
               </div>
             </div>
+
+            {hasSectionGridContent ? (
+              <div className="template5-section-grid">
+                {data.skills.length > 0 ? (
+                  <Template5Section title="Skills" className="template5-section-grid-item">
+                    <div className="template5-sidebar-card">
+                      <div className="template5-chip-list">
+                        {data.skills.map((skill, index) => (
+                          <span key={`${skill}-${index}`} className="template5-chip template5-chip-skill">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </Template5Section>
+                ) : null}
+
+                {certifications.length > 0 ? (
+                  <Template5Section title="Certifications" className="template5-section-grid-item">
+                    <div className="template5-sidebar-card template5-stack">
+                      {certifications.map((cert, index) => (
+                        <div key={`${cert.name}-${cert.issuer}-${index}`}>
+                          <p className="template5-item-title">{cert.name}</p>
+                          {hasText(cert.issuer) || hasText(cert.year) ? (
+                            <p className="template5-item-sub">
+                              {[cert.issuer, formatMonthYear(cert.year)].filter(Boolean).join(" • ")}
+                            </p>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  </Template5Section>
+                ) : null}
+
+                {data.languages.length > 0 ? (
+                  <Template5Section title="Languages" className="template5-section-grid-item">
+                    <div className="template5-sidebar-card template5-mini-list">
+                      {data.languages.map((lang, index) => (
+                        <div key={`${lang.language}-${index}`} className="template5-body">
+                          <strong>{lang.language}</strong>
+                          {hasText(lang.level) ? (
+                            <span style={{ color: theme.palette.mutedText }}> ({lang.level})</span>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  </Template5Section>
+                ) : null}
+
+                {(data.strengths || []).length > 0 ? (
+                  <Template5Section title="Strengths" className="template5-section-grid-item">
+                    <div className="template5-sidebar-card">
+                      <div className="template5-chip-list">
+                        {(data.strengths || []).map((item, index) => (
+                          <span key={`${item}-${index}`} className="template5-chip template5-chip-strength">
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </Template5Section>
+                ) : null}
+
+                {(data.hobbies || []).length > 0 ? (
+                  <Template5Section
+                    title="Interests"
+                    className="template5-section-grid-item template5-section-grid-item-full"
+                  >
+                    <div className="template5-sidebar-card">
+                      <div className="template5-chip-list">
+                        {(data.hobbies || []).map((item, index) => (
+                          <span key={`${item}-${index}`} className="template5-chip template5-chip-interest">
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </Template5Section>
+                ) : null}
+              </div>
+            ) : null}
           </main>
         </div>
       </div>

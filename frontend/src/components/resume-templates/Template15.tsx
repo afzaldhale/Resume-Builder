@@ -1,6 +1,7 @@
 import React from "react";
 import type { ResumeData } from "./types";
-import { templateThemes } from "./templateThemes";
+import { resolveTemplateTheme } from "./themeConfig";
+import type { ResumeTemplateTheme } from "./templateThemeTypes";
 
 interface Template15Props {
   data: ResumeData;
@@ -25,15 +26,15 @@ const renderSocialLinks = (links: Array<{ platform?: string; url?: string }>) =>
     );
   });
 
-const template15Styles = (theme: typeof templateThemes[15]) => `
+const template15Styles = (theme: ResumeTemplateTheme) => `
   .template15-page {
     width: 794px;
     min-height: 1123px;
     margin: 0 auto;
     font-family: ${theme.fontFamily || "Georgia, 'Times New Roman', serif"};
     color: ${theme.palette.text};
-    background: ${theme.palette.page || "#ffffff"};
-    border: 1px solid ${theme.palette.border || "#d1d5db"};
+    background: ${theme.palette.page};
+    border: 1px solid ${theme.palette.border};
   }
 
   .template15-layout {
@@ -43,7 +44,7 @@ const template15Styles = (theme: typeof templateThemes[15]) => `
   }
 
   .template15-left {
-    background: ${theme.palette.sidebarBg || "#f1f5f9"};
+    background: ${theme.palette.sidebarBg || theme.palette.accentSoft};
     padding: 32px;
     color: ${theme.palette.sidebarText || theme.palette.text};
   }
@@ -61,7 +62,7 @@ const template15Styles = (theme: typeof templateThemes[15]) => `
 
   .template15-role {
     font-size: 13px;
-    color: ${theme.palette.mutedText || "#475569"};
+    color: ${theme.palette.mutedText};
     margin-top: 6px;
   }
 
@@ -78,7 +79,7 @@ const template15Styles = (theme: typeof templateThemes[15]) => `
   .template15-left-title {
     font-size: 13px;
     font-weight: 700;
-    border-bottom: 1px solid ${theme.palette.sidebarBorder || "#cbd5e1"};
+    border-bottom: 1px solid ${theme.palette.sidebarBorder || theme.palette.border};
     padding-bottom: 4px;
     margin-top: 24px;
   }
@@ -114,7 +115,7 @@ const template15Styles = (theme: typeof templateThemes[15]) => `
 
   .template15-sub {
     font-size: 12px;
-    color: ${theme.palette.mutedText || "#64748b"};
+    color: ${theme.palette.mutedText};
   }
 
   .template15-extra-section,
@@ -220,7 +221,7 @@ const renderSupplementarySections = (data: ResumeData) => {
   return sections;
 };
 
-const template15Render = (data: ResumeData, theme: typeof templateThemes[15]) => {
+const template15Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
   const safe = {
     fullName: safeString(data.fullName) || "Your Name",
     role: safeString(data.role),
@@ -364,6 +365,7 @@ const template15Render = (data: ResumeData, theme: typeof templateThemes[15]) =>
   );
 };
 
-const Template15: React.FC<Template15Props> = ({ data }) => template15Render(data, templateThemes[15]);
+const Template15: React.FC<Template15Props> = ({ data }) =>
+  template15Render(data, resolveTemplateTheme(15, data));
 
 export default Template15;

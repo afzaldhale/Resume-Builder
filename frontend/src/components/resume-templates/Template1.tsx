@@ -11,8 +11,8 @@ import {
   ResumeSidebarContactCard,
 } from "./templatePrimitives";
 import type { ResumeTemplateTheme } from "./templateThemeTypes";
-import { template1Theme } from "./templateThemes";
 import { getCompactMode, getDensityMode, getSummaryConfig } from "./templatePolicy";
+import { resolveTemplateTheme } from "./themeConfig";
 import {
   formatMonthYear,
   getResumeSectionOrder,
@@ -235,7 +235,7 @@ const Template1Header = ({
               fontWeight: 800,
               letterSpacing: "0.5px",
               textTransform: "uppercase",
-              color: "#000000",
+              color: theme.palette.nameText || theme.palette.text,
               lineHeight: 1.1,
             }}
           >
@@ -249,7 +249,7 @@ const Template1Header = ({
                 fontWeight: 300,
                 letterSpacing: "0.5px",
                 textTransform: "uppercase",
-                color: "#111111",
+                color: theme.palette.titleText || theme.palette.mutedText,
                 lineHeight: 1.15,
               }}
             >
@@ -264,7 +264,7 @@ const Template1Header = ({
                 fontWeight: 300,
                 letterSpacing: "0.5px",
                 textTransform: "uppercase",
-                color: "#111111",
+                color: theme.palette.titleText || theme.palette.mutedText,
                 lineHeight: 1.15,
               }}
             >
@@ -277,10 +277,11 @@ const Template1Header = ({
           <div
             style={{
               display: "grid",
+              gridTemplateColumns: "max-content auto minmax(0, 1fr)",
+              columnGap: "4px",
               rowGap: "4px",
               alignContent: "start",
               minWidth: 0,
-              justifyItems: "stretch",
               alignSelf: "start",
             }}
           >
@@ -288,21 +289,19 @@ const Template1Header = ({
               <div
                 key={`${item.label}-${item.value}-${index}`}
                 style={{
-                  maxWidth: "100%",
-                  display: "grid",
-                  gridTemplateColumns: "95px 1fr",
-                  alignItems: "start",
-                  columnGap: "6px",
+                  display: "contents",
                 }}
               >
                 <span
                   style={{
                     fontSize: "13px",
                     fontWeight: 700,
-                    color: "#666666",
-                    textAlign: "right",
+                    color: theme.palette.mutedText,
+                    textAlign: "left",
                     lineHeight: 1.35,
                     whiteSpace: "nowrap",
+                    margin: 0,
+                    padding: 0,
                   }}
                 >
                   {item.label}
@@ -311,14 +310,24 @@ const Template1Header = ({
                   style={{
                     fontSize: "13px",
                     fontWeight: 500,
-                    color: "#666666",
+                    color: theme.palette.mutedText,
+                    lineHeight: 1.35,
+                  }}
+                >
+                  :
+                </span>
+                <span
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    color: theme.palette.mutedText,
                     lineHeight: 1.35,
                     wordBreak: "break-word",
                     overflowWrap: "anywhere",
                     minWidth: 0,
                   }}
                 >
-                  : {item.value}
+                  {item.value}
                 </span>
               </div>
             ))}
@@ -332,25 +341,27 @@ const Template1Header = ({
 const Template1Section = ({
   title,
   summaryTitle,
+  theme,
   children,
   avoidBreakInside = true,
 }: {
   title: string;
   summaryTitle: string;
+  theme: ResumeTemplateTheme;
   children: ReactNode;
   avoidBreakInside?: boolean;
 }) => (
   <section
     className={`resume-section${avoidBreakInside ? " break-inside-avoid" : ""}`}
-    style={{ color: template1Theme.palette.text }}
+    style={{ color: theme.palette.text }}
   >
     <h2
       className="resume-section-title"
       style={{
         margin: "12px 0 8px",
         padding: "6px 10px",
-        background: template1Theme.palette.accent,
-        color: "#000000",
+        background: theme.palette.accent,
+        color: theme.palette.headingText || theme.palette.accentText,
         fontSize: "11pt",
         fontWeight: 700,
         textTransform: "uppercase",
@@ -570,10 +581,12 @@ const renderSections = ({
   keys,
   sections,
   summaryTitle,
+  theme,
 }: {
   keys: SectionKey[];
   sections: Record<SectionKey, ReactNode>;
   summaryTitle: string;
+  theme: ResumeTemplateTheme;
 }) =>
   keys.map((key) => {
     const content = sections[key];
@@ -584,6 +597,7 @@ const renderSections = ({
         key={`main-${key}`}
         title={getSectionLabel(key, summaryTitle)}
         summaryTitle={summaryTitle}
+        theme={theme}
         avoidBreakInside={key !== "languages" && key !== "strengths"}
       >
         {content}
@@ -776,6 +790,7 @@ const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                 : theme.mainSections || DEFAULT_SINGLE_ORDER,
               sections,
               summaryTitle,
+              theme,
             })}
           </div>
         </div>
@@ -799,6 +814,7 @@ const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                         : experiencedSidebarKeys,
                       sections,
                       summaryTitle,
+                      theme,
                     })}
                   </>
                 )}
@@ -818,6 +834,7 @@ const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                     : experiencedMainKeys,
                   sections,
                   summaryTitle,
+                  theme,
                 })}
               </div>
             </div>
@@ -828,6 +845,7 @@ const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
   );
 };
 
-const Template1: React.FC<Template1Props> = ({ data }) => template1Render(data, template1Theme);
+const Template1: React.FC<Template1Props> = ({ data }) =>
+  template1Render(data, resolveTemplateTheme(1, data));
 
 export default Template1;

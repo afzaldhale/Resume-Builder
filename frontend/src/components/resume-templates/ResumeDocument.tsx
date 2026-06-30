@@ -337,8 +337,6 @@ const ResumeDocumentComponent = ({
             sidebar.style.width = "80px";
             sidebar.style.minHeight = sidebarHeight;
             sidebar.style.height = sidebarHeight;
-            sidebar.style.background =
-              "linear-gradient(180deg, #57C5B6 0%, #46B5A6 45%, #1F6F63 100%)";
           }
         };
 
@@ -580,11 +578,24 @@ const ResumeDocumentComponent = ({
             page.appendChild(styleNode.cloneNode(true));
           });
 
+          const pageHeight = `${pageHeightPx}px`;
+
           const layout = layoutTemplate.cloneNode(false) as HTMLElement;
           const sidebar = sidebarTemplate.cloneNode(false) as HTMLElement;
           const main = mainTemplate.cloneNode(false) as HTMLElement;
           const mainInner = mainInnerTemplate.cloneNode(false) as HTMLElement;
           const mainFlow = mainFlowTemplate.cloneNode(false) as HTMLElement;
+
+          page.style.height = pageHeight;
+          page.style.minHeight = pageHeight;
+          layout.style.height = pageHeight;
+          layout.style.minHeight = pageHeight;
+          sidebar.style.height = pageHeight;
+          sidebar.style.minHeight = pageHeight;
+          main.style.height = pageHeight;
+          main.style.minHeight = pageHeight;
+          mainInner.style.height = "100%";
+          mainInner.style.minHeight = "100%";
 
           if (includeHeader) {
             Array.from(sidebarTemplate.childNodes).forEach((child) => {
@@ -595,6 +606,13 @@ const ResumeDocumentComponent = ({
             if (sidebarShell instanceof HTMLElement) {
               sidebar.appendChild(sidebarShell.cloneNode(false));
             }
+          }
+
+          const sidebarShell = sidebar.firstElementChild;
+          if (sidebarShell instanceof HTMLElement) {
+            sidebarShell.style.flex = "1 1 auto";
+            sidebarShell.style.height = "100%";
+            sidebarShell.style.minHeight = "100%";
           }
 
           if (includeHeader && headerTemplate) {
