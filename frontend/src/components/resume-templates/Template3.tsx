@@ -24,6 +24,7 @@ const toBulletItems = (value?: string | null) =>
     .filter(Boolean);
 
 const uniqueItems = (items: string[]) => [...new Set(items.filter(Boolean))];
+const TEMPLATE3_BULLET = "\u2022";
 
 const formatRange = (start?: string, end?: string) => {
   const parts = [formatMonthYear(start), formatMonthYear(end)].filter(Boolean);
@@ -346,6 +347,30 @@ const MetaBlock = ({
   </div>
 );
 
+const PlainTextGroup = ({
+  items,
+  fallbackText,
+}: {
+  items: string[];
+  fallbackText?: string;
+}) => {
+  const filteredItems = items.filter(Boolean);
+
+  if (filteredItems.length === 0) {
+    return hasText(fallbackText) ? <p className="template3-copy">{fallbackText}</p> : null;
+  }
+
+  return (
+    <div>
+      {filteredItems.map((item, index) => (
+        <p key={`${item}-${index}`} className="template3-copy">
+          {item}
+        </p>
+      ))}
+    </div>
+  );
+};
+
 const CertificationList = ({
   items,
 }: {
@@ -438,16 +463,21 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
           {experience.length > 0 ? (
             <Section title="Work Experience">
               <div>
-                {experience.map((item, index) => (
-                  <MetaBlock
-                    key={`${item.company}-${item.role}-${index}`}
-                    title={item.role}
-                    subtitle={item.company}
-                    date={formatRange(item.startDate, item.endDate)}
-                  >
-                    <BulletList items={toBulletItems(item.description)} fallbackText={item.description} />
-                  </MetaBlock>
-                ))}
+                {experience.map((item, index) => {
+                  const experienceDate = formatRange(item.startDate, item.endDate);
+                  const experienceTitle = [item.role, item.company].filter(hasText).join(" at ");
+
+                  return (
+                    <MetaBlock
+                      key={`${item.company}-${item.role}-${index}`}
+                      title={`${TEMPLATE3_BULLET} ${experienceTitle}${
+                        hasText(experienceDate) ? ` at ${experienceDate}` : ""
+                      }`}
+                    >
+                      <PlainTextGroup items={toBulletItems(item.description)} fallbackText={item.description} />
+                    </MetaBlock>
+                  );
+                })}
               </div>
             </Section>
           ) : null}
@@ -458,7 +488,7 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
                 {education.map((item, index) => (
                   <MetaBlock
                     key={`${item.school}-${item.degree}-${index}`}
-                    title={item.degree}
+                    title={`${TEMPLATE3_BULLET} ${item.degree}`}
                     subtitle={item.school}
                     date={formatRange(item.startYear, item.endYear)}
                   >
@@ -481,7 +511,7 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
                 {data.projects.map((project, index) => (
                   <MetaBlock
                     key={`${project.name}-${index}`}
-                    title={project.name}
+                    title={`${TEMPLATE3_BULLET} ${project.name}`}
                     date={hasText(project.link) ? project.link : undefined}
                   >
                     {hasText(project.description) ? <p className="template3-copy">{project.description}</p> : null}

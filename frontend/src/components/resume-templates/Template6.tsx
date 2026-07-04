@@ -151,6 +151,37 @@ const buildCertificationBullets = ({
   return items;
 };
 
+const buildCertificationLine = ({
+  name,
+  issuer,
+  year,
+}: {
+  name?: string | null;
+  issuer?: string | null;
+  year?: string | null;
+}) => [name, issuer, hasText(year) ? formatMonthYear(year) : ""].filter(hasText).join(", ");
+
+const normalizeCertificationForTemplate6 = <
+  T extends {
+    name?: string | null;
+    issuer?: string | null;
+    year?: string | null;
+    credentialId?: string | null;
+  },
+>(
+  item: T
+): T => ({
+  ...item,
+  name: buildCertificationLine({
+    name: item.name,
+    issuer: item.issuer,
+    year: item.year,
+  }),
+  issuer: undefined,
+  year: undefined,
+  credentialId: undefined,
+});
+
 const uniqueItems = (items: string[]) => [...new Set(items.filter(Boolean))];
 
 const normalizeListEntries = (value?: string[] | string | null) => {
@@ -306,7 +337,9 @@ const buildSectionMap = (data: ResumeData) => {
   const { summaryText, summaryTitle } = getSummaryConfig(data);
   const experience = sortExperienceReverseChronological(data.experience || []);
   const education = sortEducationReverseChronological(data.education || []);
-  const certifications = sortCertificationsReverseChronological(data.certifications || []);
+  const certifications = sortCertificationsReverseChronological(data.certifications || []).map(
+    normalizeCertificationForTemplate6
+  );
 
   const sections: Record<SectionKey, ReactNode> = {
     summary: hasText(summaryText) ? (
@@ -321,11 +354,11 @@ const buildSectionMap = (data: ResumeData) => {
           {experience.map((item, index) => (
             <ResumeMetaBlock
               key={`${item.company}-${item.role}-${index}`}
-              title={item.role}
+              title={`• ${item.role}`}
               subtitle={item.company}
               meta={formatRange(item.startDate, item.endDate)}
             >
-              <ResumeBulletList items={toBulletItems(item.description)} fallbackText={item.description} />
+              <ResumePlainTextList items={toBulletItems(item.description)} fallbackText={item.description} />
             </ResumeMetaBlock>
           ))}
         </div>
@@ -336,7 +369,7 @@ const buildSectionMap = (data: ResumeData) => {
           {education.map((item, index) => (
             <ResumeEducationBlock
               key={`${item.school}-${item.degree}-${index}`}
-              title={item.degree}
+              title={`• ${item.degree}`}
               school={item.school}
               date={formatRange(item.startYear, item.endYear)}
               gpa={item.gpa}
@@ -350,10 +383,10 @@ const buildSectionMap = (data: ResumeData) => {
           {data.projects.map((project, index) => (
             <ResumeMetaBlock
               key={`${project.name}-${index}`}
-              title={project.name}
+              title={`• ${project.name}`}
               meta={hasText(project.link) ? project.link : undefined}
             >
-              <ResumeBulletList
+              <ResumePlainTextList
                 items={toBulletItems(project.description)}
                 fallbackText={project.description}
               />
@@ -370,14 +403,15 @@ const buildSectionMap = (data: ResumeData) => {
           {certifications.map((item, index) => (
             <ResumeMetaBlock
               key={`${item.name}-${item.issuer}-${index}`}
-              title={item.name}
+              title={`• ${item.name}`}
             >
-              <ResumeBulletList
+              <ResumePlainTextList
                 items={buildCertificationBullets({
                   issuer: item.issuer,
                   year: item.year,
                   credentialId: item.credentialId,
                 })}
+                textClassName="resume-item-meta"
               />
             </ResumeMetaBlock>
           ))}
@@ -893,6 +927,30 @@ const ResumeParagraphList = ({
   if (filteredItems.length === 0) return null;
 
   return <p className="resume-body-copy">{filteredItems.join(", ")}</p>;
+};
+
+const ResumePlainTextList = ({
+  items,
+  fallbackText,
+  textClassName = "resume-body-copy",
+}: {
+  items: string[];
+  fallbackText?: string;
+  textClassName?: string;
+}) => {
+  const filteredItems = items.filter(Boolean);
+  const resolvedItems = filteredItems.length > 0 ? filteredItems : hasText(fallbackText) ? [fallbackText!.trim()] : [];
+  if (resolvedItems.length === 0) return null;
+
+  return (
+    <div className="grid gap-1">
+      {resolvedItems.map((item, index) => (
+        <p key={`${item}-${index}`} className={textClassName}>
+          {item}
+        </p>
+      ))}
+    </div>
+  );
 };
 
 const ResumeMetaBlock = ({

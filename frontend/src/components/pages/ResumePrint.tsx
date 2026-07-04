@@ -14,6 +14,7 @@ declare global {
       resumeData?: ResumeData;
     };
     __RESUME_PRINT_READY__?: boolean;
+    __RESUME_PRINT_DEBUG__?: boolean;
   }
 }
 
@@ -29,6 +30,7 @@ const ResumePrint = () => {
     () => (searchParams.get("mode") === "pdf" ? "pdf" : "preview"),
     [searchParams]
   );
+  const debugMode = useMemo(() => searchParams.get("debug") === "1", [searchParams]);
 
   useEffect(() => {
     document.body.classList.add("resume-print-mode");
@@ -39,6 +41,7 @@ const ResumePrint = () => {
     document.documentElement.classList.remove("resume-print-ready");
     document.documentElement.removeAttribute("data-resume-print-ready");
     window.__RESUME_PRINT_READY__ = false;
+    window.__RESUME_PRINT_DEBUG__ = debugMode;
 
     const parseTemplateId = (rawTemplateId: unknown) => {
       if (typeof rawTemplateId === "number") return rawTemplateId;
@@ -67,6 +70,21 @@ const ResumePrint = () => {
         );
       }
 
+      if (debugMode) {
+        console.log(
+          "[pdf-debug][stage-2][resume-print-payload]",
+          JSON.stringify({
+            templateId: safeTemplateId,
+            educationLength: nextPayload.resumeData.education?.length ?? 0,
+            certificationsLength: nextPayload.resumeData.certifications?.length ?? 0,
+            projectsLength: nextPayload.resumeData.projects?.length ?? 0,
+            skillsLength: nextPayload.resumeData.skills?.length ?? 0,
+            experienceLength: nextPayload.resumeData.experience?.length ?? 0,
+            education: nextPayload.resumeData.education ?? [],
+          })
+        );
+      }
+
       setPayload({
         templateId: safeTemplateId,
         resumeData: nextPayload.resumeData,
@@ -82,7 +100,7 @@ const ResumePrint = () => {
       document.documentElement.classList.remove("pdf-render-mode");
       window.removeEventListener("resume-print-payload", applyPayload);
     };
-  }, [renderMode]);
+  }, [debugMode, renderMode]);
 
   useEffect(() => {
     if (!payload) {
@@ -101,13 +119,35 @@ const ResumePrint = () => {
       await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
       await new Promise((resolve) => window.requestAnimationFrame(() => resolve(undefined)));
 
+      if (debugMode) {
+        const sectionSelector = ".resume-main-section, .resume-section";
+        const sectionTitles = Array.from(document.querySelectorAll<HTMLElement>(sectionSelector)).map(
+          (section) => ({
+            title:
+              section.querySelector<HTMLElement>(".resume-section-title")?.textContent?.trim() ||
+              "(untitled)",
+            height: section.offsetHeight,
+            top: section.offsetTop,
+          })
+        );
+
+        console.log(
+          "[pdf-debug][stage-8][resume-print-ready-snapshot]",
+          JSON.stringify({
+            sectionCount: sectionTitles.length,
+            sectionTitles,
+            pageCount: document.querySelectorAll(".resume-page").length,
+          })
+        );
+      }
+
       document.documentElement.classList.add("resume-print-ready");
       document.documentElement.setAttribute("data-resume-print-ready", "true");
       window.__RESUME_PRINT_READY__ = true;
     };
 
     markReady();
-  }, [payload]);
+  }, [debugMode, payload]);
 
   if (!payload) {
     return <div className="resume-print-loading">Preparing resume...</div>;

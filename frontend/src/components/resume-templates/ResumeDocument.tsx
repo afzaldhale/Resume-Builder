@@ -14,7 +14,7 @@ const TEMPLATE_PRINTABLE_WIDTH_PX = A4_WIDTH_PX - TEMPLATE_PDF_MARGIN_PX * 2;
 const TEMPLATE_PRINTABLE_HEIGHT_PX = A4_HEIGHT_PX - TEMPLATE_PDF_MARGIN_PX * 2;
 const TEMPLATE1_CONTINUATION_TOP_OFFSET_PX = 40;
 const TEMPLATE2_CONTINUATION_TOP_OFFSET_PX = 0;
-const TEMPLATE_WITH_CUSTOM_PDF_MARGIN = new Set([1, 2]);
+const TEMPLATE_WITH_CUSTOM_PDF_MARGIN = new Set([2]);
 
 const ResumeDocumentStyles = ({
   useTemplatePdfMargins,
@@ -147,6 +147,54 @@ const normalizeResumeData = (data: ResumeData): ResumeData => ({
   theme: data.theme,
 });
 
+const isPdfDebugEnabled = () => {
+  if (typeof window === "undefined") return false;
+  return Boolean((window as Window & { __RESUME_PRINT_DEBUG__?: boolean }).__RESUME_PRINT_DEBUG__);
+};
+
+const getSectionTitle = (section: Element) =>
+  section.querySelector<HTMLElement>(".resume-section-title")?.textContent?.trim() || "(untitled)";
+
+const getPageSectionSnapshot = (pages: HTMLElement[], selector: string) =>
+  pages.map((page, index) => ({
+    page: index + 1,
+    sections: Array.from(page.querySelectorAll<HTMLElement>(selector)).map((section) => ({
+      title: getSectionTitle(section),
+      height: section.offsetHeight,
+      top: section.offsetTop,
+    })),
+  }));
+
+const getDomPath = (node: Node | null) => {
+  if (!(node instanceof Element)) {
+    return node?.nodeName || "unknown";
+  }
+
+  const segments: string[] = [];
+  let current: Element | null = node;
+
+  while (current && current.nodeType === Node.ELEMENT_NODE) {
+    const tag = current.tagName.toLowerCase();
+    const id = current.id ? `#${current.id}` : "";
+    const className =
+      typeof current.className === "string" && current.className.trim().length > 0
+        ? `.${current.className.trim().split(/\s+/).join(".")}`
+        : "";
+    let index = 1;
+    let sibling = current.previousElementSibling;
+    while (sibling) {
+      if (sibling.tagName === current.tagName) {
+        index += 1;
+      }
+      sibling = sibling.previousElementSibling;
+    }
+    segments.unshift(`${tag}${id}${className}:nth-of-type(${index})`);
+    current = current.parentElement;
+  }
+
+  return segments.join(" > ");
+};
+
 const ResumeDocumentComponent = ({
   templateId,
   data,
@@ -206,6 +254,29 @@ const ResumeDocumentComponent = ({
     // Run once per render change to avoid infinite loops.
     const scrollHeight = pageElement.scrollHeight;
     const overflow = scrollHeight > pageHeightPx + 1;
+    const debugPdf = isPdfDebugEnabled() && safeTemplateId === 9;
+
+    if (debugPdf) {
+      const prePaginationSections = Array.from(
+        pageElement.querySelectorAll<HTMLElement>(".resume-main-section, .resume-section")
+      ).map((section) => ({
+        title: getSectionTitle(section),
+        height: section.offsetHeight,
+        top: section.offsetTop,
+        left: section.offsetLeft,
+      }));
+
+      console.log(
+        "[pdf-debug][stage-3][pre-pagination-dom]",
+        JSON.stringify({
+          pageHeightPx,
+          scrollHeight,
+          overflow,
+          sectionCount: prePaginationSections.length,
+          sections: prePaginationSections,
+        })
+      );
+    }
 
     setMeasurements((previous) => ({
       initialScrollHeight:
@@ -685,13 +756,40 @@ const ResumeDocumentComponent = ({
         };
 
         const splitLargeNode = (node: Node, sectionSource?: HTMLElement) => {
+          logTemplate9Height("split-large-node-start", node, {
+            originalNodeHeight: node instanceof HTMLElement ? node.offsetHeight : null,
+            sectionTitle: sectionSource ? getSectionTitle(sectionSource) : undefined,
+            currentTargetPath: getDomPath(currentPageBody),
+          });
+
           if (node instanceof HTMLElement && node.matches("ul, ol")) {
             const listClone = node.cloneNode(false) as HTMLElement;
             appendToCurrent(listClone);
+            logTemplate9Height("split-list-wrapper-cloned", listClone, {
+              originalNodeHeight: node.offsetHeight,
+              clonedWrapperHeight: listClone.offsetHeight,
+            });
 
             for (const child of Array.from(node.children)) {
               const itemClone = child.cloneNode(true);
+              logTemplate9Height("split-list-child-before-move", itemClone, {
+                originalNodeHeight: node.offsetHeight,
+                clonedWrapperHeight: listClone.offsetHeight,
+                movedChildHeight: child instanceof HTMLElement ? child.offsetHeight : null,
+                remainingPageHeight: pageHeightPx - currentPage.scrollHeight,
+              });
               listClone.appendChild(itemClone);
+              logTemplate9Height("split-list-child-after-move", itemClone, {
+                originalNodeHeight: node.offsetHeight,
+                clonedWrapperHeight: listClone.offsetHeight,
+                movedChildHeight: child instanceof HTMLElement ? child.offsetHeight : null,
+                remainingPageHeight: pageHeightPx - currentPage.scrollHeight,
+              });
+              assertPageWithinLimit("split-list-child-after-move", itemClone, {
+                originalNodeHeight: node.offsetHeight,
+                clonedWrapperHeight: listClone.offsetHeight,
+                movedChildHeight: child instanceof HTMLElement ? child.offsetHeight : null,
+              });
 
               if (currentPage.scrollHeight <= pageHeightPx + 2) {
                 continue;
@@ -717,6 +815,17 @@ const ResumeDocumentComponent = ({
                 const nextList = node.cloneNode(false) as HTMLElement;
                 currentPageBody.appendChild(nextList);
                 nextList.appendChild(itemClone);
+                logTemplate9Height("split-list-child-moved-to-new-page", itemClone, {
+                  originalNodeHeight: node.offsetHeight,
+                  clonedWrapperHeight: nextList.offsetHeight,
+                  movedChildHeight: child instanceof HTMLElement ? child.offsetHeight : null,
+                  remainingPageHeight: pageHeightPx - currentPage.scrollHeight,
+                });
+                assertPageWithinLimit("split-list-child-moved-to-new-page", itemClone, {
+                  originalNodeHeight: node.offsetHeight,
+                  clonedWrapperHeight: nextList.offsetHeight,
+                  movedChildHeight: child instanceof HTMLElement ? child.offsetHeight : null,
+                });
 
                 if (currentPage.scrollHeight > pageHeightPx + 2) {
                   nextList.removeChild(itemClone);
@@ -752,19 +861,56 @@ const ResumeDocumentComponent = ({
 
           const shallow = node.cloneNode(false);
           appendToCurrent(shallow);
+          logTemplate9Height("split-wrapper-cloned", shallow, {
+            originalNodeHeight: node instanceof HTMLElement ? node.offsetHeight : null,
+            clonedWrapperHeight: shallow instanceof HTMLElement ? shallow.offsetHeight : null,
+            sectionTitle: sectionSource ? getSectionTitle(sectionSource) : undefined,
+          });
 
           for (const child of Array.from(node.childNodes)) {
             const childClone = child.cloneNode(true);
             const hadBefore = currentPageBody.childNodes.length > 0;
+            logTemplate9Height("split-child-before-move", childClone, {
+              originalNodeHeight: node instanceof HTMLElement ? node.offsetHeight : null,
+              clonedWrapperHeight: shallow instanceof HTMLElement ? shallow.offsetHeight : null,
+              movedChildHeight: child instanceof HTMLElement ? child.offsetHeight : null,
+              hadBefore,
+              remainingPageHeight: pageHeightPx - currentPage.scrollHeight,
+            });
             shallow.appendChild(childClone);
+            logTemplate9Height("split-child-after-move", childClone, {
+              originalNodeHeight: node instanceof HTMLElement ? node.offsetHeight : null,
+              clonedWrapperHeight: shallow instanceof HTMLElement ? shallow.offsetHeight : null,
+              movedChildHeight: child instanceof HTMLElement ? child.offsetHeight : null,
+              hadBefore,
+              remainingPageHeight: pageHeightPx - currentPage.scrollHeight,
+            });
+            assertPageWithinLimit("split-child-after-move", childClone, {
+              originalNodeHeight: node instanceof HTMLElement ? node.offsetHeight : null,
+              clonedWrapperHeight: shallow instanceof HTMLElement ? shallow.offsetHeight : null,
+              movedChildHeight: child instanceof HTMLElement ? child.offsetHeight : null,
+              hadBefore,
+            });
 
             if (currentPage.scrollHeight > pageHeightPx + 2) {
               shallow.removeChild(childClone);
+              logTemplate9Height("split-child-overflow-removed", childClone, {
+                originalNodeHeight: node instanceof HTMLElement ? node.offsetHeight : null,
+                clonedWrapperHeight: shallow instanceof HTMLElement ? shallow.offsetHeight : null,
+                movedChildHeight: child instanceof HTMLElement ? child.offsetHeight : null,
+                hadBefore,
+              });
               if (hadBefore) {
                 moveToNewPage();
                 const nextWrapper = cloneHeaderOnly(node, sectionSource);
                 appendToCurrent(nextWrapper);
                 currentPageBody = nextWrapper as HTMLElement;
+                logTemplate9Height("split-child-new-wrapper", nextWrapper, {
+                  originalNodeHeight: node instanceof HTMLElement ? node.offsetHeight : null,
+                  clonedWrapperHeight: nextWrapper.offsetHeight,
+                  movedChildHeight: child instanceof HTMLElement ? child.offsetHeight : null,
+                  hadBefore,
+                });
                 if (childClone.nodeType === Node.ELEMENT_NODE) {
                   splitLargeNode(
                     childClone,
@@ -788,6 +934,11 @@ const ResumeDocumentComponent = ({
                 }
               } else {
                 currentPageBody.removeChild(shallow);
+                logTemplate9Height("split-child-first-item-overflow", childClone, {
+                  originalNodeHeight: node instanceof HTMLElement ? node.offsetHeight : null,
+                  clonedWrapperHeight: shallow instanceof HTMLElement ? shallow.offsetHeight : null,
+                  movedChildHeight: child instanceof HTMLElement ? child.offsetHeight : null,
+                });
                 if (childClone.nodeType === Node.ELEMENT_NODE) {
                   splitLargeNode(
                     childClone,
@@ -1016,7 +1167,9 @@ const ResumeDocumentComponent = ({
             (child) => child instanceof HTMLElement && child.classList.contains("resume-main")
           ) as HTMLElement | undefined;
         const mainInnerTemplate = mainTemplate?.firstElementChild as HTMLElement | null;
-        const mainFlowTemplate = mainInnerTemplate?.firstElementChild as HTMLElement | null;
+        const mainFlowTemplate =
+          mainInnerTemplate?.querySelector<HTMLElement>(".resume-main-content") ||
+          (mainInnerTemplate?.firstElementChild as HTMLElement | null);
         const headerTemplate =
           Array.from(mainFlowTemplate?.children || []).find(
             (child) => child instanceof HTMLElement && child.tagName === "HEADER"
@@ -1026,6 +1179,21 @@ const ResumeDocumentComponent = ({
             child instanceof HTMLElement &&
             (child.classList.contains("resume-main-section") || child.classList.contains("resume-section"))
         ) as HTMLElement[];
+
+        if (debugPdf) {
+          console.log(
+            "[pdf-debug][stage-4][template9-section-sources]",
+            JSON.stringify({
+              selector: template9SectionSelector,
+              sectionCount: sectionSources.length,
+              sections: sectionSources.map((section) => ({
+                title: getSectionTitle(section),
+                height: section.offsetHeight,
+                top: section.offsetTop,
+              })),
+            })
+          );
+        }
 
         if (!sidebarTemplate || !mainTemplate || !mainInnerTemplate || !mainFlowTemplate) {
           return;
@@ -1049,6 +1217,7 @@ const ResumeDocumentComponent = ({
           const main = mainTemplate.cloneNode(false) as HTMLElement;
           const mainInner = mainInnerTemplate.cloneNode(false) as HTMLElement;
           const mainFlow = mainFlowTemplate.cloneNode(false) as HTMLElement;
+          mainFlow.classList.add("resume-main-content");
           const pageHeight = `${pageHeightPx}px`;
 
           page.style.height = pageHeight;
@@ -1107,222 +1276,534 @@ const ResumeDocumentComponent = ({
           pageParent.appendChild(page);
           pages.push(page);
 
-          return { page, body: mainFlow };
+          return { page, mainContent: mainFlow };
         };
 
         let currentTemplate9Page = makeTemplate9Page(true);
         let currentPage = currentTemplate9Page.page;
-        let currentPageFlow = currentTemplate9Page.body;
-        let currentPageBody = currentPageFlow;
+        let currentPageMainContent = currentTemplate9Page.mainContent;
 
-        const appendToCurrent = (node: Node) => {
-          currentPageBody.appendChild(node);
+        const getUsedPageHeight = (page = currentPage, mainContent = currentPageMainContent) => {
+          const pageRect = page.getBoundingClientRect();
+          const meaningfulChildren = Array.from(mainContent.children).filter(
+            (child) => child instanceof HTMLElement
+          ) as HTMLElement[];
+          const anchor = meaningfulChildren[meaningfulChildren.length - 1] || mainContent;
+          const anchorRect = anchor.getBoundingClientRect();
+          return Math.max(0, anchorRect.bottom - pageRect.top);
         };
 
-        const moveToNewPage = () => {
-          currentTemplate9Page = makeTemplate9Page(false);
-          currentPage = currentTemplate9Page.page;
-          currentPageFlow = currentTemplate9Page.body;
-          currentPageBody = currentPageFlow;
+        const elementFitsOnCurrentPage = (element: HTMLElement) => {
+          const pageRect = currentPage.getBoundingClientRect();
+          const elementRect = element.getBoundingClientRect();
+          return elementRect.bottom - pageRect.top <= pageHeightPx + 2;
         };
 
-        const cloneHeaderOnly = (node: Node, sectionSource?: HTMLElement) => {
-          if (!(node instanceof HTMLElement)) {
-            return node.cloneNode(false);
+        const pageFits = () => getUsedPageHeight() <= pageHeightPx + 2;
+        const pageHasSections = () =>
+          currentPageMainContent.querySelectorAll(":scope > .resume-main-section, :scope > .resume-section")
+            .length > 0;
+
+        const getCurrentPageMetrics = () => ({
+          page: pages.length,
+          scrollHeight: currentPage.scrollHeight,
+          clientHeight: currentPage.clientHeight,
+          usedHeight: getUsedPageHeight(),
+          remainingHeight: pageHeightPx - getUsedPageHeight(),
+          currentPageBody: getDomPath(currentPageMainContent),
+          currentMainContainer: getDomPath(currentPageMainContent),
+          appendTarget: getDomPath(currentPageMainContent),
+        });
+
+        const logTemplate9Height = (
+          stage: string,
+          node?: Node | null,
+          extra?: Record<string, unknown>
+        ) => {
+          if (!debugPdf) {
+            return;
           }
 
-          const sourceSection = node.matches(template9SectionSelector)
-            ? node
-            : node.closest<HTMLElement>(template9SectionSelector) || sectionSource;
-
-          if (sourceSection) {
-            const headerOnly = sourceSection.cloneNode(false) as HTMLElement;
-            const title = sourceSection.querySelector<HTMLElement>(".resume-section-title");
-            if (title) {
-              headerOnly.appendChild(title.cloneNode(true));
-            }
-            return headerOnly;
-          }
-
-          return node.cloneNode(false);
+          console.log(
+            `[pdf-debug][pagination][${stage}]`,
+            JSON.stringify({
+              ...getCurrentPageMetrics(),
+              currentSection:
+                node instanceof Element ? getSectionTitle(node.closest(template9SectionSelector) || node) : undefined,
+              nodeText:
+                node?.textContent?.trim()?.replace(/\s+/g, " ").slice(0, 160) || undefined,
+              nodePath: getDomPath(node || null),
+              ...extra,
+            })
+          );
         };
 
-        const isEmptyNode = (wrapper: Node) => {
-          if (!(wrapper instanceof HTMLElement)) {
-            return false;
+        const assertPageWithinLimit = (
+          stage: string,
+          node?: Node | null,
+          extra?: Record<string, unknown>
+        ) => {
+          const usedHeight = getUsedPageHeight();
+          if (usedHeight <= pageHeightPx + 2) {
+            return;
           }
-          return !Array.from(wrapper.childNodes).some((child) => {
-            if (child.nodeType === Node.TEXT_NODE) {
-              return Boolean(child.textContent?.trim());
-            }
-            if (child instanceof HTMLElement) {
-              if (child.matches(".resume-section-title")) {
-                return false;
-              }
-              return Boolean(child.textContent?.trim());
-            }
-            return true;
+
+          const payload = {
+            stage,
+            pageNumber: pages.length,
+            currentAccumulatedHeight: usedHeight,
+            printableHeight: pageHeightPx,
+            overflowBy: usedHeight - pageHeightPx,
+            nodePath: getDomPath(node || null),
+            nodeText:
+              node?.textContent?.trim()?.replace(/\s+/g, " ").slice(0, 200) || undefined,
+            ...extra,
+          };
+
+          console.error("[pdf-debug][pagination][overflow-assertion]", JSON.stringify(payload));
+        };
+
+        const appendNodeTo = (target: HTMLElement, node: Node, stage: string) => {
+          logTemplate9Height(stage, node, {
+            appendTarget: getDomPath(target),
+            childHeight: node instanceof HTMLElement ? node.offsetHeight : null,
+          });
+          target.appendChild(node);
+          logTemplate9Height(`${stage}-after`, node, {
+            appendTarget: getDomPath(target),
+            childHeight: node instanceof HTMLElement ? node.offsetHeight : null,
+            overflowOccurred: !pageFits(),
+          });
+          assertPageWithinLimit(`${stage}-after`, node, {
+            appendTarget: getDomPath(target),
           });
         };
 
-        const splitLargeNode = (node: Node, sectionSource?: HTMLElement) => {
-          if (node instanceof HTMLElement && node.matches("ul, ol")) {
-            const listClone = node.cloneNode(false) as HTMLElement;
-            appendToCurrent(listClone);
+        const appendToCurrent = (node: Node, stage = "append-main") => {
+          appendNodeTo(currentPageMainContent, node, stage);
+        };
 
-            for (const child of Array.from(node.children)) {
-              const itemClone = child.cloneNode(true);
-              listClone.appendChild(itemClone);
+        const moveToNewPage = () => {
+          logTemplate9Height("before-new-page");
+          currentTemplate9Page = makeTemplate9Page(false);
+          currentPage = currentTemplate9Page.page;
+          currentPageMainContent = currentTemplate9Page.mainContent;
+          logTemplate9Height("after-new-page");
+        };
 
-              if (currentPage.scrollHeight <= pageHeightPx + 2) {
+        const getMeaningfulChildren = (element: HTMLElement) =>
+          Array.from(element.children).filter(
+            (child): child is HTMLElement =>
+              child instanceof HTMLElement && (Boolean(child.textContent?.trim()) || child.children.length > 0)
+          );
+
+        const sectionContentSource = (sectionSource: HTMLElement) =>
+          sectionSource.querySelector<HTMLElement>(":scope > .resume-section-content");
+
+        const createSectionShell = (sectionSource: HTMLElement) => {
+          const section = sectionSource.cloneNode(false) as HTMLElement;
+          const header = Array.from(sectionSource.children).find(
+            (child) =>
+              child instanceof HTMLElement && child.classList.contains("resume-main-section-header")
+          ) as HTMLElement | undefined;
+          const contentSource = sectionContentSource(sectionSource);
+          const content = contentSource
+            ? (contentSource.cloneNode(false) as HTMLElement)
+            : document.createElement("div");
+          content.classList.add("resume-section-content");
+          if (header) {
+            section.appendChild(header.cloneNode(true));
+          }
+          section.appendChild(content);
+          return { section, content, contentSource };
+        };
+
+        const getSectionSplitPlan = (sectionSource: HTMLElement) => {
+          const contentSource = sectionContentSource(sectionSource);
+          if (!contentSource) {
+            return null;
+          }
+
+          const directChildren = getMeaningfulChildren(contentSource);
+          if (directChildren.length === 0) {
+            return null;
+          }
+
+          if (directChildren.length === 1) {
+            const wrapperSource = directChildren[0];
+            if (
+              wrapperSource.matches(".grid, ul, ol, .resume-pill-grid, .resume-two-column-list")
+            ) {
+              const itemSources = getMeaningfulChildren(wrapperSource);
+              return {
+                itemSources,
+                createSectionShell: () => {
+                  const shell = createSectionShell(sectionSource);
+                  const wrapper = wrapperSource.cloneNode(false) as HTMLElement;
+                  shell.content.appendChild(wrapper);
+                  return { section: shell.section, appendTarget: wrapper };
+                },
+              };
+            }
+          }
+
+          return {
+            itemSources: directChildren,
+            createSectionShell: () => {
+              const shell = createSectionShell(sectionSource);
+              return { section: shell.section, appendTarget: shell.content };
+            },
+          };
+        };
+
+        const splitParagraphText = (
+          text: string,
+          appendChunk: (chunk: string) => boolean
+        ) => {
+          const paragraphs = String(text || "")
+            .split(/\n\s*\n|\r\n\s*\r\n|\n/)
+            .map((part) => part.trim())
+            .filter(Boolean);
+
+          const sentencesFor = (paragraph: string) =>
+            paragraph.match(/[^.!?\n]+[.!?\n]*/g)?.map((part) => part.trim()).filter(Boolean) || [paragraph];
+
+          for (const paragraph of paragraphs) {
+            if (appendChunk(paragraph)) {
+              continue;
+            }
+
+            const sentences = sentencesFor(paragraph);
+            let sentenceBuffer = "";
+            for (const sentence of sentences) {
+              const candidate = sentenceBuffer ? `${sentenceBuffer} ${sentence}` : sentence;
+              if (appendChunk(candidate)) {
+                sentenceBuffer = candidate;
                 continue;
               }
 
-              listClone.removeChild(itemClone);
+              if (sentenceBuffer && !appendChunk(sentenceBuffer)) {
+                return false;
+              }
 
-              const listHadItems = listClone.children.length > 0;
-              if (listHadItems) {
-                moveToNewPage();
-                const nextWrapper = cloneHeaderOnly(node, sectionSource);
-                appendToCurrent(nextWrapper);
-                let nextContent =
-                  nextWrapper instanceof HTMLElement
-                    ? nextWrapper.querySelector<HTMLElement>(".resume-section-content")
-                    : null;
-                if (!nextContent && nextWrapper instanceof HTMLElement) {
-                  nextContent = document.createElement("div");
-                  nextContent.classList.add("resume-section-content");
-                  nextWrapper.appendChild(nextContent);
+              let wordBuffer: string[] = [];
+              const words = sentence.split(/\s+/).filter(Boolean);
+              for (const word of words) {
+                const wordCandidate = [...wordBuffer, word].join(" ");
+                if (appendChunk(wordCandidate)) {
+                  wordBuffer.push(word);
+                  continue;
                 }
-                currentPageBody = nextContent || (nextWrapper as HTMLElement);
-                const nextList = node.cloneNode(false) as HTMLElement;
-                currentPageBody.appendChild(nextList);
-                nextList.appendChild(itemClone);
 
-                if (currentPage.scrollHeight > pageHeightPx + 2) {
-                  nextList.removeChild(itemClone);
-                  splitLargeNode(itemClone, sectionSource);
+                if (wordBuffer.length > 0 && !appendChunk(wordBuffer.join(" "))) {
+                  return false;
                 }
-              } else {
-                currentPageBody.removeChild(listClone);
-                splitLargeNode(itemClone, sectionSource);
+
+                wordBuffer = [word];
+                if (!appendChunk(wordBuffer.join(" "))) {
+                  return false;
+                }
+              }
+
+              sentenceBuffer = "";
+            }
+          }
+
+          return true;
+        };
+
+        const splitMetaBlockAcrossPages = (itemSource: HTMLElement, sectionSource: HTMLElement) => {
+          const plan = getSectionSplitPlan(sectionSource);
+          if (!plan) {
+            return false;
+          }
+
+          const directChildren = Array.from(itemSource.children);
+          const bodySource = directChildren.find(
+            (child) => child instanceof HTMLElement && child.tagName === "DIV"
+          ) as HTMLElement | undefined;
+          const bodyChildren = bodySource ? getMeaningfulChildren(bodySource) : [];
+          const listSource =
+            bodyChildren.length === 1 && bodyChildren[0].matches("ul, ol") ? bodyChildren[0] : null;
+
+          const createMetaBlockShell = () => {
+            const block = itemSource.cloneNode(false) as HTMLElement;
+            directChildren.forEach((child) => {
+              if (child === bodySource) {
+                return;
+              }
+              block.appendChild(child.cloneNode(true));
+            });
+
+            let bodyTarget: HTMLElement | null = null;
+            if (bodySource) {
+              bodyTarget = bodySource.cloneNode(false) as HTMLElement;
+              block.appendChild(bodyTarget);
+            }
+
+            return { block, bodyTarget };
+          };
+
+          let activeSection = plan.createSectionShell();
+          appendToCurrent(activeSection.section, "append-meta-section-shell");
+
+          const startNewMetaPage = () => {
+            moveToNewPage();
+            activeSection = plan.createSectionShell();
+            appendToCurrent(activeSection.section, "append-meta-section-shell");
+          };
+
+          if (listSource) {
+            let activeBlock = createMetaBlockShell();
+            activeSection.appendTarget.appendChild(activeBlock.block);
+            const activeList = listSource.cloneNode(false) as HTMLElement;
+            activeBlock.bodyTarget?.appendChild(activeList);
+            let appendedCount = 0;
+
+            for (const item of getMeaningfulChildren(listSource)) {
+              const clone = item.cloneNode(true);
+              activeList.appendChild(clone);
+              if (elementFitsOnCurrentPage(clone as HTMLElement)) {
+                appendedCount += 1;
+                continue;
+              }
+
+              clone.remove();
+
+              if (appendedCount > 0) {
+                startNewMetaPage();
+                activeBlock = createMetaBlockShell();
+                activeSection.appendTarget.appendChild(activeBlock.block);
+                const nextList = listSource.cloneNode(false) as HTMLElement;
+                activeBlock.bodyTarget?.appendChild(nextList);
+                nextList.appendChild(clone);
+                if (!elementFitsOnCurrentPage(clone as HTMLElement)) {
+                  throw new Error(
+                    `[template9-pagination] Meta block list item too tall for a fresh page: ${getDomPath(item)}`
+                  );
+                }
+                appendedCount = 1;
+                continue;
+              }
+
+              throw new Error(
+                `[template9-pagination] Unable to split oversized meta block list item: ${getDomPath(item)}`
+              );
+            }
+
+            return true;
+          }
+
+          if (bodyChildren.length > 0) {
+            let activeBlock = createMetaBlockShell();
+            activeSection.appendTarget.appendChild(activeBlock.block);
+
+            for (const child of bodyChildren) {
+              if (child.matches("p") && activeBlock.bodyTarget) {
+                const paragraphClassName = child.className || "resume-body-copy";
+                const text = child.textContent?.trim() || "";
+                const appendChunk = (chunk: string) => {
+                  const paragraph = document.createElement("p");
+                  paragraph.className = paragraphClassName;
+                  paragraph.textContent = chunk;
+                  activeBlock.bodyTarget?.appendChild(paragraph);
+                  if (elementFitsOnCurrentPage(paragraph)) {
+                    return true;
+                  }
+                  paragraph.remove();
+                  startNewMetaPage();
+                  activeBlock = createMetaBlockShell();
+                  activeSection.appendTarget.appendChild(activeBlock.block);
+                  const retryParagraph = document.createElement("p");
+                  retryParagraph.className = paragraphClassName;
+                  retryParagraph.textContent = chunk;
+                  activeBlock.bodyTarget?.appendChild(retryParagraph);
+                  if (!elementFitsOnCurrentPage(retryParagraph)) {
+                    retryParagraph.remove();
+                    return false;
+                  }
+                  return true;
+                };
+
+                if (!splitParagraphText(text, appendChunk)) {
+                  throw new Error(
+                    `[template9-pagination] Unable to split oversized paragraph in meta block: ${getDomPath(child)}`
+                  );
+                }
+                continue;
+              }
+
+              const clone = child.cloneNode(true);
+              activeBlock.bodyTarget?.appendChild(clone);
+              if (elementFitsOnCurrentPage(clone as HTMLElement)) {
+                continue;
+              }
+              clone.remove();
+              startNewMetaPage();
+              activeBlock = createMetaBlockShell();
+              activeSection.appendTarget.appendChild(activeBlock.block);
+              activeBlock.bodyTarget?.appendChild(clone);
+              if (!elementFitsOnCurrentPage(clone as HTMLElement)) {
+                throw new Error(
+                  `[template9-pagination] Oversized meta block child does not fit on a fresh page: ${getDomPath(child)}`
+                );
               }
             }
 
-            if (isEmptyNode(listClone)) {
-              listClone.parentNode?.removeChild(listClone);
-            }
-            return;
+            return true;
           }
 
-          const textContent = node.textContent?.trim() || "";
-          const hasChildren = (node as HTMLElement).children?.length > 0;
+          throw new Error(
+            `[template9-pagination] Oversized meta block could not be split safely: ${getDomPath(itemSource)}`
+          );
+        };
 
-          if (!hasChildren && textContent) {
-            currentPageBody = splitTextIntoChunks(
-              textContent,
-              () => {
+        const paginateSectionByPlan = (sectionSource: HTMLElement) => {
+          const splitPlan = getSectionSplitPlan(sectionSource);
+          if (!splitPlan) {
+            return false;
+          }
+
+          const [firstItem] = splitPlan.itemSources;
+          if (!firstItem) {
+            return false;
+          }
+
+          const probe = splitPlan.createSectionShell();
+          probe.appendTarget.appendChild(firstItem.cloneNode(true));
+          appendToCurrent(probe.section, "append-section-probe");
+          const probeFits = pageFits();
+          probe.section.remove();
+
+          if (!probeFits && pageHasSections()) {
+            moveToNewPage();
+          }
+
+          let activeSection: ReturnType<typeof splitPlan.createSectionShell> | null = null;
+          let appendedCount = 0;
+
+          const ensureActiveSection = () => {
+            if (activeSection) {
+              return activeSection;
+            }
+            activeSection = splitPlan.createSectionShell();
+            appendToCurrent(activeSection.section, "append-section-shell");
+            appendedCount = 0;
+            return activeSection;
+          };
+
+          const resetActiveSection = () => {
+            activeSection = null;
+            appendedCount = 0;
+          };
+
+          for (const itemSource of splitPlan.itemSources) {
+            const shouldPreSplitMetaBlock =
+              itemSource.classList.contains("resume-meta-block") &&
+              itemSource.querySelectorAll("li").length > 12;
+
+            if (shouldPreSplitMetaBlock) {
+              logTemplate9Height("pre-split-meta-block", itemSource, {
+                listItemCount: itemSource.querySelectorAll("li").length,
+                itemHeight: itemSource.getBoundingClientRect().height,
+              });
+              if (appendedCount > 0) {
                 moveToNewPage();
-                return currentPage;
-              },
-              currentPageBody,
-              pageHeightPx
+              } else if (activeSection?.section.isConnected) {
+                activeSection.section.remove();
+              }
+
+              resetActiveSection();
+
+              if (!splitMetaBlockAcrossPages(itemSource, sectionSource)) {
+                return false;
+              }
+
+              continue;
+            }
+
+            const sectionShell = ensureActiveSection();
+            const itemClone = itemSource.cloneNode(true);
+            sectionShell.appendTarget.appendChild(itemClone);
+            if (pageFits()) {
+              appendedCount += 1;
+              continue;
+            }
+
+            itemClone.remove();
+
+            if (appendedCount > 0) {
+              moveToNewPage();
+              resetActiveSection();
+              const nextSectionShell = ensureActiveSection();
+              nextSectionShell.appendTarget.appendChild(itemClone);
+              if (pageFits()) {
+                appendedCount = 1;
+                continue;
+              }
+              itemClone.remove();
+            }
+
+            sectionShell.section.remove();
+            resetActiveSection();
+
+            if (itemSource.classList.contains("resume-meta-block")) {
+              if (!splitMetaBlockAcrossPages(itemSource, sectionSource)) {
+                return false;
+              }
+              continue;
+            }
+
+            throw new Error(
+              `[template9-pagination] Oversized section item does not fit on a fresh page: ${getDomPath(itemSource)}`
             );
-            return;
           }
 
-          const shallow = node.cloneNode(false);
-          appendToCurrent(shallow);
-
-          for (const child of Array.from(node.childNodes)) {
-            const childClone = child.cloneNode(true);
-            const hadBefore = currentPageBody.childNodes.length > 0;
-            shallow.appendChild(childClone);
-
-            if (currentPage.scrollHeight > pageHeightPx + 2) {
-              shallow.removeChild(childClone);
-              if (hadBefore) {
-                moveToNewPage();
-                const nextWrapper = cloneHeaderOnly(node, sectionSource);
-                appendToCurrent(nextWrapper);
-                currentPageBody = nextWrapper as HTMLElement;
-                if (childClone.nodeType === Node.ELEMENT_NODE) {
-                  splitLargeNode(
-                    childClone,
-                    sectionSource ||
-                      (childClone instanceof HTMLElement && childClone.matches(template9SectionSelector)
-                        ? childClone
-                        : undefined)
-                  );
-                } else if (childClone.textContent?.trim()) {
-                  currentPageBody = splitTextIntoChunks(
-                    childClone.textContent.trim(),
-                    () => {
-                      moveToNewPage();
-                      return currentPage;
-                    },
-                    currentPageBody,
-                    pageHeightPx
-                  );
-                } else {
-                  appendToCurrent(childClone);
-                }
-              } else {
-                currentPageBody.removeChild(shallow);
-                if (childClone.nodeType === Node.ELEMENT_NODE) {
-                  splitLargeNode(
-                    childClone,
-                    sectionSource ||
-                      (childClone instanceof HTMLElement && childClone.matches(template9SectionSelector)
-                        ? childClone
-                        : undefined)
-                  );
-                } else if (childClone.textContent?.trim()) {
-                  currentPageBody = splitTextIntoChunks(
-                    childClone.textContent.trim(),
-                    () => {
-                      moveToNewPage();
-                      return currentPage;
-                    },
-                    currentPageBody,
-                    pageHeightPx
-                  );
-                } else {
-                  appendToCurrent(childClone);
-                }
-              }
-            }
-          }
-          if (isEmptyNode(shallow)) {
-            shallow.parentNode?.removeChild(shallow);
-          }
+          return true;
         };
 
         const appendSection = (sectionSource: HTMLElement) => {
-          currentPageBody = currentPageFlow;
-          const sectionClone = sectionSource.cloneNode(true);
-          const hadContent = currentPageFlow.childNodes.length > 0;
-          appendToCurrent(sectionClone);
+          if (debugPdf) {
+            console.log(
+              "[pdf-debug][stage-5][append-section-attempt]",
+              JSON.stringify({
+                title: getSectionTitle(sectionSource),
+                currentPage: pages.length,
+                currentPageHeight: currentPage.scrollHeight,
+                currentFlowHeight: currentPageMainContent.scrollHeight,
+                sectionHeight: sectionSource.offsetHeight,
+                remainingPageHeight: pageHeightPx - currentPage.scrollHeight,
+                currentPageBody: getDomPath(currentPageMainContent),
+                currentMainContainer: getDomPath(currentPageMainContent),
+                appendTarget: getDomPath(currentPageMainContent),
+              })
+            );
+          }
 
-          if (currentPage.scrollHeight <= pageHeightPx + 2) {
-            currentPageBody = currentPageFlow;
+          const sectionClone = sectionSource.cloneNode(true);
+          const hadContent = pageHasSections();
+          appendToCurrent(sectionClone, "append-whole-section");
+
+          if (pageFits()) {
             return;
           }
 
-          currentPageBody.removeChild(sectionClone);
+          sectionClone.remove();
 
           if (hadContent) {
             moveToNewPage();
-            appendToCurrent(sectionClone);
-            if (currentPage.scrollHeight <= pageHeightPx + 2) {
-              currentPageBody = currentPageFlow;
+            appendToCurrent(sectionClone, "append-whole-section");
+            if (pageFits()) {
               return;
             }
-            currentPageBody.removeChild(sectionClone);
+            sectionClone.remove();
           }
 
-          splitLargeNode(sectionClone, sectionClone as HTMLElement);
-          currentPageBody = currentPageFlow;
+          if (!paginateSectionByPlan(sectionSource)) {
+            throw new Error(
+              `[template9-pagination] Unable to paginate oversized section: ${getSectionTitle(sectionSource)}`
+            );
+          }
         };
 
         sectionSources.forEach((sectionSource) => appendSection(sectionSource));
@@ -1330,14 +1811,65 @@ const ResumeDocumentComponent = ({
         const pageElements = Array.from(
           pageParent.querySelectorAll<HTMLElement>(".resume-theme-root.resume-page")
         );
-        pageElements.forEach((page, index) => {
-          if (page.scrollHeight > pageHeightPx + 2) {
-            console.warn(
-              `[resume-pagination] Page ${index + 1} exceeds printable height: ${page.scrollHeight}px > ${pageHeightPx}px`,
-              page
-            );
+
+        const validateTemplate9Page = (page: HTMLElement, pageNumber: number) => {
+          const mainContents = page.querySelectorAll<HTMLElement>(".resume-main-content");
+          if (mainContents.length !== 1) {
+            const message = `[template9-pagination] Page ${pageNumber} must contain exactly one .resume-main-content, found ${mainContents.length}.`;
+            if (debugPdf) {
+              console.error(message);
+              return;
+            }
+            throw new Error(message);
           }
-        });
+
+          const invalidSection = Array.from(
+            page.querySelectorAll<HTMLElement>(template9SectionSelector)
+          ).find((section) => !section.parentElement?.classList.contains("resume-main-content"));
+          if (invalidSection) {
+            const message = `[template9-pagination] Invalid section nesting on page ${pageNumber}: ${getDomPath(
+              invalidSection
+            )}`;
+            if (debugPdf) {
+              console.error(message);
+              return;
+            }
+            throw new Error(message);
+          }
+
+          const mainContent = page.querySelector<HTMLElement>(".resume-main-content");
+          const usedHeight = mainContent ? getUsedPageHeight(page, mainContent) : page.scrollHeight;
+          if (usedHeight > pageHeightPx + 2) {
+            const message = `[template9-pagination] Page ${pageNumber} exceeds printable height: ${usedHeight}px > ${pageHeightPx}px`;
+            if (debugPdf) {
+              console.error(message);
+              return;
+            }
+            throw new Error(message);
+          }
+        };
+
+        if (debugPdf) {
+          console.log(
+            "[pdf-debug][stage-6][post-pagination-pre-cleanup]",
+            JSON.stringify({
+              pageCount: pageElements.length,
+              pages: getPageSectionSnapshot(pageElements, template9SectionSelector),
+            })
+          );
+        }
+
+        pageElements.forEach((page, index) => validateTemplate9Page(page, index + 1));
+
+        if (debugPdf) {
+          console.log(
+            "[pdf-debug][stage-7][template9-return-before-global-cleanup]",
+            JSON.stringify({
+              pageCount: pageElements.length,
+              pages: getPageSectionSnapshot(pageElements, template9SectionSelector),
+            })
+          );
+        }
 
         return;
       }

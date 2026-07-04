@@ -25,7 +25,7 @@ const TEMPLATE_NAMES = {
   15: "Corporate Clean",
 };
 
-const TEMPLATE_WITH_CUSTOM_PDF_MARGIN = new Set([1, 2]);
+const TEMPLATE_WITH_CUSTOM_PDF_MARGIN = new Set([2]);
 
 const normalizeResumeData = (resumeData = {}) => ({
   ...resumeData,
@@ -59,17 +59,34 @@ const getSafeTemplateId = (templateId) => {
   return Number.isInteger(id) && TEMPLATE_NAMES[id] ? id : 1;
 };
 
-const getPrintRenderUrl = () => `${FRONTEND_RENDER_URL.replace(/\/$/, "")}/print/resume?mode=pdf`;
+const getPrintRenderUrl = (debugMode = false) =>
+  `${FRONTEND_RENDER_URL.replace(/\/$/, "")}/print/resume?mode=pdf${debugMode ? "&debug=1" : ""}`;
 
 export const generateResumePDF = async (resumeData, templateId, options = {}) => {
   let browser;
   const { debugMode = false } = options;
   const safeTemplateId = getSafeTemplateId(templateId);
   const normalizedResumeData = normalizeResumeData(resumeData);
-  const renderUrl = getPrintRenderUrl();
+  const renderUrl = getPrintRenderUrl(debugMode);
 
   try {
     // Reduced logging for production: only log errors and essential warnings.
+    if (debugMode) {
+      console.log(
+        "[pdf-debug][stage-1][payload]",
+        JSON.stringify({
+          templateId: safeTemplateId,
+          educationLength: normalizedResumeData.education.length,
+          certificationsLength: normalizedResumeData.certifications.length,
+          projectsLength: normalizedResumeData.projects.length,
+          skillsLength: normalizedResumeData.skills.length,
+          experienceLength: normalizedResumeData.experience.length,
+          education: normalizedResumeData.education,
+          certifications: normalizedResumeData.certifications,
+          resumeData: normalizedResumeData,
+        })
+      );
+    }
 
     if (safeTemplateId !== Number.parseInt(templateId, 10)) {
       console.warn(
@@ -148,6 +165,36 @@ export const generateResumePDF = async (resumeData, templateId, options = {}) =>
 
     const fontsReadyHandle = await page.evaluateHandle("document.fonts.ready");
     await fontsReadyHandle.jsonValue();
+
+    if (debugMode) {
+      const finalDomSnapshot = await page.evaluate(() => {
+        const sectionSelector = ".resume-main-section, .resume-section";
+        const pages = Array.from(document.querySelectorAll<HTMLElement>(".resume-page")).map(
+          (page, index) => ({
+            page: index + 1,
+            sections: Array.from(page.querySelectorAll<HTMLElement>(sectionSelector)).map((section) => ({
+              title:
+                section.querySelector<HTMLElement>(".resume-section-title")?.textContent?.trim() ||
+                "(untitled)",
+              height: section.offsetHeight,
+              top: section.offsetTop,
+              display: getComputedStyle(section).display,
+              visibility: getComputedStyle(section).visibility,
+            })),
+          })
+        );
+
+        return {
+          pageCount: pages.length,
+          pages,
+          educationExists: pages.some((page) =>
+            page.sections.some((section) => section.title.toLowerCase() === "education")
+          ),
+        };
+      });
+
+      console.log("[pdf-debug][stage-8][final-dom-before-pdf]", JSON.stringify(finalDomSnapshot));
+    }
 
     // Generating PDF
     const pdfBuffer = await page.pdf({

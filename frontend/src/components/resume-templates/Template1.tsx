@@ -159,21 +159,36 @@ const Template1StructuredEntry = ({
   subtitle,
   meta,
   bullets,
+  details,
+  bulletAsBody = false,
 }: {
   title: string;
   subtitle?: string;
   meta?: string;
   bullets?: string[];
+  details?: ReactNode;
+  bulletAsBody?: boolean;
 }) => (
   <div className="resume-meta-block break-inside-avoid">
     <Template1BulletLine text={title} title />
     <div style={{ marginLeft: `${TEMPLATE1_BULLET_INDENT}px` }}>
       {hasText(subtitle) ? <p className="resume-item-subtitle mt-1">{subtitle}</p> : null}
       {hasText(meta) ? <p className="resume-item-meta mt-1.5">{meta}</p> : null}
+      {details}
     </div>
     {bullets && bullets.length > 0 ? (
       <div className="mt-2.5">
-        <Template1BulletList items={bullets} />
+        {bulletAsBody ? (
+          <div className="grid gap-[2px]">
+            {bullets.map((item, index) => (
+              <p key={`${item}-${index}`} className="resume-body-copy">
+                {item}
+              </p>
+            ))}
+          </div>
+        ) : (
+          <Template1BulletList items={bullets} />
+        )}
       </div>
     ) : null}
   </div>
@@ -216,7 +231,7 @@ const Template1Header = ({
         style={{
           display: "grid",
           gridTemplateColumns: "minmax(0, 1fr) minmax(220px, 320px)",
-          columnGap: "20px",
+          columnGap: "32px",
           alignItems: "flex-start",
         }}
       >
@@ -381,6 +396,26 @@ const Template1Section = ({
   </section>
 );
 
+const Template1ProjectEntry = ({
+  title,
+  description,
+  technologies,
+}: {
+  title: string;
+  description?: string;
+  technologies: string[];
+}) => (
+  <div className="resume-meta-block break-inside-avoid">
+    <Template1BulletLine text={title} title />
+    <div style={{ marginLeft: `${TEMPLATE1_BULLET_INDENT}px` }}>
+      {hasText(description) ? <p className="resume-body-copy mt-2.5">{description}</p> : null}
+      {technologies.length > 0 ? (
+        <p className="resume-item-meta mt-2">{uniqueItems(technologies).join(", ")}</p>
+      ) : null}
+    </div>
+  </div>
+);
+
 const getSectionLabel = (key: SectionKey, summaryTitle: string) => {
   switch (key) {
     case "summary":
@@ -486,6 +521,7 @@ const buildSectionMap = (data: ResumeData) => {
                 title={title}
                 meta={formatRange(item.startDate, item.endDate)}
                 bullets={responsibilities}
+                bulletAsBody
               />
             );
           })}
@@ -500,7 +536,11 @@ const buildSectionMap = (data: ResumeData) => {
               title={item.degree}
               subtitle={item.school}
               meta={formatRange(item.startYear, item.endYear)}
-              bullets={hasText(item.gpa) ? [`GPA: ${item.gpa}`] : undefined}
+              details={
+                hasText(item.gpa) ? (
+                  <p className="resume-body-copy mt-1.5">GPA: {item.gpa}</p>
+                ) : undefined
+              }
             />
           ))}
         </div>
@@ -509,16 +549,12 @@ const buildSectionMap = (data: ResumeData) => {
       data.projects.length > 0 ? (
         <div className="space-y-3.5">
           {data.projects.map((project, index) => (
-            <ResumeMetaBlock
+            <Template1ProjectEntry
               key={`${project.name}-${index}`}
               title={project.name}
-              meta={hasText(project.link) ? project.link : undefined}
-            >
-              {hasText(project.description) ? <p className="resume-body-copy">{project.description}</p> : null}
-              {project.technologies.length > 0 ? (
-                <p className="resume-item-meta mt-2">{uniqueItems(project.technologies).join(", ")}</p>
-              ) : null}
-            </ResumeMetaBlock>
+              description={project.description}
+              technologies={project.technologies}
+            />
           ))}
         </div>
       ) : null,
@@ -526,11 +562,9 @@ const buildSectionMap = (data: ResumeData) => {
       certifications.length > 0 ? (
         <div className="space-y-3">
           {certifications.map((item, index) => (
-            <Template1StructuredEntry
+            <Template1BulletLine
               key={`${item.name}-${item.issuer}-${index}`}
-              title={item.name}
-              subtitle={item.issuer}
-              meta={formatMonthYear(item.year)}
+              text={[item.name, item.issuer, formatMonthYear(item.year)].filter(hasText).join(", ")}
             />
           ))}
         </div>

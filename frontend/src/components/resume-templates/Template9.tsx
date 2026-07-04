@@ -453,34 +453,44 @@ const buildSectionMap = (data: ResumeData) => {
         <p className="resume-body-copy">{summaryText}</p>
       </div>
     ) : null,
-    skills: data.skills.length > 0 ? <ResumePillGrid items={data.skills} /> : null,
+    skills: data.skills.length > 0 ? <ResumeTagList items={data.skills} /> : null,
     experience:
       experience.length > 0 ? (
         <div className="grid" style={{ rowGap: "24px" }}>
-          {experience.map((item, index) => (
-            <ResumeMetaBlock
-              key={`${item.company}-${item.role}-${index}`}
-              title={item.role}
-              subtitle={item.company}
-              meta={formatRange(item.startDate, item.endDate)}
-            >
-              <ResumeBulletList items={toBulletItems(item.description)} fallbackText={item.description} />
-            </ResumeMetaBlock>
-          ))}
+          {experience.map((item, index) => {
+            const experienceDate = formatRange(item.startDate, item.endDate);
+            const experienceTitle = [item.role, item.company].filter(hasText).join(" at ");
+            const descriptionItems = toBulletItems(item.description);
+            const [firstDescription, ...remainingDescriptions] = descriptionItems;
+            const fallbackDescription = hasText(item.description) ? item.description.trim() : "";
+            const inlineDescription = firstDescription || fallbackDescription;
+
+            return (
+              <ResumeMetaBlock
+                key={`${item.company}-${item.role}-${index}`}
+                title={`\u2022 ${experienceTitle}${hasText(experienceDate) ? ` at ${experienceDate}` : ""}${
+                  hasText(inlineDescription) ? ` at ${inlineDescription}` : ""
+                }`}
+              >
+                <ResumePlainTextGroup items={remainingDescriptions} />
+              </ResumeMetaBlock>
+            );
+          })}
         </div>
       ) : null,
     education:
       education.length > 0 ? (
-        <div className="grid" style={{ rowGap: "24px" }}>
+        <div className="grid" style={{ rowGap: "20px" }}>
           {education.map((item, index) => (
-            <ResumeMetaBlock
+            <ResumeDetailBulletGroup
               key={`${item.school}-${item.degree}-${index}`}
-              title={item.degree}
-              subtitle={item.school}
-              meta={formatRange(item.startYear, item.endYear)}
-            >
-              {hasText(item.gpa) ? <p className="resume-item-meta">GPA: {item.gpa}</p> : null}
-            </ResumeMetaBlock>
+              items={[
+                { content: item.degree, className: "resume-item-title" },
+                { content: item.school, className: "resume-item-subtitle" },
+                { content: formatRange(item.startYear, item.endYear), className: "resume-item-meta" },
+                ...(hasText(item.gpa) ? [{ content: `GPA: ${item.gpa}`, className: "resume-item-meta" }] : []),
+              ]}
+            />
           ))}
         </div>
       ) : null,
@@ -490,7 +500,7 @@ const buildSectionMap = (data: ResumeData) => {
           {data.projects.map((project, index) => (
             <ResumeMetaBlock
               key={`${project.name}-${index}`}
-              title={project.name}
+              title={`\u2022 ${project.name}`}
               meta={hasText(project.link) ? project.link : undefined}
             >
               {hasText(project.description) ? <p className="resume-body-copy">{project.description}</p> : null}
@@ -507,9 +517,9 @@ const buildSectionMap = (data: ResumeData) => {
           {certifications.map((item, index) => (
             <ResumeMetaBlock
               key={`${item.name}-${item.issuer}-${index}`}
-              title={item.name}
-              subtitle={item.issuer}
-              meta={formatMonthYear(item.year)}
+              title={`\u2022 ${[item.name, item.issuer, hasText(item.year) ? formatMonthYear(item.year) : ""]
+                .filter(hasText)
+                .join(", ")}`}
             />
           ))}
         </div>
@@ -524,10 +534,8 @@ const buildSectionMap = (data: ResumeData) => {
           )}
         />
       ) : null,
-    strengths:
-      (data.strengths || []).length > 0 ? <ResumeTwoColumnBulletList items={data.strengths || []} /> : null,
-    hobbies:
-      (data.hobbies || []).length > 0 ? <ResumeTwoColumnBulletList items={data.hobbies || []} /> : null,
+    strengths: (data.strengths || []).length > 0 ? <ResumeTagList items={data.strengths || []} /> : null,
+    hobbies: (data.hobbies || []).length > 0 ? <ResumeTagList items={data.hobbies || []} /> : null,
     references:
       (data.references || []).length > 0 ? <ResumeBulletList items={data.references || []} /> : null,
     custom:
@@ -553,6 +561,11 @@ const buildSectionMap = (data: ResumeData) => {
   };
 
   return { sections, summaryTitle };
+};
+
+const isPdfDebugEnabled = () => {
+  if (typeof window === "undefined") return false;
+  return Boolean((window as Window & { __RESUME_PRINT_DEBUG__?: boolean }).__RESUME_PRINT_DEBUG__);
 };
 
 const ResumePage = ({
@@ -684,6 +697,23 @@ const ResumePageStyles = () => (
       margin-top: 6px;
     }
 
+    .resume-detail-bullet-group {
+      margin: 0;
+      padding-left: var(--resume-list-indent, 18px);
+      display: grid;
+      row-gap: 4px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .resume-detail-bullet-group li::marker {
+      font-size: 0.8em;
+    }
+
+    .resume-detail-bullet-line {
+      display: block;
+    }
+
     .resume-summary-box {
       border-left: 4px solid var(--resume-accent);
       background: var(--resume-accent-soft);
@@ -766,26 +796,48 @@ const ResumePageStyles = () => (
       margin-top: 0;
     }
 
-    .resume-pill-grid,
+    .resume-skills-grid,
     .resume-two-column-list {
       min-width: 0;
       max-width: 100%;
     }
 
-    .resume-pill-grid {
+    .resume-skills-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px 12px;
+      gap: 6px 32px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
     }
 
-    .resume-pill-item {
-      border: 1px solid var(--resume-border);
-      background: var(--resume-accent-soft);
+    .resume-skills-grid li {
+      position: relative;
+      padding-left: 16px;
+      font-size: 13.5px;
+      font-weight: 500;
+      line-height: 1.6;
+      color: #333333;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .resume-skills-grid li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.8em;
+      width: 6px;
+      height: 6px;
       border-radius: 999px;
-      padding: 8px 12px;
-      font-size: var(--resume-body-size);
-      line-height: 1.45;
-      color: var(--resume-page-text);
+      background: var(--resume-accent);
+      transform: translateY(-50%);
+    }
+
+    @media (max-width: 720px) {
+      .resume-skills-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
     }
 
     .resume-two-column-list {
@@ -1039,6 +1091,31 @@ const ResumeBulletList = ({
   );
 };
 
+const ResumePlainTextGroup = ({
+  items,
+  fallbackText,
+}: {
+  items: string[];
+  fallbackText?: string;
+}) => {
+  const filteredItems = items.filter(Boolean);
+  if (filteredItems.length === 0 && !hasText(fallbackText)) return null;
+
+  const resolvedItems =
+    filteredItems.length > 0 ? filteredItems : hasText(fallbackText) ? [fallbackText!.trim()] : [];
+  if (resolvedItems.length === 0) return null;
+
+  return (
+    <div style={{ display: "grid", rowGap: "2px" }}>
+      {resolvedItems.map((item, index) => (
+        <p key={`${item}-${index}`} className="resume-body-copy" style={{ margin: 0 }}>
+          {item}
+        </p>
+      ))}
+    </div>
+  );
+};
+
 const ResumeTagList = ({
   items,
 }: {
@@ -1050,37 +1127,22 @@ const ResumeTagList = ({
   return <p className="resume-body-copy resume-skills">{filteredItems.join(", ")}</p>;
 };
 
-const ResumePillGrid = ({
+const ResumeDetailBulletGroup = ({
   items,
 }: {
-  items: string[];
+  items: Array<{ content?: string; className?: string }>;
 }) => {
-  const filteredItems = uniqueItems(items.filter(Boolean));
+  const filteredItems = items.filter((item) => hasText(item.content));
   if (filteredItems.length === 0) return null;
 
   return (
-    <div className="resume-pill-grid">
+    <ul className="resume-detail-bullet-group break-inside-avoid">
       {filteredItems.map((item, index) => (
-        <div key={`${item}-${index}`} className="resume-pill-item">
-          {item}
-        </div>
-      ))}
-    </div>
-  );
-};
-
-const ResumeTwoColumnBulletList = ({
-  items,
-}: {
-  items: string[];
-}) => {
-  const filteredItems = uniqueItems(items.filter(Boolean));
-  if (filteredItems.length === 0) return null;
-
-  return (
-    <ul className="resume-two-column-list">
-      {filteredItems.map((item, index) => (
-        <li key={`${item}-${index}`}>{item}</li>
+        <li key={`${item.content}-${index}`}>
+          <span className={`resume-detail-bullet-line ${item.className || "resume-body-copy"}`.trim()}>
+            {item.content}
+          </span>
+        </li>
       ))}
     </ul>
   );
@@ -1275,6 +1337,28 @@ const template9Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
   const experiencedSidebarKeys = templateSidebarKeys.filter((key) => hasSectionData(key, data));
   const experiencedMainKeys = templateMainKeys.filter((key) => hasSectionData(key, data));
 
+  if (isPdfDebugEnabled()) {
+    const activeMainKeys = (fresherResume ? fresherMainKeys : experiencedMainKeys).filter(
+      (key) => Boolean(sections[key])
+    );
+    const activeSidebarKeys = (fresherResume ? fresherSidebarKeys : experiencedSidebarKeys).filter(
+      (key) => Boolean(sections[key])
+    );
+
+    console.log(
+      "[pdf-debug][stage-2b][template9-sections]",
+      JSON.stringify({
+        summaryTitle,
+        activeMainSections: activeMainKeys.map((key) => getSectionLabel(key, summaryTitle)),
+        activeSidebarSections: activeSidebarKeys.map((key) => getSectionLabel(key, summaryTitle)),
+        educationLength: data.education?.length ?? 0,
+        certificationsLength: data.certifications?.length ?? 0,
+        projectsLength: data.projects?.length ?? 0,
+        skillsLength: data.skills?.length ?? 0,
+      })
+    );
+  }
+
   const densityScale =
     densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.95 : 0.92;
 
@@ -1374,7 +1458,7 @@ const template9Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           }
           main={
             <div style={mainStyle}>
-              <div className="flex flex-col" style={{ gap: `${sectionGap}px` }}>
+              <div className="resume-main-content flex flex-col" style={{ gap: `${sectionGap}px` }}>
                 {renderSections({
                   keys: fresherResume ? fresherMainKeys : experiencedMainKeys,
                   sections,

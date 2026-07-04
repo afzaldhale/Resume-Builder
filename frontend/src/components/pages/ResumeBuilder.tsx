@@ -937,6 +937,7 @@ const ResumeBuilder = () => {
           </Button>
         </div>
       </Card>
+
     </div>
   );
 
