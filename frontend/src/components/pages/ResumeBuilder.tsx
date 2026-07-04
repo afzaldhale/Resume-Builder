@@ -2,6 +2,7 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
+  CheckCircle2,
   ChevronDown,
   Download,
   FileText,
@@ -11,6 +12,7 @@ import {
   Plus,
   Save,
   Send,
+  Trash2,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -48,6 +50,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import ConfirmationDialog from "@/components/ui/confirmation-dialog";
 import { useAuthContext } from "@/context/AuthContext";
 import { resumeService } from "@/services/resumeService";
 import {
@@ -60,6 +63,7 @@ import {
 } from "@/types/resumeDataConverter";
 
 const DRAFT_STORAGE_KEY = "resume-builder-draft";
+const EDITOR_LAUNCH_CONTEXT_KEY = "resume-builder-editor-launch";
 const PREVIEW_SCALE = 0.75;
 
 const createDefaultFormData = (): FormData => ({
@@ -84,6 +88,33 @@ const createThemePayload = (
   templateId,
   colors: mergeThemeColors(templateId, colors),
 });
+
+const getEditorLaunchContext = () => {
+  try {
+    const rawValue = sessionStorage.getItem(EDITOR_LAUNCH_CONTEXT_KEY);
+    if (!rawValue) {
+      return null;
+    }
+
+    const parsed = JSON.parse(rawValue) as {
+      mode?: string;
+      templateId?: number;
+      timestamp?: number;
+    };
+
+    if (parsed.mode !== "new" || !Number.isInteger(parsed.templateId)) {
+      return null;
+    }
+
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+const clearEditorLaunchContext = () => {
+  sessionStorage.removeItem(EDITOR_LAUNCH_CONTEXT_KEY);
+};
 
 const ResumeBuilder = () => {
   const navigate = useNavigate();
@@ -115,6 +146,7 @@ const ResumeBuilder = () => {
   ]);
   const [certifications, setCertifications] = useState<CertificationItem[]>([]);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const [isClearDialogOpen, setIsClearDialogOpen] = useState(false);
   const [themeColors, setThemeColors] = useState<Record<string, string>>(
     mergeThemeColors(
       Number.isFinite(requestedTemplateId) && requestedTemplateId > 0
@@ -152,7 +184,7 @@ const ResumeBuilder = () => {
     const nextTemplateId = getTemplateById(requestedTemplateId).id;
     setSelectedTemplate(nextTemplateId);
     setCandidateType(requestedCandidateType);
-    setThemeColors((prev) => mergeThemeColors(nextTemplateId, prev));
+    setThemeColors(mergeThemeColors(nextTemplateId, {}));
     setResumeStatus(null);
   }, [editingResumeId, requestedCandidateType, requestedTemplateId]);
 
@@ -178,12 +210,20 @@ const ResumeBuilder = () => {
 
   useEffect(() => {
     if (editingResumeId) {
+      clearEditorLaunchContext();
       return;
     }
 
+    const nextTemplateId = getTemplateById(requestedTemplateId).id;
+    const launchContext = getEditorLaunchContext();
+    const isFreshTemplateLaunch =
+      launchContext?.mode === "new" && launchContext.templateId === nextTemplateId;
     const draft = localStorage.getItem(DRAFT_STORAGE_KEY);
 
     if (!draft) {
+      if (isFreshTemplateLaunch) {
+        clearEditorLaunchContext();
+      }
       return;
     }
 
@@ -193,13 +233,20 @@ const ResumeBuilder = () => {
       if (parsed.languages) setLanguages(parsed.languages);
       if (parsed.certifications) setCertifications(parsed.certifications);
       if (parsed.socialLinks) setSocialLinks(parsed.socialLinks);
-      if (parsed.themeColors) {
+
+      if (isFreshTemplateLaunch) {
+        setThemeColors(mergeThemeColors(nextTemplateId, {}));
+        clearEditorLaunchContext();
+      } else if (parsed.themeColors && parsed.selectedTemplate === nextTemplateId) {
         setThemeColors(mergeThemeColors(getTemplateById(requestedTemplateId).id, parsed.themeColors));
+      } else {
+        setThemeColors(mergeThemeColors(nextTemplateId, {}));
       }
     } catch {
       localStorage.removeItem(DRAFT_STORAGE_KEY);
+      clearEditorLaunchContext();
     }
-  }, [editingResumeId]);
+  }, [editingResumeId, requestedTemplateId]);
 
   useEffect(() => {
     if (!editingResumeId || !user?.uid) {
@@ -261,10 +308,10 @@ const ResumeBuilder = () => {
   };
 
   const handleClearForm = () => {
-    if (!window.confirm("Are you sure you want to clear all form data?")) {
-      return;
-    }
+    setIsClearDialogOpen(true);
+  };
 
+  const handleConfirmClearForm = () => {
     const clearedData = clearFormData(candidateType);
     setFormData(clearedData.formData);
     setLanguages(clearedData.languages);
@@ -272,7 +319,14 @@ const ResumeBuilder = () => {
     setSocialLinks(clearedData.socialLinks);
     localStorage.removeItem(DRAFT_STORAGE_KEY);
     setSaveStatus("idle");
-    toast.info("Form cleared");
+    setIsClearDialogOpen(false);
+    toast.success("Resume cleared successfully", {
+      description: "All entered resume information has been removed.",
+      duration: 3000,
+      position: "top-right",
+      icon: <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />,
+      className: "border-emerald-200 bg-emerald-50 text-slate-900 shadow-lg",
+    });
   };
 
   const handleRequestDownload = async () => {
@@ -928,87 +982,100 @@ const ResumeBuilder = () => {
   );
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <UserSidebar />
+    <>
+      <div className="flex min-h-screen bg-slate-50">
+        <UserSidebar />
 
-      <main className="flex-1 px-4 pb-10 pt-20 md:px-8 md:pt-8">
-        <div className="mx-auto max-w-[1600px] space-y-6">
-          <Card className="border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-              <div className="space-y-3">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="h-auto px-0 text-slate-600 hover:bg-transparent hover:text-slate-900"
-                  onClick={() =>
-                    navigate(`/builder?template=${selectedTemplate}&type=${candidateType}`)
-                  }
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Templates
-                </Button>
-
-                <div>
-                  <h1 className="text-2xl font-bold text-slate-900">
-                    {editingResumeId ? "Edit Resume" : "Resume Editor"}
-                  </h1>
-                  <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-600">
-                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 font-medium">
-                      {selectedTemplateMeta.name}
-                    </span>
-                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-medium text-emerald-700">
-                      {candidateType === "experienced" ? "Experienced" : "Fresher"}
-                    </span>
-                    <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
-                      {isLoadingResume
-                        ? "Loading resume..."
-                        : saveStatus === "saving"
-                        ? "Saving draft..."
-                        : "Draft saved"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Button type="button" variant="outline" onClick={() => persistDraft({ showToast: true })}>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Draft
-                </Button>
-
-                {editingResumeId && resumeStatus === "approved" ? (
+        <main className="flex-1 px-4 pb-10 pt-20 md:px-8 md:pt-8">
+          <div className="mx-auto max-w-[1600px] space-y-6">
+            <Card className="border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                <div className="space-y-3">
                   <Button
                     type="button"
-                    variant="outline"
-                    onClick={handleDownloadPdf}
-                    disabled={isDownloadingPdf}
+                    variant="ghost"
+                    className="h-auto px-0 text-slate-600 hover:bg-transparent hover:text-slate-900"
+                    onClick={() =>
+                      navigate(`/builder?template=${selectedTemplate}&type=${candidateType}`)
+                    }
                   >
-                    <Download className="mr-2 h-4 w-4" />
-                    {isDownloadingPdf ? "Opening PDF..." : "Download PDF"}
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Templates
                   </Button>
-                ) : null}
+
+                  <div>
+                    <h1 className="text-2xl font-bold text-slate-900">
+                      {editingResumeId ? "Edit Resume" : "Resume Editor"}
+                    </h1>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+                      <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 font-medium">
+                        {selectedTemplateMeta.name}
+                      </span>
+                      <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-medium text-emerald-700">
+                        {candidateType === "experienced" ? "Experienced" : "Fresher"}
+                      </span>
+                      <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                        {isLoadingResume
+                          ? "Loading resume..."
+                          : saveStatus === "saving"
+                          ? "Saving draft..."
+                          : "Draft saved"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" variant="outline" onClick={() => persistDraft({ showToast: true })}>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Draft
+                  </Button>
+
+                  {editingResumeId && resumeStatus === "approved" ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleDownloadPdf}
+                      disabled={isDownloadingPdf}
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      {isDownloadingPdf ? "Opening PDF..." : "Download PDF"}
+                    </Button>
+                  ) : null}
+                </div>
               </div>
+            </Card>
+
+            <div className="lg:hidden">
+              <Tabs defaultValue="form" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="form">Form</TabsTrigger>
+                  <TabsTrigger value="preview">Preview</TabsTrigger>
+                </TabsList>
+                <TabsContent value="form">{formPanel}</TabsContent>
+                <TabsContent value="preview">{previewPanel}</TabsContent>
+              </Tabs>
             </div>
-          </Card>
 
-          <div className="lg:hidden">
-            <Tabs defaultValue="form" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="form">Form</TabsTrigger>
-                <TabsTrigger value="preview">Preview</TabsTrigger>
-              </TabsList>
-              <TabsContent value="form">{formPanel}</TabsContent>
-              <TabsContent value="preview">{previewPanel}</TabsContent>
-            </Tabs>
+            <div className="hidden gap-6 lg:grid lg:grid-cols-2">
+              <div className="max-h-[calc(100vh-10rem)] overflow-y-auto pr-2">{formPanel}</div>
+              <div className="sticky top-8 self-start">{previewPanel}</div>
+            </div>
           </div>
+        </main>
+      </div>
 
-          <div className="hidden gap-6 lg:grid lg:grid-cols-2">
-            <div className="max-h-[calc(100vh-10rem)] overflow-y-auto pr-2">{formPanel}</div>
-            <div className="sticky top-8 self-start">{previewPanel}</div>
-          </div>
-        </div>
-      </main>
-    </div>
+      <ConfirmationDialog
+        open={isClearDialogOpen}
+        onOpenChange={setIsClearDialogOpen}
+        onConfirm={handleConfirmClearForm}
+        title="Clear Resume"
+        description="This action will remove all entered resume information. You cannot undo this action."
+        confirmLabel="Clear Resume"
+        cancelLabel="Cancel"
+        icon={<Trash2 className="h-5 w-5" aria-hidden="true" />}
+      />
+    </>
   );
 };
 

@@ -607,7 +607,7 @@ const renderSections = ({
 
 // === Template1 Main Renderer ===
 
-const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
+export const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
   const { sections, summaryTitle } = buildSectionMap(data);
   const fresherResume = isFresherResume(data);
   const compactMode = getCompactMode(data);

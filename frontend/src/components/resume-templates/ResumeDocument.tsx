@@ -177,7 +177,8 @@ const ResumeDocumentComponent = ({
     [normalizedData, renderMode, compactLevel]
   );
   const resumeMode = resolveResumeMode(fittedData);
-  const compactMode = renderMode === "pdf" ? getCompactMode(fittedData) : false;
+  const compactMode =
+    safeTemplateId === 9 ? false : renderMode === "pdf" ? getCompactMode(fittedData) : false;
   const splitStateRef = useRef<{ splitDone: boolean }>({ splitDone: false });
 
   useLayoutEffect(() => {
@@ -990,6 +991,357 @@ const ResumeDocumentComponent = ({
         return;
       }
 
+      if (safeTemplateId === 9) {
+        const layoutTemplate = contentWrapper.cloneNode(false) as HTMLElement;
+        const template9SectionSelector = ".resume-main-section, .resume-section";
+        const styleNodes = Array.from(pageRoot.children).filter(
+          (child) => child.nodeType === Node.ELEMENT_NODE && child.nodeName === "STYLE"
+        );
+        const decorationTemplates = Array.from(pageRoot.children).filter(
+          (child) =>
+            child instanceof HTMLElement &&
+            child !== contentWrapper &&
+            child.nodeName !== "STYLE"
+        ) as HTMLElement[];
+        const sidebarFillTemplate =
+          Array.from(contentWrapper.children).find(
+            (child) => child instanceof HTMLElement && child.classList.contains("resume-sidebar-fill")
+          ) as HTMLElement | undefined;
+        const sidebarTemplate =
+          Array.from(contentWrapper.children).find(
+            (child) => child instanceof HTMLElement && child.classList.contains("resume-sidebar")
+          ) as HTMLElement | undefined;
+        const mainTemplate =
+          Array.from(contentWrapper.children).find(
+            (child) => child instanceof HTMLElement && child.classList.contains("resume-main")
+          ) as HTMLElement | undefined;
+        const mainInnerTemplate = mainTemplate?.firstElementChild as HTMLElement | null;
+        const mainFlowTemplate = mainInnerTemplate?.firstElementChild as HTMLElement | null;
+        const headerTemplate =
+          Array.from(mainFlowTemplate?.children || []).find(
+            (child) => child instanceof HTMLElement && child.tagName === "HEADER"
+          ) as HTMLElement | undefined;
+        const sectionSources = Array.from(mainFlowTemplate?.children || []).filter(
+          (child) =>
+            child instanceof HTMLElement &&
+            (child.classList.contains("resume-main-section") || child.classList.contains("resume-section"))
+        ) as HTMLElement[];
+
+        if (!sidebarTemplate || !mainTemplate || !mainInnerTemplate || !mainFlowTemplate) {
+          return;
+        }
+
+        const sidebarWidth =
+          getComputedStyle(pageRoot).getPropertyValue("--resume-sidebar-width").trim() || "24%";
+
+        const makeTemplate9Page = (includeHeader: boolean) => {
+          const page = pageTemplate.cloneNode(false) as HTMLElement;
+          styleNodes.forEach((styleNode) => {
+            page.appendChild(styleNode.cloneNode(true));
+          });
+          decorationTemplates.forEach((node) => {
+            page.appendChild(node.cloneNode(true));
+          });
+
+          const layout = layoutTemplate.cloneNode(false) as HTMLElement;
+          const sidebarFill = sidebarFillTemplate?.cloneNode(true) as HTMLElement | undefined;
+          const sidebar = sidebarTemplate.cloneNode(false) as HTMLElement;
+          const main = mainTemplate.cloneNode(false) as HTMLElement;
+          const mainInner = mainInnerTemplate.cloneNode(false) as HTMLElement;
+          const mainFlow = mainFlowTemplate.cloneNode(false) as HTMLElement;
+          const pageHeight = `${pageHeightPx}px`;
+
+          page.style.height = pageHeight;
+          page.style.minHeight = pageHeight;
+          layout.style.height = pageHeight;
+          layout.style.minHeight = pageHeight;
+          layout.style.display = "grid";
+          layout.style.gridTemplateColumns = `minmax(0, ${sidebarWidth}) minmax(0, calc(100% - ${sidebarWidth}))`;
+
+          if (sidebarFill) {
+            sidebarFill.style.position = "absolute";
+            sidebarFill.style.left = "0";
+            sidebarFill.style.top = "0";
+            sidebarFill.style.bottom = "0";
+            sidebarFill.style.width = sidebarWidth;
+            page.appendChild(sidebarFill);
+          }
+
+          sidebar.style.width = "100%";
+          sidebar.style.minWidth = "0";
+          sidebar.style.maxWidth = "none";
+          sidebar.style.height = "100%";
+          sidebar.style.minHeight = "100%";
+
+          main.style.width = "100%";
+          main.style.minWidth = "0";
+          main.style.maxWidth = "none";
+          main.style.height = "100%";
+          main.style.minHeight = "100%";
+          mainInner.style.height = "100%";
+          mainInner.style.minHeight = "100%";
+
+          if (includeHeader) {
+            Array.from(sidebarTemplate.childNodes).forEach((child) => {
+              sidebar.appendChild(child.cloneNode(true));
+            });
+          } else {
+            const sidebarShell = sidebarTemplate.firstElementChild;
+            if (sidebarShell instanceof HTMLElement) {
+              const sidebarShellClone = sidebarShell.cloneNode(false) as HTMLElement;
+              sidebarShellClone.style.height = "100%";
+              sidebarShellClone.style.minHeight = "100%";
+              sidebar.appendChild(sidebarShellClone);
+            }
+          }
+
+          if (includeHeader && headerTemplate) {
+            mainFlow.appendChild(headerTemplate.cloneNode(true));
+          }
+
+          mainInner.appendChild(mainFlow);
+          main.appendChild(mainInner);
+          layout.appendChild(sidebar);
+          layout.appendChild(main);
+          page.appendChild(layout);
+          pageParent.appendChild(page);
+          pages.push(page);
+
+          return { page, body: mainFlow };
+        };
+
+        let currentTemplate9Page = makeTemplate9Page(true);
+        let currentPage = currentTemplate9Page.page;
+        let currentPageFlow = currentTemplate9Page.body;
+        let currentPageBody = currentPageFlow;
+
+        const appendToCurrent = (node: Node) => {
+          currentPageBody.appendChild(node);
+        };
+
+        const moveToNewPage = () => {
+          currentTemplate9Page = makeTemplate9Page(false);
+          currentPage = currentTemplate9Page.page;
+          currentPageFlow = currentTemplate9Page.body;
+          currentPageBody = currentPageFlow;
+        };
+
+        const cloneHeaderOnly = (node: Node, sectionSource?: HTMLElement) => {
+          if (!(node instanceof HTMLElement)) {
+            return node.cloneNode(false);
+          }
+
+          const sourceSection = node.matches(template9SectionSelector)
+            ? node
+            : node.closest<HTMLElement>(template9SectionSelector) || sectionSource;
+
+          if (sourceSection) {
+            const headerOnly = sourceSection.cloneNode(false) as HTMLElement;
+            const title = sourceSection.querySelector<HTMLElement>(".resume-section-title");
+            if (title) {
+              headerOnly.appendChild(title.cloneNode(true));
+            }
+            return headerOnly;
+          }
+
+          return node.cloneNode(false);
+        };
+
+        const isEmptyNode = (wrapper: Node) => {
+          if (!(wrapper instanceof HTMLElement)) {
+            return false;
+          }
+          return !Array.from(wrapper.childNodes).some((child) => {
+            if (child.nodeType === Node.TEXT_NODE) {
+              return Boolean(child.textContent?.trim());
+            }
+            if (child instanceof HTMLElement) {
+              if (child.matches(".resume-section-title")) {
+                return false;
+              }
+              return Boolean(child.textContent?.trim());
+            }
+            return true;
+          });
+        };
+
+        const splitLargeNode = (node: Node, sectionSource?: HTMLElement) => {
+          if (node instanceof HTMLElement && node.matches("ul, ol")) {
+            const listClone = node.cloneNode(false) as HTMLElement;
+            appendToCurrent(listClone);
+
+            for (const child of Array.from(node.children)) {
+              const itemClone = child.cloneNode(true);
+              listClone.appendChild(itemClone);
+
+              if (currentPage.scrollHeight <= pageHeightPx + 2) {
+                continue;
+              }
+
+              listClone.removeChild(itemClone);
+
+              const listHadItems = listClone.children.length > 0;
+              if (listHadItems) {
+                moveToNewPage();
+                const nextWrapper = cloneHeaderOnly(node, sectionSource);
+                appendToCurrent(nextWrapper);
+                let nextContent =
+                  nextWrapper instanceof HTMLElement
+                    ? nextWrapper.querySelector<HTMLElement>(".resume-section-content")
+                    : null;
+                if (!nextContent && nextWrapper instanceof HTMLElement) {
+                  nextContent = document.createElement("div");
+                  nextContent.classList.add("resume-section-content");
+                  nextWrapper.appendChild(nextContent);
+                }
+                currentPageBody = nextContent || (nextWrapper as HTMLElement);
+                const nextList = node.cloneNode(false) as HTMLElement;
+                currentPageBody.appendChild(nextList);
+                nextList.appendChild(itemClone);
+
+                if (currentPage.scrollHeight > pageHeightPx + 2) {
+                  nextList.removeChild(itemClone);
+                  splitLargeNode(itemClone, sectionSource);
+                }
+              } else {
+                currentPageBody.removeChild(listClone);
+                splitLargeNode(itemClone, sectionSource);
+              }
+            }
+
+            if (isEmptyNode(listClone)) {
+              listClone.parentNode?.removeChild(listClone);
+            }
+            return;
+          }
+
+          const textContent = node.textContent?.trim() || "";
+          const hasChildren = (node as HTMLElement).children?.length > 0;
+
+          if (!hasChildren && textContent) {
+            currentPageBody = splitTextIntoChunks(
+              textContent,
+              () => {
+                moveToNewPage();
+                return currentPage;
+              },
+              currentPageBody,
+              pageHeightPx
+            );
+            return;
+          }
+
+          const shallow = node.cloneNode(false);
+          appendToCurrent(shallow);
+
+          for (const child of Array.from(node.childNodes)) {
+            const childClone = child.cloneNode(true);
+            const hadBefore = currentPageBody.childNodes.length > 0;
+            shallow.appendChild(childClone);
+
+            if (currentPage.scrollHeight > pageHeightPx + 2) {
+              shallow.removeChild(childClone);
+              if (hadBefore) {
+                moveToNewPage();
+                const nextWrapper = cloneHeaderOnly(node, sectionSource);
+                appendToCurrent(nextWrapper);
+                currentPageBody = nextWrapper as HTMLElement;
+                if (childClone.nodeType === Node.ELEMENT_NODE) {
+                  splitLargeNode(
+                    childClone,
+                    sectionSource ||
+                      (childClone instanceof HTMLElement && childClone.matches(template9SectionSelector)
+                        ? childClone
+                        : undefined)
+                  );
+                } else if (childClone.textContent?.trim()) {
+                  currentPageBody = splitTextIntoChunks(
+                    childClone.textContent.trim(),
+                    () => {
+                      moveToNewPage();
+                      return currentPage;
+                    },
+                    currentPageBody,
+                    pageHeightPx
+                  );
+                } else {
+                  appendToCurrent(childClone);
+                }
+              } else {
+                currentPageBody.removeChild(shallow);
+                if (childClone.nodeType === Node.ELEMENT_NODE) {
+                  splitLargeNode(
+                    childClone,
+                    sectionSource ||
+                      (childClone instanceof HTMLElement && childClone.matches(template9SectionSelector)
+                        ? childClone
+                        : undefined)
+                  );
+                } else if (childClone.textContent?.trim()) {
+                  currentPageBody = splitTextIntoChunks(
+                    childClone.textContent.trim(),
+                    () => {
+                      moveToNewPage();
+                      return currentPage;
+                    },
+                    currentPageBody,
+                    pageHeightPx
+                  );
+                } else {
+                  appendToCurrent(childClone);
+                }
+              }
+            }
+          }
+          if (isEmptyNode(shallow)) {
+            shallow.parentNode?.removeChild(shallow);
+          }
+        };
+
+        const appendSection = (sectionSource: HTMLElement) => {
+          currentPageBody = currentPageFlow;
+          const sectionClone = sectionSource.cloneNode(true);
+          const hadContent = currentPageFlow.childNodes.length > 0;
+          appendToCurrent(sectionClone);
+
+          if (currentPage.scrollHeight <= pageHeightPx + 2) {
+            currentPageBody = currentPageFlow;
+            return;
+          }
+
+          currentPageBody.removeChild(sectionClone);
+
+          if (hadContent) {
+            moveToNewPage();
+            appendToCurrent(sectionClone);
+            if (currentPage.scrollHeight <= pageHeightPx + 2) {
+              currentPageBody = currentPageFlow;
+              return;
+            }
+            currentPageBody.removeChild(sectionClone);
+          }
+
+          splitLargeNode(sectionClone, sectionClone as HTMLElement);
+          currentPageBody = currentPageFlow;
+        };
+
+        sectionSources.forEach((sectionSource) => appendSection(sectionSource));
+
+        const pageElements = Array.from(
+          pageParent.querySelectorAll<HTMLElement>(".resume-theme-root.resume-page")
+        );
+        pageElements.forEach((page, index) => {
+          if (page.scrollHeight > pageHeightPx + 2) {
+            console.warn(
+              `[resume-pagination] Page ${index + 1} exceeds printable height: ${page.scrollHeight}px > ${pageHeightPx}px`,
+              page
+            );
+          }
+        });
+
+        return;
+      }
+
       const createPageBody = (page: HTMLElement) => {
         if (safeTemplateId === 1 && template1ShellTemplate && template1BodyTemplate) {
           const shell = template1ShellTemplate.cloneNode(false) as HTMLElement;
@@ -1548,7 +1900,9 @@ const ResumeDocumentComponent = ({
       });
 
       pageElements.forEach((page) => {
-        const sections = Array.from(page.querySelectorAll<HTMLElement>(".resume-section"));
+        const sectionSelector =
+          safeTemplateId === 9 ? ".resume-main-section, .resume-section" : ".resume-section";
+        const sections = Array.from(page.querySelectorAll<HTMLElement>(sectionSelector));
         // remove pages that contain no sections (including spacer-only pages)
         if (sections.length === 0) {
           page.remove();

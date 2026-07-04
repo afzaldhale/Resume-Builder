@@ -11,6 +11,7 @@ import {
 import { CandidateType } from "@/types/resumeDataConverter";
 
 const DRAFT_STORAGE_KEY = "resume-builder-draft";
+const EDITOR_LAUNCH_CONTEXT_KEY = "resume-builder-editor-launch";
 
 const TemplateSelectionPage = () => {
   const navigate = useNavigate();
@@ -61,6 +62,15 @@ const TemplateSelectionPage = () => {
         ...JSON.parse(localStorage.getItem(DRAFT_STORAGE_KEY) || "{}"),
         candidateType,
         selectedTemplate: nextTemplate.id,
+      })
+    );
+
+    sessionStorage.setItem(
+      EDITOR_LAUNCH_CONTEXT_KEY,
+      JSON.stringify({
+        mode: "new",
+        templateId: nextTemplate.id,
+        timestamp: Date.now(),
       })
     );
 

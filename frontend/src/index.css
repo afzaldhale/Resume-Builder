@@ -331,13 +331,10 @@ All colors MUST be HSL.
 
 /* Ensure PDF render mode does not clip overflowing page content */
 .pdf-render-mode .resume-print-root,
-.pdf-render-mode .resume-page,
-.pdf-render-mode * {
+.pdf-render-mode .resume-document-shell,
+.pdf-render-mode .resume-document-scale {
   overflow: visible !important;
   max-height: none !important;
-  min-height: auto !important;
-  height: auto !important;
-  white-space: normal !important;
   text-overflow: clip !important;
   -webkit-line-clamp: unset !important;
   line-clamp: unset !important;

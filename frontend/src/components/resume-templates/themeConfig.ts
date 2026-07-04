@@ -91,9 +91,55 @@ const createMinimalConfig = (templateId: number): TemplateThemeConfig => ({
 });
 
 export const templateThemeConfigs: Record<number, TemplateThemeConfig> = {
-  1: createMinimalConfig(1),
+  1: {
+    templateId: 1,
+    defaultColors: {
+      headingBar: templateThemes[1].palette.accent,
+      headingText:
+        templateThemes[1].palette.headingText ||
+        templateThemes[1].palette.accentText ||
+        templateThemes[1].palette.text,
+      accentBorder: templateThemes[1].palette.accent,
+      nameText:
+        templateThemes[1].palette.nameText || templateThemes[1].palette.text,
+      titleText:
+        templateThemes[1].palette.titleText || templateThemes[1].palette.mutedText,
+      bodyText: templateThemes[1].palette.text,
+      dividerColor: templateThemes[1].palette.border,
+    },
+    editableColors: [
+      { key: "headingBar", label: "Heading Color" },
+      { key: "accentBorder", label: "Accent Border Color" },
+      { key: "nameText", label: "Name Color" },
+      { key: "bodyText", label: "Body Text Color" },
+    ],
+  },
   2: createMinimalConfig(2),
-  3: createSingleBarConfig(3, "#38BDF8"),
+  3: {
+    templateId: 3,
+    defaultColors: {
+      headingBar: templateThemes[3].palette.accent,
+      headingText:
+        templateThemes[3].palette.headingText ||
+        templateThemes[3].palette.text,
+      nameText:
+        templateThemes[3].palette.nameText || templateThemes[3].palette.text,
+      titleText:
+        templateThemes[3].palette.titleText || templateThemes[3].palette.mutedText,
+      bodyText: templateThemes[3].palette.text,
+      accent: templateThemes[3].palette.accent,
+      accentBorder:
+        templateThemes[3].palette.accentBorder || templateThemes[3].palette.accent,
+      dividerColor: templateThemes[3].palette.border,
+    },
+    editableColors: [
+      { key: "headingBar", label: "Heading Color" },
+      { key: "headingText", label: "Heading Text Color" },
+      { key: "nameText", label: "Name Color" },
+      { key: "bodyText", label: "Body Text Color" },
+      { key: "accent", label: "Accent Color" },
+    ],
+  },
   4: createMinimalConfig(4),
   5: createSidebarConfig(5),
   6: {

@@ -11,8 +11,6 @@ import {
   type ResumeSectionKey,
 } from "./resumeSections";
 import type { ResumeData } from "./types";
-import { ResumeSection } from "@/components/resume/ResumeSection";
-import { ResumeTypography } from "@/constants/resumeDesignSystem";
 import { resolveTemplateTheme } from "./themeConfig";
 
 type HeadingStyle = "bar" | "underline" | "accent";
@@ -98,27 +96,6 @@ const DEFAULT_SINGLE_ORDER: SectionKey[] = [
   "custom",
 ];
 
-const DEFAULT_EXPERIENCED_SIDEBAR: SectionKey[] = [
-  "skills",
-  "certifications",
-  "languages",
-  "strengths",
-  "hobbies",
-];
-
-const DEFAULT_EXPERIENCED_MAIN: SectionKey[] = [
-  "summary",
-  "experience",
-  "education",
-  "projects",
-  "achievements",
-  "references",
-  "custom",
-];
-
-const DEFAULT_FRESHER_SIDEBAR: SectionKey[] = ["languages", "strengths", "hobbies"];
-const DEFAULT_FRESHER_MAIN: SectionKey[] = ["summary", "skills", "experience", "education", "certifications"];
-
 const hasText = (value?: string | null) => Boolean(value && value.trim());
 
 const toBulletItems = (value?: string | null) =>
@@ -140,6 +117,43 @@ const formatRange = (start?: string, end?: string) => {
   return parts.join(" - ");
 };
 
+const resolveSidebarWidth = (value?: string) => {
+  if (typeof value !== "string") {
+    return "24%";
+  }
+
+  const parsed = Number.parseFloat(value);
+  if (!Number.isFinite(parsed)) {
+    return "24%";
+  }
+
+  return `${Math.max(23, Math.min(25, parsed))}%`;
+};
+
+const getSocialLabel = (platform?: string | null, url?: string | null) => {
+  const normalizedPlatform = (platform || "").trim().toLowerCase();
+  const normalizedUrl = (url || "").trim().toLowerCase();
+
+  if (normalizedPlatform.includes("linkedin") || normalizedUrl.includes("linkedin.com")) {
+    return "LinkedIn";
+  }
+
+  if (normalizedPlatform.includes("github") || normalizedUrl.includes("github.com")) {
+    return "GitHub";
+  }
+
+  if (
+    normalizedPlatform.includes("portfolio") ||
+    normalizedPlatform.includes("website") ||
+    normalizedPlatform.includes("personal") ||
+    normalizedUrl.includes("portfolio")
+  ) {
+    return "Portfolio";
+  }
+
+  return platform || "Website";
+};
+
 const getContactItems = (data: ResumeData): ContactItem[] => {
   const items: ContactItem[] = [];
 
@@ -149,12 +163,172 @@ const getContactItems = (data: ResumeData): ContactItem[] => {
 
   (data.socialLinks || []).forEach((link) => {
     if (hasText(link.url)) {
-      const label = link.platform?.toLowerCase().includes("linkedin") ? "LinkedIn" : link.platform || "Website";
+      const label = getSocialLabel(link.platform, link.url);
       items.push({ label, value: link.url });
     }
   });
 
   return items;
+};
+
+const ResumeSidebarSection = ({
+  title,
+  children,
+  theme,
+}: {
+  title: string;
+  children: ReactNode;
+  theme: ResumeTemplateTheme;
+}) => (
+  <section className="break-inside-avoid" style={{ display: "grid", rowGap: "14px" }}>
+    <div
+      style={{
+        width: "100%",
+        height: "1px",
+        background: theme.palette.sidebarBorder || "rgba(255,255,255,0.24)",
+      }}
+    />
+    <div style={{ display: "grid", rowGap: "12px" }}>
+      <h2
+        className="resume-heading"
+        style={{
+          margin: 0,
+          color: theme.palette.accent,
+          fontSize: "13px",
+          letterSpacing: "0.16em",
+        }}
+      >
+        {title}
+      </h2>
+      {children}
+    </div>
+  </section>
+);
+
+const ResumeMainSection = ({
+  title,
+  children,
+  theme,
+}: {
+  title: string;
+  children: ReactNode;
+  theme: ResumeTemplateTheme;
+}) => (
+  <section
+    className="resume-main-section break-inside-avoid"
+    style={{ display: "grid", rowGap: "16px", color: theme.palette.text }}
+  >
+    <div
+      className="resume-main-section-header"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+      }}
+    >
+      <span
+        aria-hidden="true"
+        style={{
+          width: "4px",
+          minWidth: "4px",
+          alignSelf: "stretch",
+          borderRadius: "999px",
+          background: theme.palette.accent,
+        }}
+      />
+      <h2
+        className="resume-section-title"
+        style={{
+          margin: 0,
+          color: theme.palette.text,
+          lineHeight: "1.18",
+        }}
+      >
+        {title}
+      </h2>
+    </div>
+    <div className="resume-section-content">{children}</div>
+  </section>
+);
+
+const ResumeSidebarIdentity = ({
+  data,
+  theme,
+}: {
+  data: ResumeData;
+  theme: ResumeTemplateTheme;
+}) => {
+  const contactItems = getContactItems(data);
+
+  return (
+    <section className="break-inside-avoid" style={{ display: "grid", rowGap: "20px" }}>
+      <div style={{ display: "grid", rowGap: "8px" }}>
+        <h1
+          style={{
+            margin: 0,
+            color: theme.palette.sidebarText || theme.palette.text,
+            fontSize: "30px",
+            lineHeight: "1.04",
+            fontWeight: 800,
+            letterSpacing: "0.03em",
+            textTransform: "uppercase",
+          }}
+        >
+          {data.fullName}
+        </h1>
+        {hasText(data.role) ? (
+          <p
+            style={{
+              margin: 0,
+              color: theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText,
+              fontSize: "13.5px",
+              lineHeight: "1.45",
+              fontWeight: 600,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+            }}
+          >
+            {data.role}
+          </p>
+        ) : null}
+      </div>
+
+      {contactItems.length > 0 ? (
+        <ResumeSidebarSection title="Contact" theme={theme}>
+          <div style={{ display: "grid", rowGap: "12px" }}>
+            {contactItems.map((item, index) => (
+              <div key={`${item.label}-${item.value}-${index}`} style={{ display: "grid", rowGap: "4px" }}>
+                <p
+                  style={{
+                    margin: 0,
+                    color: theme.palette.accent,
+                    fontSize: "10.5px",
+                    lineHeight: "1.3",
+                    fontWeight: 700,
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {item.label}
+                </p>
+                <p
+                  className="resume-long-text"
+                  style={{
+                    margin: 0,
+                    color: theme.palette.sidebarText || theme.palette.text,
+                    fontSize: "12px",
+                    lineHeight: "1.55",
+                  }}
+                >
+                  {item.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </ResumeSidebarSection>
+      ) : null}
+    </section>
+  );
 };
 
 const getSectionLabel = (key: SectionKey, summaryTitle: string) => {
@@ -197,6 +371,7 @@ const ResumeSidebarContactCard = ({
   theme: ResumeTemplateTheme;
   compactMode?: boolean;
 }) => {
+  void compactMode;
   const items = getContactItems(data);
 
   if (items.length === 0) return null;
@@ -264,6 +439,8 @@ const ResumeSidebarContactCard = ({
   );
 };
 
+void ResumeSidebarContactCard;
+
 const buildSectionMap = (data: ResumeData) => {
   const { summaryText, summaryTitle } = getSummaryConfig(data);
   const experience = sortExperienceReverseChronological(data.experience || []);
@@ -276,10 +453,10 @@ const buildSectionMap = (data: ResumeData) => {
         <p className="resume-body-copy">{summaryText}</p>
       </div>
     ) : null,
-    skills: data.skills.length > 0 ? <ResumeTagList items={data.skills} /> : null,
+    skills: data.skills.length > 0 ? <ResumePillGrid items={data.skills} /> : null,
     experience:
       experience.length > 0 ? (
-        <div className="space-y-3.5">
+        <div className="grid" style={{ rowGap: "24px" }}>
           {experience.map((item, index) => (
             <ResumeMetaBlock
               key={`${item.company}-${item.role}-${index}`}
@@ -294,7 +471,7 @@ const buildSectionMap = (data: ResumeData) => {
       ) : null,
     education:
       education.length > 0 ? (
-        <div className="space-y-3.5">
+        <div className="grid" style={{ rowGap: "24px" }}>
           {education.map((item, index) => (
             <ResumeMetaBlock
               key={`${item.school}-${item.degree}-${index}`}
@@ -309,7 +486,7 @@ const buildSectionMap = (data: ResumeData) => {
       ) : null,
     projects:
       data.projects.length > 0 ? (
-        <div className="space-y-3.5">
+        <div className="grid" style={{ rowGap: "22px" }}>
           {data.projects.map((project, index) => (
             <ResumeMetaBlock
               key={`${project.name}-${index}`}
@@ -326,7 +503,7 @@ const buildSectionMap = (data: ResumeData) => {
       ) : null,
     certifications:
       certifications.length > 0 ? (
-        <div className="space-y-3">
+        <div className="grid" style={{ rowGap: "20px" }}>
           {certifications.map((item, index) => (
             <ResumeMetaBlock
               key={`${item.name}-${item.issuer}-${index}`}
@@ -347,13 +524,15 @@ const buildSectionMap = (data: ResumeData) => {
           )}
         />
       ) : null,
-    strengths: (data.strengths || []).length > 0 ? <ResumeTagList items={data.strengths || []} /> : null,
-    hobbies: (data.hobbies || []).length > 0 ? <ResumeTagList items={data.hobbies || []} /> : null,
+    strengths:
+      (data.strengths || []).length > 0 ? <ResumeTwoColumnBulletList items={data.strengths || []} /> : null,
+    hobbies:
+      (data.hobbies || []).length > 0 ? <ResumeTwoColumnBulletList items={data.hobbies || []} /> : null,
     references:
       (data.references || []).length > 0 ? <ResumeBulletList items={data.references || []} /> : null,
     custom:
       (data.customSections || []).length > 0 ? (
-        <div className="space-y-3.5">
+        <div className="grid" style={{ rowGap: "22px" }}>
           {data.customSections.map((section, index) => {
             const hasItems = (section.items || []).length > 0;
             const hasDescription = hasText(section.description);
@@ -453,7 +632,7 @@ const ResumePageStyles = () => (
 
     .resume-heading {
       font-size: var(--resume-heading-size);
-      line-height: 1.2;
+      line-height: 1.16;
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -461,52 +640,54 @@ const ResumePageStyles = () => (
 
     .resume-body-copy {
       font-size: var(--resume-body-size);
-      line-height: 1.34;
+      line-height: 1.68;
     }
 
     .resume-item-title {
       font-size: var(--resume-item-title-size);
-      line-height: 1.35;
+      line-height: 1.42;
       font-weight: 700;
     }
 
     .resume-item-subtitle {
       font-size: var(--resume-item-subtitle-size);
-      line-height: 1.32;
+      line-height: 1.42;
       color: var(--resume-page-text);
     }
 
     .resume-item-meta {
       font-size: var(--resume-item-meta-size);
-      line-height: 1.3;
+      line-height: 1.45;
       color: var(--resume-muted-text);
     }
 
     .resume-section-title {
       display: block;
       font-size: var(--resume-heading-size);
-      line-height: 1.2;
+      line-height: 1.18;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      margin: 0 0 0.35em;
+      margin: 0;
+      break-after: avoid-page;
+      page-break-after: avoid;
     }
 
     .resume-bullet-list {
       margin: 0;
       padding-left: var(--resume-list-indent, 18px);
       font-size: var(--resume-list-size);
-      line-height: 1.34;
+      line-height: 1.62;
     }
 
     .resume-bullet-list li + li {
-      margin-top: 2px;
+      margin-top: 6px;
     }
 
     .resume-summary-box {
       border-left: 4px solid var(--resume-accent);
       background: var(--resume-accent-soft);
-      padding: var(--resume-summary-box-padding, 10px 12px);
+      padding: var(--resume-summary-box-padding, 14px 16px);
     }
 
     .resume-section-summary-plain .resume-summary-box {
@@ -529,7 +710,7 @@ const ResumePageStyles = () => (
     }
 
     .resume-meta-block + .resume-meta-block {
-      margin-top: 8px;
+      margin-top: 0;
     }
 
     .break-inside-avoid {
@@ -538,12 +719,28 @@ const ResumePageStyles = () => (
     }
 
     .resume-two-column-layout {
+      position: relative;
       width: 100%;
+      height: 100%;
+      min-height: 100%;
       min-width: 0;
     }
 
     .resume-sidebar {
+      position: relative;
+      z-index: 1;
       min-width: 0;
+      align-self: stretch;
+    }
+
+    .resume-sidebar-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: var(--resume-sidebar-width, 24%);
+      background: var(--resume-sidebar-bg);
+      border-right: 1px solid var(--resume-sidebar-border);
+      z-index: 0;
+      pointer-events: none;
     }
 
     .resume-main,
@@ -558,7 +755,79 @@ const ResumePageStyles = () => (
 
     .resume-section {
       display: grid;
-      row-gap: var(--resume-section-vertical-gap, 8px);
+      row-gap: var(--resume-section-heading-gap, 14px);
+    }
+
+    .resume-section-content {
+      min-width: 0;
+    }
+
+    .resume-main-section + .resume-main-section {
+      margin-top: 0;
+    }
+
+    .resume-pill-grid,
+    .resume-two-column-list {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .resume-pill-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 12px;
+    }
+
+    .resume-pill-item {
+      border: 1px solid var(--resume-border);
+      background: var(--resume-accent-soft);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: var(--resume-body-size);
+      line-height: 1.45;
+      color: var(--resume-page-text);
+    }
+
+    .resume-two-column-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 18px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .resume-two-column-list li {
+      position: relative;
+      padding-left: 16px;
+      font-size: var(--resume-list-size);
+      line-height: 1.55;
+    }
+
+    .resume-two-column-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.62em;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--resume-accent);
+      transform: translateY(-50%);
+    }
+
+    .resume-page p,
+    .resume-page li {
+      orphans: 2;
+      widows: 2;
+    }
+
+    .resume-meta-block,
+    .resume-summary-box,
+    .resume-bullet-list li,
+    .resume-section-content {
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
   `}</style>
 );
@@ -567,19 +836,19 @@ const ResumeContactRow = ({
   items,
   align = "left",
   color,
-  compactMode: _compactMode = false,
+  compactMode = false,
   densityMode = "comfortable",
 }: {
   items: ContactItem[];
   align?: "left" | "right";
   color: string;
-  _compactMode?: boolean;
+  compactMode?: boolean;
   densityMode?: "comfortable" | "compact" | "ultra-compact";
 }) => {
-  void _compactMode;
+  void compactMode;
 
-  const gapX = densityMode === "ultra-compact" ? 10 : densityMode === "compact" ? 12 : 14;
-  const gapY = densityMode === "ultra-compact" ? 4 : densityMode === "compact" ? 6 : 8;
+  const gapX = densityMode === "ultra-compact" ? 12 : densityMode === "compact" ? 14 : 16;
+  const gapY = densityMode === "ultra-compact" ? 8 : densityMode === "compact" ? 10 : 12;
 
   return (
     <div
@@ -620,6 +889,7 @@ const ResumeHeader = ({
 }) => {
   const { summaryText } = getSummaryConfig(data);
   const contactItems = getContactItems(data);
+  void compactMode;
 
   const titleSize = "var(--resume-name-size)";
   const roleSize = "var(--resume-role-size)";
@@ -630,19 +900,32 @@ const ResumeHeader = ({
       style={{
         background: theme.headerBand ? theme.palette.headerBg || theme.palette.page : "transparent",
         borderBottom: theme.headerDivider ? `1px solid ${theme.palette.border}` : "none",
-        paddingBottom: theme.headerDivider ? "16px" : "0",
+        paddingBottom: theme.headerDivider ? "20px" : "0",
       }}
     >
       <div
-        className={theme.headerLayout === "split" ? "flex items-end justify-between gap-8" : "space-y-2.5"}
+        className={theme.headerLayout === "split" ? "flex items-end justify-between gap-8" : ""}
+        style={
+          theme.headerLayout === "split"
+            ? undefined
+            : {
+                display: "grid",
+                rowGap: densityMode === "comfortable" ? "18px" : "14px",
+              }
+        }
       >
         <div className="min-w-0">
           <h1
             className="font-bold tracking-[0.02em] uppercase"
             style={{
               fontSize: titleSize,
-              lineHeight: "var(--resume-line-height)",
+              lineHeight: "1.08",
               color: theme.palette.nameText || theme.palette.text,
+              margin: 0,
+              whiteSpace: "normal",
+              overflowWrap: "normal",
+              wordBreak: "normal",
+              hyphens: "manual",
             }}
           >
             {data.fullName}
@@ -652,9 +935,10 @@ const ResumeHeader = ({
               className="mt-2 font-medium uppercase"
               style={{
                 fontSize: roleSize,
-                lineHeight: "var(--resume-line-height)",
+                lineHeight: "1.35",
                 color: theme.palette.titleText || theme.palette.mutedText,
                 letterSpacing: "0.08em",
+                margin: "12px 0 0",
               }}
             >
               {data.role}
@@ -674,7 +958,7 @@ const ResumeHeader = ({
       </div>
 
       {theme.summaryInHeader && hasText(summaryText) ? (
-        <div className="mt-4">
+        <div className="mt-5">
           {theme.summaryStyle === "plain" ? (
             <p className="resume-body-copy">{summaryText}</p>
           ) : (
@@ -688,6 +972,8 @@ const ResumeHeader = ({
   );
 };
 
+void ResumeHeader;
+
 const ResumeSidebar = ({
   children,
   theme,
@@ -700,9 +986,10 @@ const ResumeSidebar = ({
   <aside
     className="self-stretch"
     style={{
-      background: theme.palette.sidebarBg || theme.palette.accentSoft,
+      background: "transparent",
       color: theme.palette.sidebarText || theme.palette.text,
-      padding: scalePxString(theme.sidebarPadding || "28px 22px", compactMode ? 0.82 : 1),
+      minHeight: "100%",
+      padding: scalePxString(theme.sidebarPadding || "44px 24px 44px 26px", compactMode ? 0.94 : 1),
     }}
   >
     {children}
@@ -763,6 +1050,42 @@ const ResumeTagList = ({
   return <p className="resume-body-copy resume-skills">{filteredItems.join(", ")}</p>;
 };
 
+const ResumePillGrid = ({
+  items,
+}: {
+  items: string[];
+}) => {
+  const filteredItems = uniqueItems(items.filter(Boolean));
+  if (filteredItems.length === 0) return null;
+
+  return (
+    <div className="resume-pill-grid">
+      {filteredItems.map((item, index) => (
+        <div key={`${item}-${index}`} className="resume-pill-item">
+          {item}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const ResumeTwoColumnBulletList = ({
+  items,
+}: {
+  items: string[];
+}) => {
+  const filteredItems = uniqueItems(items.filter(Boolean));
+  if (filteredItems.length === 0) return null;
+
+  return (
+    <ul className="resume-two-column-list">
+      {filteredItems.map((item, index) => (
+        <li key={`${item}-${index}`}>{item}</li>
+      ))}
+    </ul>
+  );
+};
+
 const ResumeMetaBlock = ({
   title,
   subtitle,
@@ -774,11 +1097,11 @@ const ResumeMetaBlock = ({
   meta?: string;
   children?: ReactNode;
 }) => (
-  <div className="resume-meta-block break-inside-avoid">
+  <div className="resume-meta-block break-inside-avoid" style={{ display: "grid", rowGap: "6px" }}>
     <h3 className="resume-item-title">{title}</h3>
-    {hasText(subtitle) ? <p className="resume-item-subtitle mt-1">{subtitle}</p> : null}
-    {hasText(meta) ? <p className="resume-item-meta mt-1.5">{meta}</p> : null}
-    {children ? <div className="mt-2.5">{children}</div> : null}
+    {hasText(subtitle) ? <p className="resume-item-subtitle">{subtitle}</p> : null}
+    {hasText(meta) ? <p className="resume-item-meta">{meta}</p> : null}
+    {children ? <div style={{ marginTop: "10px" }}>{children}</div> : null}
   </div>
 );
 
@@ -791,15 +1114,36 @@ const ResumeTwoColumnLayout = ({
   main: ReactNode;
   theme: ResumeTemplateTheme;
 }) => {
-  const sidebarWidth = theme.sidebarWidth || "30%";
+  const sidebarWidth = resolveSidebarWidth(theme.sidebarWidth);
   const mainWidth = `calc(100% - ${sidebarWidth})`;
 
   return (
-    <div className="resume-two-column-layout flex h-full items-stretch">
-      <div className="resume-sidebar" style={{ width: sidebarWidth, flex: `0 0 ${sidebarWidth}` }}>
+    <div
+      className="resume-two-column-layout h-full items-stretch"
+      style={{
+        display: "grid",
+        gridTemplateColumns: `minmax(0, ${sidebarWidth}) minmax(0, ${mainWidth})`,
+      }}
+    >
+      <div className="resume-sidebar-fill" aria-hidden="true" />
+      <div
+        className="resume-sidebar"
+        style={{
+          width: "100%",
+          minWidth: 0,
+          maxWidth: "none",
+        }}
+      >
         {sidebar}
       </div>
-      <main className="resume-main" style={{ width: mainWidth }}>
+      <main
+        className="resume-main"
+        style={{
+          width: "100%",
+          minWidth: 0,
+          maxWidth: "none",
+        }}
+      >
         {main}
       </main>
     </div>
@@ -820,24 +1164,32 @@ const renderSections = ({
   theme: ResumeTemplateTheme;
   compactMode?: boolean;
   sidebar?: boolean;
-}) =>
+}) => {
+  void compactMode;
+
+  return (
   keys.map((key) => {
     const content = sections[key];
     if (!content) return null;
 
+    const title = getSectionLabel(key, summaryTitle);
+
+    if (sidebar) {
+      return (
+        <ResumeSidebarSection key={`sidebar-${key}`} title={title} theme={theme}>
+          <div style={{ color: theme.palette.sidebarText || theme.palette.text }}>{content}</div>
+        </ResumeSidebarSection>
+      );
+    }
+
     return (
-      <ResumeSection
-        key={`${sidebar ? "sidebar" : "main"}-${key}`}
-        title={getSectionLabel(key, summaryTitle)}
-        theme={theme}
-        sidebar={sidebar}
-        compactMode={compactMode}
-        summaryTitle={summaryTitle}
-      >
+      <ResumeMainSection key={`main-${key}`} title={title} theme={theme}>
         {content}
-      </ResumeSection>
+      </ResumeMainSection>
     );
-  });
+  })
+  );
+};
 
 const template9Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
   const { sections, summaryTitle } = buildSectionMap(data);
@@ -853,79 +1205,46 @@ const template9Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
       : 0.82;
   const baseSpacingFactor = compactMode ? 0.92 : 1;
   const compactSpacingFactor = compactLevel === 1 ? 0.9 : compactLevel >= 2 ? 0.8 : 1;
-  const rawGap = Math.round((theme.sectionSpacing || 22) * densityFactor * baseSpacingFactor * compactSpacingFactor * (theme.spacingScale || 1));
-  const minSectionGap = densityMode === "comfortable" && compactLevel === 0 ? 12 : 10;
-  const sectionGap = Math.max(minSectionGap, Math.min(16, rawGap));
+  const rawGap = Math.round(26 * densityFactor * baseSpacingFactor * compactSpacingFactor);
+  const minSectionGap =
+    densityMode === "comfortable" && compactLevel === 0 ? 24 : densityMode === "compact" ? 20 : 18;
+  const sectionGap = Math.max(minSectionGap, Math.min(28, rawGap));
 
   const clampPadding = (padding: string) => {
     try {
       const parts = padding.trim().split(/\s+/).map((p) => parseInt(p, 10) || 0);
-      let vert = parts.length === 4 ? parts[0] + parts[2] : parts[0] || 36;
-      let horiz = parts.length === 4 ? parts[1] + parts[3] : parts[1] || parts[0] || 32;
+      let vert = parts.length === 4 ? parts[0] + parts[2] : parts[0] || 38;
+      let horiz = parts.length === 4 ? parts[1] + parts[3] : parts[1] || parts[0] || 40;
       vert = Math.round(vert / (parts.length === 4 ? 2 : 1));
       horiz = Math.round(horiz / (parts.length === 4 ? 2 : 1));
-      const minPadding = densityMode === "comfortable" && compactLevel === 0 ? 32 : densityMode === "compact" || compactLevel >= 1 ? 28 : 24;
-      vert = Math.max(minPadding, Math.min(40, vert));
-      horiz = Math.max(minPadding, Math.min(40, horiz));
+      const minVerticalPadding =
+        densityMode === "comfortable" && compactLevel === 0 ? 42 : densityMode === "compact" || compactLevel >= 1 ? 34 : 32;
+      const minHorizontalPadding =
+        densityMode === "comfortable" && compactLevel === 0 ? 44 : densityMode === "compact" || compactLevel >= 1 ? 36 : 34;
+      vert = Math.max(minVerticalPadding, Math.min(48, vert));
+      horiz = Math.max(minHorizontalPadding, Math.min(46, horiz));
       return `${vert}px ${horiz}px`;
     } catch {
-      return "36px 32px";
+      return "42px 44px";
     }
   };
 
   const pageStyle: CSSProperties = {
     padding:
       theme.layout === "single"
-        ? scalePxString(clampPadding(theme.pagePadding || "36px 32px"), densityFactor * baseSpacingFactor * compactSpacingFactor)
+        ? scalePxString(
+            clampPadding(theme.pagePadding || "42px 44px"),
+            densityFactor * baseSpacingFactor * compactSpacingFactor
+          )
         : "0",
   };
 
   const mainStyle: CSSProperties = {
     padding: scalePxString(
-      clampPadding(theme.mainPadding || theme.contentPadding || "36px 32px"),
+      clampPadding(theme.mainPadding || theme.contentPadding || "42px 44px"),
       densityFactor * baseSpacingFactor * compactSpacingFactor
     ),
   };
-
-  const sidebarIntro = (
-    <div className="break-inside-avoid space-y-2.5">
-      <h1
-        className="font-bold tracking-[0.02em] uppercase"
-        style={{
-          fontSize: "var(--resume-name-size)",
-          lineHeight: "var(--resume-line-height)",
-          color: theme.palette.sidebarText || theme.palette.text,
-        }}
-      >
-        {data.fullName}
-      </h1>
-      {hasText(data.role) ? (
-        <p
-          style={{
-            fontSize: "var(--resume-role-size)",
-            lineHeight: "var(--resume-line-height)",
-            color:
-              theme.palette.titleText ||
-              theme.palette.sidebarMutedText ||
-              theme.palette.sidebarText ||
-              theme.palette.mutedText,
-            letterSpacing: "0.07em",
-            textTransform: "uppercase",
-          }}
-        >
-          {data.role}
-        </p>
-      ) : null}
-      {getContactItems(data).length > 0 ? (
-        <ResumeContactRow
-          items={getContactItems(data)}
-          color={theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText}
-          compactMode={compactMode}
-          densityMode={densityMode}
-        />
-      ) : null}
-    </div>
-  );
 
   const fresherSectionKeys = [
     ...getResumeSectionOrder("fresher").filter((key): key is SectionKey => key !== "header"),
@@ -935,36 +1254,47 @@ const template9Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
     "custom" as SectionKey,
   ].filter((key, index, items) => items.indexOf(key) === index && hasSectionData(key as ResumeSectionKey, data));
 
-  const fresherSidebarKeys = (theme.sidebarSections || DEFAULT_FRESHER_SIDEBAR).filter((key: SectionKey) =>
-    fresherSectionKeys.includes(key)
-  );
-  const fresherMainKeys = (theme.fresherMainSections || DEFAULT_FRESHER_MAIN).filter((key) =>
-    hasSectionData(key, data)
-  );
+  const templateSidebarKeys: SectionKey[] = ["languages"];
+  const templateMainKeys: SectionKey[] = [
+    "summary",
+    "skills",
+    "experience",
+    "projects",
+    "education",
+    "certifications",
+    "strengths",
+    "achievements",
+    "hobbies",
+    "references",
+    "custom",
+  ];
 
-  const experiencedSidebarKeys = theme.sidebarSections || DEFAULT_EXPERIENCED_SIDEBAR;
-  const experiencedMainKeys = theme.mainSections || DEFAULT_EXPERIENCED_MAIN;
+  const fresherSidebarKeys = templateSidebarKeys.filter((key) => fresherSectionKeys.includes(key));
+  const fresherMainKeys = templateMainKeys.filter((key) => hasSectionData(key, data));
+
+  const experiencedSidebarKeys = templateSidebarKeys.filter((key) => hasSectionData(key, data));
+  const experiencedMainKeys = templateMainKeys.filter((key) => hasSectionData(key, data));
 
   const densityScale =
     densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.95 : 0.92;
 
   const typScale = theme.typographyScale || 1;
 
-  const nameBase = ResumeTypography.name * typScale;
-  const roleBase = ResumeTypography.role * typScale;
-  const headingBase = ResumeTypography.heading * typScale;
-  const bodyBase = ResumeTypography.body * typScale;
-  const smallBase = ResumeTypography.small * typScale;
-  const lineHeight = ResumeTypography.lineHeight || 1.4;
+  const nameBase = 34 * typScale;
+  const roleBase = 14 * typScale;
+  const headingBase = 14 * typScale;
+  const bodyBase = 12.2 * typScale;
+  const smallBase = 10.5 * typScale;
+  const lineHeight = 1.68;
 
   const nameSize = nameBase * densityScale;
   const roleSize = roleBase * densityScale;
   const headingSize = headingBase * densityScale;
-  const bodySize = Math.max(10.5, bodyBase * densityScale);
-  const titleSize = Math.max(11, (ResumeTypography.role || 15) * typScale * densityScale);
-  const subtitleSize = Math.max(10.2, (ResumeTypography.body || 12) * typScale * densityScale);
+  const bodySize = Math.max(12, bodyBase * densityScale);
+  const titleSize = Math.max(12.5, 13 * typScale * densityScale);
+  const subtitleSize = Math.max(11.25, 11.8 * typScale * densityScale);
   const metaSize = Math.max(10.5, smallBase * densityScale);
-  const listSize = Math.max(10, (ResumeTypography.body || 12) * typScale * densityScale);
+  const listSize = Math.max(11.5, 11.75 * typScale * densityScale);
 
   return (
     <ResumePage
@@ -979,6 +1309,9 @@ const template9Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           "--resume-accent": theme.palette.accent,
           "--resume-accent-soft": theme.palette.accentSoft,
           "--resume-accent-text": theme.palette.accentText,
+          "--resume-sidebar-bg": theme.palette.sidebarBg || theme.palette.accentSoft,
+          "--resume-sidebar-border": theme.palette.sidebarBorder || theme.palette.border,
+          "--resume-sidebar-width": resolveSidebarWidth(theme.sidebarWidth),
           "--resume-heading-size": `${headingSize.toFixed(2)}px`,
           "--resume-body-size": `${bodySize.toFixed(2)}px`,
           "--resume-item-title-size": `${titleSize.toFixed(2)}px`,
@@ -988,10 +1321,11 @@ const template9Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           "--resume-name-size": `${Math.round(nameSize * 100) / 100}px`,
           "--resume-role-size": `${Math.round(roleSize * 100) / 100}px`,
           "--resume-line-height": `${lineHeight}`,
-          "--resume-summary-box-padding": compactMode || densityMode !== "comfortable" ? "8px 10px" : "10px 12px",
-          "--resume-list-indent": densityMode === "comfortable" ? "18px" : "16px",
-          "--resume-contact-separator-gap": densityMode === "comfortable" ? "8px" : "6px",
-          "--resume-section-vertical-gap": densityMode === "comfortable" && compactLevel === 0 ? "8px" : densityMode === "compact" ? "7px" : "6px",
+          "--resume-summary-box-padding": compactMode || densityMode !== "comfortable" ? "12px 14px" : "14px 16px",
+          "--resume-list-indent": densityMode === "comfortable" ? "20px" : "18px",
+          "--resume-contact-separator-gap": densityMode === "comfortable" ? "10px" : "8px",
+          "--resume-section-heading-gap":
+            densityMode === "comfortable" && compactLevel === 0 ? "14px" : densityMode === "compact" ? "12px" : "10px",
           "--resume-font-family": theme.fontFamily || "Inter, Arial, Helvetica, sans-serif",
         } as CSSProperties),
       }}
@@ -1010,7 +1344,6 @@ const template9Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
 
       {theme.layout === "single" ? (
         <div className="flex h-full flex-col" style={{ gap: `${sectionGap}px` }}>
-          <ResumeHeader data={data} theme={theme} compactMode={compactMode} />
           <div className="flex flex-col" style={{ gap: `${sectionGap}px` }}>
             {renderSections({
               keys: fresherResume ? fresherSectionKeys : theme.mainSections || DEFAULT_SINGLE_ORDER,
@@ -1026,31 +1359,22 @@ const template9Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           theme={theme}
           sidebar={
             <ResumeSidebar theme={theme} compactMode={compactMode}>
-              <div className="flex flex-col" style={{ gap: `${sectionGap}px` }}>
-                {theme.sidebarMode === "contact-only" ? (
-                  <ResumeSidebarContactCard data={data} theme={theme} compactMode={compactMode} />
-                ) : (
-                  <>
-                    {sidebarIntro}
-                    {renderSections({
-                      keys: fresherResume ? fresherSidebarKeys : experiencedSidebarKeys,
-                      sections,
-                      summaryTitle,
-                      theme,
-                      compactMode,
-                      sidebar: true,
-                    })}
-                  </>
-                )}
+              <div className="flex flex-col" style={{ gap: "22px" }}>
+                <ResumeSidebarIdentity data={data} theme={theme} />
+                {renderSections({
+                  keys: fresherResume ? fresherSidebarKeys : experiencedSidebarKeys,
+                  sections,
+                  summaryTitle,
+                  theme,
+                  compactMode,
+                  sidebar: true,
+                })}
               </div>
             </ResumeSidebar>
           }
           main={
             <div style={mainStyle}>
               <div className="flex flex-col" style={{ gap: `${sectionGap}px` }}>
-                {theme.summaryInHeader ? null : (
-                  <ResumeHeader data={data} theme={theme} compactMode={compactMode} densityMode={densityMode} />
-                )}
                 {renderSections({
                   keys: fresherResume ? fresherMainKeys : experiencedMainKeys,
                   sections,
