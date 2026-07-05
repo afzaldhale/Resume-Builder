@@ -286,7 +286,7 @@ const ResumeSidebarContactCard = ({
         style={{
           color: theme.palette.sidebarText || theme.palette.text,
           marginBottom: "8px",
-          fontSize: compactMode ? "17px" : "19px",
+          fontSize: `var(--resume-heading-size)`,
           letterSpacing: "0.14em",
         }}
       >
@@ -306,7 +306,7 @@ const ResumeSidebarContactCard = ({
             <div className="space-y-0">
               <p
                 style={{
-                  fontSize: compactMode ? "12px" : "13px",
+                  fontSize: "var(--resume-contact-size)",
                   lineHeight: "var(--resume-line-height)",
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
@@ -317,7 +317,7 @@ const ResumeSidebarContactCard = ({
               </p>
               <p
                 style={{
-                  fontSize: compactMode ? "13px" : "14.5px",
+                  fontSize: "var(--resume-contact-size)",
                   lineHeight: "1.45",
                   color: theme.palette.sidebarText || theme.palette.text,
                   wordBreak: "break-word",
@@ -738,7 +738,7 @@ const ResumeContactRow = ({
           className="resume-contact-item"
           style={{
             color,
-            fontSize: "var(--resume-item-meta-size)",
+            fontSize: "var(--resume-contact-size)",
             lineHeight: "var(--resume-line-height)",
           }}
         >
@@ -1210,10 +1210,10 @@ const template6Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
   const roleSize = roleBase * densityScale;
   const headingSize = Math.max(16, Math.min(18, headingBase * densityScale + 1.5));
   const bodySize = Math.max(10.8, Math.min(12.2, bodyBase * densityScale));
-  const titleSize = Math.max(13, Math.min(14, bodyBase * densityScale + 2));
-  const subtitleSize = Math.max(11, Math.min(12, bodyBase * densityScale));
-  const metaSize = Math.max(11, Math.min(12, smallBase * densityScale * 1.08));
-  const listSize = Math.max(11, Math.min(12.2, bodyBase * densityScale));
+  const titleSize = Math.max(ResumeTypography.title, Math.min(ResumeTypography.title, ResumeTypography.title * typScale * densityScale));
+  const subtitleSize = Math.max(ResumeTypography.subtitle, Math.min(ResumeTypography.subtitle, ResumeTypography.subtitle * typScale * densityScale));
+  const metaSize = Math.max(ResumeTypography.meta, Math.min(ResumeTypography.contact, ResumeTypography.meta * typScale * densityScale * 1.08));
+  const listSize = Math.max(ResumeTypography.list, Math.min(ResumeTypography.list, ResumeTypography.list * typScale * densityScale));
 
   return (
     <ResumePage
@@ -1234,6 +1234,7 @@ const template6Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           "--resume-item-subtitle-size": `${subtitleSize.toFixed(2)}px`,
           "--resume-item-meta-size": `${metaSize.toFixed(2)}px`,
           "--resume-list-size": `${listSize.toFixed(2)}px`,
+          "--resume-contact-size": `${(ResumeTypography.contact * typScale * densityScale).toFixed(2)}px`,
           "--resume-name-size": `${Math.round(nameSize * 100) / 100}px`,
           "--resume-role-size": `${Math.round(roleSize * 100) / 100}px`,
           "--resume-line-height": `${lineHeight}`,

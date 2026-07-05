@@ -246,7 +246,7 @@ const Template1Header = ({
           <h1
             style={{
               margin: 0,
-              fontSize: "28px",
+              fontSize: `${ResumeTypography.name}px`,
               fontWeight: 800,
               letterSpacing: "0.5px",
               textTransform: "uppercase",
@@ -260,7 +260,7 @@ const Template1Header = ({
             <p
               style={{
                 margin: "2px 0 0",
-                fontSize: "22px",
+                fontSize: `${ResumeTypography.role}px`,
                 fontWeight: 300,
                 letterSpacing: "0.5px",
                 textTransform: "uppercase",
@@ -275,7 +275,7 @@ const Template1Header = ({
             <p
               style={{
                 margin: 0,
-                fontSize: "22px",
+                fontSize: `${ResumeTypography.role}px`,
                 fontWeight: 300,
                 letterSpacing: "0.5px",
                 textTransform: "uppercase",
@@ -309,7 +309,7 @@ const Template1Header = ({
               >
                 <span
                   style={{
-                    fontSize: "13px",
+                    fontSize: `${ResumeTypography.contact}px`,
                     fontWeight: 700,
                     color: theme.palette.mutedText,
                     textAlign: "left",
@@ -323,7 +323,7 @@ const Template1Header = ({
                 </span>
                 <span
                   style={{
-                    fontSize: "13px",
+                    fontSize: `${ResumeTypography.contact}px`,
                     fontWeight: 500,
                     color: theme.palette.mutedText,
                     lineHeight: 1.35,
@@ -333,7 +333,7 @@ const Template1Header = ({
                 </span>
                 <span
                   style={{
-                    fontSize: "13px",
+                    fontSize: `${ResumeTypography.contact}px`,
                     fontWeight: 500,
                     color: theme.palette.mutedText,
                     lineHeight: 1.35,
@@ -377,7 +377,7 @@ const Template1Section = ({
         padding: "6px 10px",
         background: theme.palette.accent,
         color: theme.palette.headingText || theme.palette.accentText,
-        fontSize: "11pt",
+        fontSize: `${ResumeTypography.heading}px`,
         fontWeight: 700,
         textTransform: "uppercase",
         letterSpacing: "0.75pt",
@@ -743,13 +743,13 @@ export const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) =>
   const roleSize = roleBase * densityScale;
   const headingSize = headingBase * densityScale;
   const bodySize = Math.max(10.5, bodyBase * densityScale);
-  const titleSize = Math.max(11, (ResumeTypography.role || 15) * typScale * densityScale);
+  const titleSize = Math.max(ResumeTypography.title, ResumeTypography.title * typScale * densityScale);
   const subtitleSize = Math.max(
-    10.2,
-    (ResumeTypography.body || 12) * typScale * densityScale
+    ResumeTypography.subtitle,
+    ResumeTypography.subtitle * typScale * densityScale
   );
-  const metaSize = Math.max(10.5, smallBase * densityScale);
-  const listSize = Math.max(10, (ResumeTypography.body || 12) * typScale * densityScale);
+  const metaSize = Math.max(ResumeTypography.meta, ResumeTypography.meta * typScale * densityScale);
+  const listSize = Math.max(ResumeTypography.list, ResumeTypography.list * typScale * densityScale);
 
   return (
     <ResumePage

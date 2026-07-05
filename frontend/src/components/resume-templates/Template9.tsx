@@ -1,4 +1,5 @@
 import React, { type CSSProperties, type ReactNode } from "react";
+import { ResumeTypography } from "@/constants/resumeDesignSystem";
 import { getCompactMode, getDensityMode, getSummaryConfig } from "./templatePolicy";
 import {
   formatMonthYear,
@@ -194,7 +195,7 @@ const ResumeSidebarSection = ({
         style={{
           margin: 0,
           color: theme.palette.accent,
-          fontSize: "13px",
+          fontSize: `${ResumeTypography.heading}px`,
           letterSpacing: "0.16em",
         }}
       >
@@ -267,7 +268,7 @@ const ResumeSidebarIdentity = ({
           style={{
             margin: 0,
             color: theme.palette.sidebarText || theme.palette.text,
-            fontSize: "30px",
+            fontSize: `${ResumeTypography.name}px`,
             lineHeight: "1.04",
             fontWeight: 800,
             letterSpacing: "0.03em",
@@ -281,7 +282,7 @@ const ResumeSidebarIdentity = ({
             style={{
               margin: 0,
               color: theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText,
-              fontSize: "13.5px",
+              fontSize: `${ResumeTypography.role}px`,
               lineHeight: "1.45",
               fontWeight: 600,
               letterSpacing: "0.12em",
@@ -302,7 +303,7 @@ const ResumeSidebarIdentity = ({
                   style={{
                     margin: 0,
                     color: theme.palette.accent,
-                    fontSize: "10.5px",
+                    fontSize: `${ResumeTypography.meta}px`,
                     lineHeight: "1.3",
                     fontWeight: 700,
                     letterSpacing: "0.14em",
@@ -316,7 +317,7 @@ const ResumeSidebarIdentity = ({
                   style={{
                     margin: 0,
                     color: theme.palette.sidebarText || theme.palette.text,
-                    fontSize: "12px",
+                    fontSize: `${ResumeTypography.contact}px`,
                     lineHeight: "1.55",
                   }}
                 >
@@ -917,7 +918,7 @@ const ResumeContactRow = ({
           className="resume-contact-item"
           style={{
             color,
-            fontSize: "var(--resume-item-meta-size)",
+            fontSize: "var(--resume-contact-size)",
             lineHeight: "var(--resume-line-height)",
           }}
         >
@@ -1364,21 +1365,23 @@ const template9Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
 
   const typScale = theme.typographyScale || 1;
 
-  const nameBase = 34 * typScale;
-  const roleBase = 14 * typScale;
-  const headingBase = 14 * typScale;
-  const bodyBase = 12.2 * typScale;
-  const smallBase = 10.5 * typScale;
-  const lineHeight = 1.68;
+  const nameBase = ResumeTypography.name * typScale;
+  const roleBase = ResumeTypography.role * typScale;
+  const headingBase = ResumeTypography.heading * typScale;
+  const bodyBase = ResumeTypography.body * typScale;
+  const lineHeight = ResumeTypography.lineHeight || 1.4;
 
   const nameSize = nameBase * densityScale;
   const roleSize = roleBase * densityScale;
   const headingSize = headingBase * densityScale;
   const bodySize = Math.max(12, bodyBase * densityScale);
-  const titleSize = Math.max(12.5, 13 * typScale * densityScale);
-  const subtitleSize = Math.max(11.25, 11.8 * typScale * densityScale);
-  const metaSize = Math.max(10.5, smallBase * densityScale);
-  const listSize = Math.max(11.5, 11.75 * typScale * densityScale);
+  const titleSize = Math.max(ResumeTypography.title, ResumeTypography.title * typScale * densityScale);
+  const subtitleSize = Math.max(
+    ResumeTypography.subtitle,
+    ResumeTypography.subtitle * typScale * densityScale
+  );
+  const metaSize = Math.max(ResumeTypography.meta, ResumeTypography.meta * typScale * densityScale);
+  const listSize = Math.max(ResumeTypography.list, ResumeTypography.list * typScale * densityScale);
 
   return (
     <ResumePage
@@ -1402,6 +1405,7 @@ const template9Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           "--resume-item-subtitle-size": `${subtitleSize.toFixed(2)}px`,
           "--resume-item-meta-size": `${metaSize.toFixed(2)}px`,
           "--resume-list-size": `${listSize.toFixed(2)}px`,
+          "--resume-contact-size": `${(ResumeTypography.contact * typScale * densityScale).toFixed(2)}px`,
           "--resume-name-size": `${Math.round(nameSize * 100) / 100}px`,
           "--resume-role-size": `${Math.round(roleSize * 100) / 100}px`,
           "--resume-line-height": `${lineHeight}`,

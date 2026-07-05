@@ -957,21 +957,33 @@ const ResumeBuilder = () => {
         </span>
       </div>
 
-      <div className="resume-preview-container min-h-[760px] rounded-2xl border">
+      <div
+        className={`resume-preview-container min-h-[760px] rounded-2xl border ${
+          deferredSelectedTemplate === 2 ? "resume-preview-container-template2" : ""
+        }`.trim()}
+      >
         {formData.fullName ? (
           <div
-            className="resume-preview-outer"
-            style={{
-              ["--preview-scale" as string]: PREVIEW_SCALE,
-            }}
+            className={`resume-preview-outer ${
+              deferredSelectedTemplate === 2 ? "resume-preview-outer-template2" : ""
+            }`.trim()}
+            style={
+              deferredSelectedTemplate === 2
+                ? undefined
+                : {
+                    ["--preview-scale" as string]: PREVIEW_SCALE,
+                  }
+            }
           >
             <div
-              className="resume-preview-inner"
+              className={`resume-preview-inner ${
+                deferredSelectedTemplate === 2 ? "resume-preview-inner-template2" : ""
+              }`.trim()}
             >
               <ResumeDocument
                 templateId={deferredSelectedTemplate}
                 data={deferredTemplateData}
-                renderMode="editor-preview"
+                renderMode={deferredSelectedTemplate === 2 ? "pdf" : "editor-preview"}
               />
             </div>
           </div>

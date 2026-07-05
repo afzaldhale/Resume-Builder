@@ -12,7 +12,6 @@ import {
 } from "./resumeSections";
 import type { ResumeData } from "./types";
 import { ResumeSection } from "@/components/resume/ResumeSection";
-import { ResumeTypography } from "@/constants/resumeDesignSystem";
 import { resolveTemplateTheme } from "./themeConfig";
 
 type HeadingStyle = "bar" | "underline" | "accent";
@@ -198,6 +197,7 @@ const ResumeSidebarContactCard = ({
   compactMode?: boolean;
 }) => {
   const items = getContactItems(data);
+  void compactMode;
 
   if (items.length === 0) return null;
 
@@ -567,16 +567,16 @@ const ResumeContactRow = ({
   items,
   align = "left",
   color,
-  compactMode: _compactMode = false,
+  compactMode = false,
   densityMode = "comfortable",
 }: {
   items: ContactItem[];
   align?: "left" | "right";
   color: string;
-  _compactMode?: boolean;
+  compactMode?: boolean;
   densityMode?: "comfortable" | "compact" | "ultra-compact";
 }) => {
-  void _compactMode;
+  void compactMode;
 
   const gapX = densityMode === "ultra-compact" ? 10 : densityMode === "compact" ? 12 : 14;
   const gapY = densityMode === "ultra-compact" ? 4 : densityMode === "compact" ? 6 : 8;
@@ -811,7 +811,7 @@ const renderSections = ({
   sections,
   summaryTitle,
   theme,
-  compactMode = false,
+  compactMode,
   sidebar = false,
 }: {
   keys: SectionKey[];
@@ -945,27 +945,6 @@ const template14Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
   const experiencedSidebarKeys = theme.sidebarSections || DEFAULT_EXPERIENCED_SIDEBAR;
   const experiencedMainKeys = theme.mainSections || DEFAULT_EXPERIENCED_MAIN;
 
-  const densityScale =
-    densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.95 : 0.92;
-
-  const typScale = theme.typographyScale || 1;
-
-  const nameBase = ResumeTypography.name * typScale;
-  const roleBase = ResumeTypography.role * typScale;
-  const headingBase = ResumeTypography.heading * typScale;
-  const bodyBase = ResumeTypography.body * typScale;
-  const smallBase = ResumeTypography.small * typScale;
-  const lineHeight = ResumeTypography.lineHeight || 1.4;
-
-  const nameSize = nameBase * densityScale;
-  const roleSize = roleBase * densityScale;
-  const headingSize = headingBase * densityScale;
-  const bodySize = Math.max(10.5, bodyBase * densityScale);
-  const titleSize = Math.max(11, (ResumeTypography.role || 15) * typScale * densityScale);
-  const subtitleSize = Math.max(10.2, (ResumeTypography.body || 12) * typScale * densityScale);
-  const metaSize = Math.max(10.5, smallBase * densityScale);
-  const listSize = Math.max(10, (ResumeTypography.body || 12) * typScale * densityScale);
-
   return (
     <ResumePage
       theme={theme}
@@ -979,20 +958,20 @@ const template14Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           "--resume-accent": theme.palette.accent,
           "--resume-accent-soft": theme.palette.accentSoft,
           "--resume-accent-text": theme.palette.accentText,
-          "--resume-heading-size": `${headingSize.toFixed(2)}px`,
-          "--resume-body-size": `${bodySize.toFixed(2)}px`,
-          "--resume-item-title-size": `${titleSize.toFixed(2)}px`,
-          "--resume-item-subtitle-size": `${subtitleSize.toFixed(2)}px`,
-          "--resume-item-meta-size": `${metaSize.toFixed(2)}px`,
-          "--resume-list-size": `${listSize.toFixed(2)}px`,
-          "--resume-name-size": `${Math.round(nameSize * 100) / 100}px`,
-          "--resume-role-size": `${Math.round(roleSize * 100) / 100}px`,
-          "--resume-line-height": `${lineHeight}`,
+          "--resume-heading-size": "16px",
+          "--resume-body-size": "11px",
+          "--resume-item-title-size": "13px",
+          "--resume-item-subtitle-size": "11px",
+          "--resume-item-meta-size": "10px",
+          "--resume-list-size": "11px",
+          "--resume-name-size": "32px",
+          "--resume-role-size": "13px",
+          "--resume-line-height": "1.5",
           "--resume-summary-box-padding": compactMode || densityMode !== "comfortable" ? "8px 10px" : "10px 12px",
           "--resume-list-indent": densityMode === "comfortable" ? "18px" : "16px",
           "--resume-contact-separator-gap": densityMode === "comfortable" ? "8px" : "6px",
           "--resume-section-vertical-gap": densityMode === "comfortable" && compactLevel === 0 ? "8px" : densityMode === "compact" ? "7px" : "6px",
-          "--resume-font-family": theme.fontFamily || "Inter, Arial, Helvetica, sans-serif",
+            "--resume-font-family": theme.fontFamily || "Inter, Arial, Helvetica, sans-serif",
         } as CSSProperties),
       }}
       data-density-mode={densityMode}

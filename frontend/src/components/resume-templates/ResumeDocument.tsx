@@ -14,7 +14,7 @@ const TEMPLATE_PRINTABLE_WIDTH_PX = A4_WIDTH_PX - TEMPLATE_PDF_MARGIN_PX * 2;
 const TEMPLATE_PRINTABLE_HEIGHT_PX = A4_HEIGHT_PX - TEMPLATE_PDF_MARGIN_PX * 2;
 const TEMPLATE1_CONTINUATION_TOP_OFFSET_PX = 40;
 const TEMPLATE2_CONTINUATION_TOP_OFFSET_PX = 0;
-const TEMPLATE_WITH_CUSTOM_PDF_MARGIN = new Set([2]);
+const TEMPLATE_WITH_CUSTOM_PDF_MARGIN = new Set<number>();
 
 const ResumeDocumentStyles = ({
   useTemplatePdfMargins,
@@ -363,12 +363,9 @@ const ResumeDocumentComponent = ({
         safeTemplateId === 1 && template1BodyTemplate
           ? (template1BodyTemplate.cloneNode(false) as HTMLElement)
           : (contentWrapper.cloneNode(false) as HTMLElement);
-      const templateStyleNodes =
-        safeTemplateId === 3
-          ? Array.from(pageRoot.children).filter(
-              (child) => child.nodeType === Node.ELEMENT_NODE && child.nodeName === "STYLE"
-            )
-          : [];
+      const templateStyleNodes = Array.from(pageRoot.children).filter(
+        (child) => child.nodeType === Node.ELEMENT_NODE && child.nodeName === "STYLE"
+      );
 
       pageParent.innerHTML = "";
 
@@ -1905,6 +1902,9 @@ const ResumeDocumentComponent = ({
 
       const makePage = () => {
         const page = pageTemplate.cloneNode(false) as HTMLElement;
+        templateStyleNodes.forEach((styleNode) => {
+          page.appendChild(styleNode.cloneNode(true));
+        });
         pageParent.appendChild(page);
         pages.push(page);
         return page;

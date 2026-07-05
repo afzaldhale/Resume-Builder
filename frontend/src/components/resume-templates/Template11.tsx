@@ -2,17 +2,13 @@ import React, { type CSSProperties, type ReactNode } from "react";
 import { getCompactMode, getDensityMode, getSummaryConfig } from "./templatePolicy";
 import {
   formatMonthYear,
-  getResumeSectionOrder,
-  hasSectionData,
-  isFresherResume,
   sortCertificationsReverseChronological,
   sortEducationReverseChronological,
   sortExperienceReverseChronological,
   type ResumeSectionKey,
 } from "./resumeSections";
 import type { ResumeData } from "./types";
-import { ResumeSection } from "@/components/resume/ResumeSection";
-import { ResumeTypography } from "@/constants/resumeDesignSystem";
+// Template11 uses inline structure; shared `ResumeSection` and `ResumeTypography` are not required here.
 import { resolveTemplateTheme } from "./themeConfig";
 
 type HeadingStyle = "bar" | "underline" | "accent";
@@ -83,41 +79,7 @@ interface Template11Props {
   data: ResumeData;
 }
 
-const DEFAULT_SINGLE_ORDER: SectionKey[] = [
-  "summary",
-  "skills",
-  "experience",
-  "education",
-  "certifications",
-  "projects",
-  "achievements",
-  "languages",
-  "strengths",
-  "hobbies",
-  "references",
-  "custom",
-];
-
-const DEFAULT_EXPERIENCED_SIDEBAR: SectionKey[] = [
-  "skills",
-  "certifications",
-  "languages",
-  "strengths",
-  "hobbies",
-];
-
-const DEFAULT_EXPERIENCED_MAIN: SectionKey[] = [
-  "summary",
-  "experience",
-  "education",
-  "projects",
-  "achievements",
-  "references",
-  "custom",
-];
-
-const DEFAULT_FRESHER_SIDEBAR: SectionKey[] = ["languages", "strengths", "hobbies"];
-const DEFAULT_FRESHER_MAIN: SectionKey[] = ["summary", "skills", "experience", "education", "certifications"];
+// Template11: local ordering and defaults are handled by shared helpers when needed.
 
 const hasText = (value?: string | null) => Boolean(value && value.trim());
 
@@ -157,112 +119,9 @@ const getContactItems = (data: ResumeData): ContactItem[] => {
   return items;
 };
 
-const getSectionLabel = (key: SectionKey, summaryTitle: string) => {
-  switch (key) {
-    case "summary":
-      return summaryTitle;
-    case "skills":
-      return "Skills";
-    case "experience":
-      return "Work Experience";
-    case "education":
-      return "Education";
-    case "projects":
-      return "Projects";
-    case "certifications":
-      return "Certifications";
-    case "achievements":
-      return "Achievements";
-    case "languages":
-      return "Languages";
-    case "strengths":
-      return "Strengths";
-    case "hobbies":
-      return "Hobbies / Interests";
-    case "references":
-      return "References";
-    case "custom":
-      return "Additional Information";
-    default:
-      return "";
-  }
-};
+// Section labels implemented inline in Template11 where needed.
 
-const ResumeSidebarContactCard = ({
-  data,
-  theme,
-  compactMode = false,
-}: {
-  data: ResumeData;
-  theme: ResumeTemplateTheme;
-  compactMode?: boolean;
-}) => {
-  const items = getContactItems(data);
-
-  if (items.length === 0) return null;
-
-  return (
-    <section className="break-inside-avoid">
-      <h2
-        className="resume-heading"
-        style={{
-          color: theme.palette.sidebarText || theme.palette.text,
-          marginBottom: "8px",
-        }}
-      >
-        {theme.sidebarHeading || "Contact"}
-      </h2>
-      <div
-        style={{
-          width: "100%",
-          height: "1px",
-          background: theme.palette.divider || theme.palette.sidebarBorder || "rgba(255,255,255,0.28)",
-          marginBottom: "8px",
-        }}
-      />
-      <div className="space-y-3">
-        {items.map((item, index) => (
-          <div key={`${item.label}-${item.value}-${index}`} className="flex items-start gap-3">
-            <span
-              aria-hidden="true"
-              style={{
-                color: theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText,
-                fontSize: "1rem",
-                lineHeight: "1.2",
-                minWidth: "20px",
-              }}
-            >
-              {item.label === "Phone" ? "☎" : item.label === "Email" ? "✉" : item.label === "Location" ? "📍" : "🔗"}
-            </span>
-            <div className="space-y-0">
-              <p
-                style={{
-                  fontSize: "var(--resume-item-meta-size)",
-                  lineHeight: "var(--resume-line-height)",
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  color: theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText,
-                }}
-              >
-                {item.label}
-              </p>
-              <p
-                style={{
-                  fontSize: "var(--resume-body-size)",
-                  lineHeight: "var(--resume-line-height)",
-                  color: theme.palette.sidebarText || theme.palette.text,
-                  wordBreak: "break-word",
-                }}
-              >
-                {item.value}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-};
+// Sidebar contact card is replaced by template-local markup below.
 
 const buildSectionMap = (data: ResumeData) => {
   const { summaryText, summaryTitle } = getSummaryConfig(data);
@@ -563,151 +422,11 @@ const ResumePageStyles = () => (
   `}</style>
 );
 
-const ResumeContactRow = ({
-  items,
-  align = "left",
-  color,
-  compactMode: _compactMode = false,
-  densityMode = "comfortable",
-}: {
-  items: ContactItem[];
-  align?: "left" | "right";
-  color: string;
-  _compactMode?: boolean;
-  densityMode?: "comfortable" | "compact" | "ultra-compact";
-}) => {
-  void _compactMode;
+// A lightweight contact row helper is not required for Template11.
 
-  const gapX = densityMode === "ultra-compact" ? 10 : densityMode === "compact" ? 12 : 14;
-  const gapY = densityMode === "ultra-compact" ? 4 : densityMode === "compact" ? 6 : 8;
+// Header is implemented inline for Template11 below.
 
-  return (
-    <div
-      className="flex flex-wrap"
-      style={{
-        justifyContent: align === "right" ? "flex-end" : "flex-start",
-        maxWidth: align === "right" ? "390px" : "100%",
-        gap: `${gapY}px ${gapX}px`,
-      }}
-    >
-      {items.map((item, index) => (
-        <span
-          key={`${item.label}-${item.value}-${index}`}
-          className="resume-contact-item"
-          style={{
-            color,
-            fontSize: "var(--resume-item-meta-size)",
-            lineHeight: "var(--resume-line-height)",
-          }}
-        >
-          {item.value}
-        </span>
-      ))}
-    </div>
-  );
-};
-
-const ResumeHeader = ({
-  data,
-  theme,
-  compactMode = false,
-  densityMode = "comfortable",
-}: {
-  data: ResumeData;
-  theme: ResumeTemplateTheme;
-  compactMode?: boolean;
-  densityMode?: "comfortable" | "compact" | "ultra-compact";
-}) => {
-  const { summaryText } = getSummaryConfig(data);
-  const contactItems = getContactItems(data);
-
-  const titleSize = "var(--resume-name-size)";
-  const roleSize = "var(--resume-role-size)";
-
-  return (
-    <header
-      className="break-inside-avoid"
-      style={{
-        background: theme.headerBand ? theme.palette.headerBg || theme.palette.page : "transparent",
-        borderBottom: theme.headerDivider ? `1px solid ${theme.palette.border}` : "none",
-        paddingBottom: theme.headerDivider ? "16px" : "0",
-      }}
-    >
-      <div
-        className={theme.headerLayout === "split" ? "flex items-end justify-between gap-8" : "space-y-2.5"}
-      >
-        <div className="min-w-0">
-          <h1
-            className="font-bold tracking-[0.02em] uppercase"
-            style={{
-              fontSize: titleSize,
-              lineHeight: "var(--resume-line-height)",
-              color: theme.palette.nameText || theme.palette.text,
-            }}
-          >
-            {data.fullName}
-          </h1>
-          {hasText(data.role) ? (
-            <p
-              className="mt-2 font-medium uppercase"
-              style={{
-                fontSize: roleSize,
-                lineHeight: "var(--resume-line-height)",
-                color: theme.palette.titleText || theme.palette.mutedText,
-                letterSpacing: "0.08em",
-              }}
-            >
-              {data.role}
-            </p>
-          ) : null}
-        </div>
-
-        {theme.showHeaderContact !== false && contactItems.length > 0 ? (
-          <ResumeContactRow
-            items={contactItems}
-            align={theme.headerLayout === "split" ? "right" : "left"}
-            color={theme.palette.mutedText}
-            compactMode={compactMode}
-            densityMode={densityMode}
-          />
-        ) : null}
-      </div>
-
-      {theme.summaryInHeader && hasText(summaryText) ? (
-        <div className="mt-4">
-          {theme.summaryStyle === "plain" ? (
-            <p className="resume-body-copy">{summaryText}</p>
-          ) : (
-            <div className="resume-summary-box">
-              <p className="resume-body-copy">{summaryText}</p>
-            </div>
-          )}
-        </div>
-      ) : null}
-    </header>
-  );
-};
-
-const ResumeSidebar = ({
-  children,
-  theme,
-  compactMode = false,
-}: {
-  children: ReactNode;
-  theme: ResumeTemplateTheme;
-  compactMode?: boolean;
-}) => (
-  <aside
-    className="self-stretch"
-    style={{
-      background: theme.palette.sidebarBg || theme.palette.accentSoft,
-      color: theme.palette.sidebarText || theme.palette.text,
-      padding: scalePxString(theme.sidebarPadding || "28px 22px", compactMode ? 0.82 : 1),
-    }}
-  >
-    {children}
-  </aside>
-);
+// Sidebar element is rendered directly in the template.
 
 const ResumeAccentStrip = ({
   theme,
@@ -782,66 +501,38 @@ const ResumeMetaBlock = ({
   </div>
 );
 
-const ResumeTwoColumnLayout = ({
-  sidebar,
-  main,
+const Template11Section = ({
+  title,
   theme,
+  children,
 }: {
-  sidebar: ReactNode;
-  main: ReactNode;
+  title: string;
   theme: ResumeTemplateTheme;
-}) => {
-  const sidebarWidth = theme.sidebarWidth || "30%";
-  const mainWidth = `calc(100% - ${sidebarWidth})`;
+  children: ReactNode;
+}) => (
+  <section className="break-inside-avoid template11-section">
+    <h3
+      style={{
+        fontSize: "var(--resume-heading-size)",
+        fontWeight: 700,
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+        margin: "0 0 8px",
+        color: theme.palette.text,
+      }}
+    >
+      {title}
+    </h3>
+    <div>{children}</div>
+  </section>
+);
 
-  return (
-    <div className="resume-two-column-layout flex h-full items-stretch">
-      <div className="resume-sidebar" style={{ width: sidebarWidth, flex: `0 0 ${sidebarWidth}` }}>
-        {sidebar}
-      </div>
-      <main className="resume-main" style={{ width: mainWidth }}>
-        {main}
-      </main>
-    </div>
-  );
-};
+// Two-column layout helper is not used by Template11 (custom markup below).
 
-const renderSections = ({
-  keys,
-  sections,
-  summaryTitle,
-  theme,
-  compactMode = false,
-  sidebar = false,
-}: {
-  keys: SectionKey[];
-  sections: Record<SectionKey, ReactNode>;
-  summaryTitle: string;
-  theme: ResumeTemplateTheme;
-  compactMode?: boolean;
-  sidebar?: boolean;
-}) =>
-  keys.map((key) => {
-    const content = sections[key];
-    if (!content) return null;
-
-    return (
-      <ResumeSection
-        key={`${sidebar ? "sidebar" : "main"}-${key}`}
-        title={getSectionLabel(key, summaryTitle)}
-        theme={theme}
-        sidebar={sidebar}
-        compactMode={compactMode}
-        summaryTitle={summaryTitle}
-      >
-        {content}
-      </ResumeSection>
-    );
-  });
+// Section rendering uses template-local components, not the shared renderer.
 
 const template11Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
   const { sections, summaryTitle } = buildSectionMap(data);
-  const fresherResume = isFresherResume(data);
   const compactMode = getCompactMode(data);
   const densityMode = getDensityMode(data);
   const compactLevel = data.compactLevel || 0;
@@ -880,91 +571,7 @@ const template11Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
         : "0",
   };
 
-  const mainStyle: CSSProperties = {
-    padding: scalePxString(
-      clampPadding(theme.mainPadding || theme.contentPadding || "36px 32px"),
-      densityFactor * baseSpacingFactor * compactSpacingFactor
-    ),
-  };
-
-  const sidebarIntro = (
-    <div className="break-inside-avoid space-y-2.5">
-      <h1
-        className="font-bold tracking-[0.02em] uppercase"
-        style={{
-          fontSize: "var(--resume-name-size)",
-          lineHeight: "var(--resume-line-height)",
-          color: theme.palette.sidebarText || theme.palette.text,
-        }}
-      >
-        {data.fullName}
-      </h1>
-      {hasText(data.role) ? (
-        <p
-          style={{
-            fontSize: "var(--resume-role-size)",
-            lineHeight: "var(--resume-line-height)",
-            color:
-              theme.palette.titleText ||
-              theme.palette.sidebarMutedText ||
-              theme.palette.sidebarText ||
-              theme.palette.mutedText,
-            letterSpacing: "0.07em",
-            textTransform: "uppercase",
-          }}
-        >
-          {data.role}
-        </p>
-      ) : null}
-      {getContactItems(data).length > 0 ? (
-        <ResumeContactRow
-          items={getContactItems(data)}
-          color={theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText}
-          compactMode={compactMode}
-          densityMode={densityMode}
-        />
-      ) : null}
-    </div>
-  );
-
-  const fresherSectionKeys = [
-    ...getResumeSectionOrder("fresher").filter((key): key is SectionKey => key !== "header"),
-    "projects" as SectionKey,
-    "achievements" as SectionKey,
-    "references" as SectionKey,
-    "custom" as SectionKey,
-  ].filter((key, index, items) => items.indexOf(key) === index && hasSectionData(key as ResumeSectionKey, data));
-
-  const fresherSidebarKeys = (theme.sidebarSections || DEFAULT_FRESHER_SIDEBAR).filter((key: SectionKey) =>
-    fresherSectionKeys.includes(key)
-  );
-  const fresherMainKeys = (theme.fresherMainSections || DEFAULT_FRESHER_MAIN).filter((key) =>
-    hasSectionData(key, data)
-  );
-
-  const experiencedSidebarKeys = theme.sidebarSections || DEFAULT_EXPERIENCED_SIDEBAR;
-  const experiencedMainKeys = theme.mainSections || DEFAULT_EXPERIENCED_MAIN;
-
-  const densityScale =
-    densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.95 : 0.92;
-
-  const typScale = theme.typographyScale || 1;
-
-  const nameBase = ResumeTypography.name * typScale;
-  const roleBase = ResumeTypography.role * typScale;
-  const headingBase = ResumeTypography.heading * typScale;
-  const bodyBase = ResumeTypography.body * typScale;
-  const smallBase = ResumeTypography.small * typScale;
-  const lineHeight = ResumeTypography.lineHeight || 1.4;
-
-  const nameSize = nameBase * densityScale;
-  const roleSize = roleBase * densityScale;
-  const headingSize = headingBase * densityScale;
-  const bodySize = Math.max(10.5, bodyBase * densityScale);
-  const titleSize = Math.max(11, (ResumeTypography.role || 15) * typScale * densityScale);
-  const subtitleSize = Math.max(10.2, (ResumeTypography.body || 12) * typScale * densityScale);
-  const metaSize = Math.max(10.5, smallBase * densityScale);
-  const listSize = Math.max(10, (ResumeTypography.body || 12) * typScale * densityScale);
+  // Keep layout spacing and padding calculations; rest is implemented inline below.
 
   return (
     <ResumePage
@@ -979,15 +586,14 @@ const template11Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           "--resume-accent": theme.palette.accent,
           "--resume-accent-soft": theme.palette.accentSoft,
           "--resume-accent-text": theme.palette.accentText,
-          "--resume-heading-size": `${headingSize.toFixed(2)}px`,
-          "--resume-body-size": `${bodySize.toFixed(2)}px`,
-          "--resume-item-title-size": `${titleSize.toFixed(2)}px`,
-          "--resume-item-subtitle-size": `${subtitleSize.toFixed(2)}px`,
-          "--resume-item-meta-size": `${metaSize.toFixed(2)}px`,
-          "--resume-list-size": `${listSize.toFixed(2)}px`,
-          "--resume-name-size": `${Math.round(nameSize * 100) / 100}px`,
-          "--resume-role-size": `${Math.round(roleSize * 100) / 100}px`,
-          "--resume-line-height": `${lineHeight}`,
+          /* Enforce Template 1 typography scale exactly */
+          "--resume-name-size": "32px",
+          "--resume-role-size": "13px",
+          "--resume-heading-size": "16px",
+          "--resume-body-size": "11px",
+          "--resume-item-meta-size": "10px",
+          "--resume-list-size": "11px",
+          "--resume-line-height": "1.5",
           "--resume-summary-box-padding": compactMode || densityMode !== "comfortable" ? "8px 10px" : "10px 12px",
           "--resume-list-indent": densityMode === "comfortable" ? "18px" : "16px",
           "--resume-contact-separator-gap": densityMode === "comfortable" ? "8px" : "6px",
@@ -1008,61 +614,180 @@ const template11Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
 
       {theme.leftAccentLine && theme.layout === "single" ? <ResumeAccentStrip theme={theme} /> : null}
 
-      {theme.layout === "single" ? (
-        <div className="flex h-full flex-col" style={{ gap: `${sectionGap}px` }}>
-          <ResumeHeader data={data} theme={theme} compactMode={compactMode} />
-          <div className="flex flex-col" style={{ gap: `${sectionGap}px` }}>
-            {renderSections({
-              keys: fresherResume ? fresherSectionKeys : theme.mainSections || DEFAULT_SINGLE_ORDER,
-              sections,
-              summaryTitle,
-              theme,
-              compactMode,
-            })}
-          </div>
-        </div>
-      ) : (
-        <ResumeTwoColumnLayout
-          theme={theme}
-          sidebar={
-            <ResumeSidebar theme={theme} compactMode={compactMode}>
-              <div className="flex flex-col" style={{ gap: `${sectionGap}px` }}>
-                {theme.sidebarMode === "contact-only" ? (
-                  <ResumeSidebarContactCard data={data} theme={theme} compactMode={compactMode} />
-                ) : (
-                  <>
-                    {sidebarIntro}
-                    {renderSections({
-                      keys: fresherResume ? fresherSidebarKeys : experiencedSidebarKeys,
-                      sections,
-                      summaryTitle,
-                      theme,
-                      compactMode,
-                      sidebar: true,
-                    })}
-                  </>
-                )}
-              </div>
-            </ResumeSidebar>
-          }
-          main={
-            <div style={mainStyle}>
-              <div className="flex flex-col" style={{ gap: `${sectionGap}px` }}>
-                {theme.summaryInHeader ? null : (
-                  <ResumeHeader data={data} theme={theme} compactMode={compactMode} densityMode={densityMode} />
-                )}
-                {renderSections({
-                  keys: fresherResume ? fresherMainKeys : experiencedMainKeys,
-                  sections,
-                  summaryTitle,
-                  theme,
-                  compactMode,
-                })}
-              </div>
+      {/* Two-column Word-style layout for Template 11 */}
+      <div
+        className="template11-document"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: `${sectionGap}px`,
+          maxWidth: "720px",
+          margin: "0 auto",
+          padding: "28px 48px 0",
+        }}
+      >
+        <header style={{ textAlign: "center", paddingBottom: "8px" }}>
+          <h1 style={{ margin: 0, fontSize: "var(--resume-name-size)", lineHeight: "1.05", fontWeight: 700, textTransform: "uppercase", color: theme.palette.nameText || theme.palette.text }}>
+            {data.fullName}
+          </h1>
+          {hasText(data.role) ? (
+            <p style={{ margin: "6px 0 0", fontSize: "var(--resume-role-size)", color: theme.palette.titleText || theme.palette.mutedText, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              {data.role}
+            </p>
+          ) : null}
+        </header>
+
+        <div style={{ display: "flex", gap: "28px", alignItems: "flex-start" }}>
+          <aside style={{ width: "31%", flex: `0 0 31%`, minWidth: 0 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: `${sectionGap}px` }}>
+              {/* Contact */}
+              {getContactItems(data).length > 0 ? (
+                <Template11Section title="Contact" theme={theme}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    {getContactItems(data).map((c, i) => (
+                      <div key={`${c.label}-${i}`}> 
+                        <p style={{ margin: 0, fontSize: "var(--resume-item-meta-size)", color: theme.palette.mutedText, textTransform: "uppercase", letterSpacing: "0.06em" }}>{c.label}</p>
+                        <p style={{ margin: "3px 0 0", fontSize: "var(--resume-body-size)", color: theme.palette.text }}>{c.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </Template11Section>
+              ) : null}
+
+              {/* Skills */}
+              {sections.skills ? (
+                <Template11Section title="Skills" theme={theme}>
+                  <ul style={{ margin: 0, paddingLeft: "18px", listStyle: "disc", listStylePosition: "outside" }}>
+                    {(data.skills || []).filter(Boolean).map((s, i) => (
+                      <li key={`${s}-${i}`} style={{ marginBottom: 6, fontSize: "var(--resume-body-size)" }}>{s}</li>
+                    ))}
+                  </ul>
+                </Template11Section>
+              ) : null}
+
+              {/* Interests (hobbies) */}
+              {sections.hobbies ? (
+                <Template11Section title="Interests" theme={theme}>
+                  <ul style={{ margin: 0, paddingLeft: "18px", listStyle: "disc", listStylePosition: "outside" }}>
+                    {(data.hobbies || []).filter(Boolean).map((h, i) => (
+                      <li key={`${h}-${i}`} style={{ marginBottom: 6, fontSize: "var(--resume-body-size)" }}>{h}</li>
+                    ))}
+                  </ul>
+                </Template11Section>
+              ) : null}
+
+              {/* Languages */}
+              {sections.languages ? (
+                <Template11Section title="Languages" theme={theme}>
+                  <ul style={{ margin: 0, paddingLeft: "18px", listStyle: "disc", listStylePosition: "outside" }}>
+                    {(data.languages || []).filter(Boolean).map((l, i) => (
+                      <li key={`${l.language}-${i}`} style={{ marginBottom: 6, fontSize: "var(--resume-body-size)" }}>{hasText(l.level) ? `${l.language} (${l.level})` : l.language}</li>
+                    ))}
+                  </ul>
+                </Template11Section>
+              ) : null}
+
+              {/* Additional Info */}
+              {sections.custom ? (
+                <Template11Section title="Additional Information" theme={theme}>
+                  <div>
+                    {(data.customSections || []).map((section, idx) => (
+                      <div key={`${section.title}-${idx}`} style={{ marginBottom: 8 }}>
+                        {hasText(section.title) ? <p style={{ margin: 0, fontWeight: 700 }}>{section.title}</p> : null}
+                        {hasText(section.description) ? <p style={{ margin: "4px 0 0", fontSize: "var(--resume-body-size)" }}>{section.description}</p> : null}
+                      </div>
+                    ))}
+                  </div>
+                </Template11Section>
+              ) : null}
             </div>
-          }
-        />
-      )}
+          </aside>
+
+          <div aria-hidden style={{ width: 1, background: theme.palette.divider || theme.palette.border, alignSelf: "stretch", margin: "0 12px" }} />
+
+          <main style={{ width: "69%", flex: "1 1 auto", minWidth: 0 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: `${sectionGap}px` }}>
+              {/* Summary */}
+              {sections.summary ? (
+                <Template11Section title={summaryTitle || "Summary"} theme={theme}>
+                  <p style={{ margin: 0, fontSize: "var(--resume-body-size)", lineHeight: parseFloat(String("1.5")) }}>{getSummaryConfig(data).summaryText}</p>
+                </Template11Section>
+              ) : null}
+
+              {/* Education moved to main per user request */}
+              {sections.education ? (
+                <Template11Section title="Education" theme={theme}>
+                  <div>
+                    {sortEducationReverseChronological(data.education || []).map((edu, i) => (
+                      <div key={`${edu.school}-${i}`} style={{ marginBottom: 10 }}>
+                        <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700 }}>{edu.degree}</p>
+                        <p style={{ margin: "3px 0 0", fontSize: "var(--resume-body-size)" }}>{edu.school}</p>
+                        <p style={{ margin: "3px 0 0", fontSize: "var(--resume-item-meta-size)", color: theme.palette.mutedText }}>{formatRange(edu.startYear, edu.endYear)}</p>
+                        {hasText(edu.gpa) ? <p style={{ margin: "4px 0 0", fontSize: "var(--resume-item-meta-size)", color: theme.palette.mutedText }}>GPA: {edu.gpa}</p> : null}
+                      </div>
+                    ))}
+                  </div>
+                </Template11Section>
+              ) : null}
+
+              {/* Work Experience */}
+              {sections.experience ? (
+                <Template11Section title="Work Experience" theme={theme}>
+                  <div>
+                    {sortExperienceReverseChronological(data.experience || []).map((item, idx) => (
+                      <div key={`${item.company}-${idx}`} style={{ marginBottom: 12 }}>
+                        <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700 }}>{item.role} — {item.company}</p>
+                        <p style={{ margin: "4px 0 0", fontSize: "var(--resume-item-meta-size)", color: theme.palette.mutedText }}>{formatRange(item.startDate, item.endDate)}</p>
+                        {hasText(item.description) ? (
+                          <div style={{ marginTop: 6 }}>
+                            {toBulletItems(item.description).length > 1 ? (
+                              <ul style={{ margin: 0, paddingLeft: 18, listStyle: "disc", listStylePosition: "outside" }}>
+                                {toBulletItems(item.description).map((b, bi) => (
+                                  <li key={`${bi}`} style={{ marginBottom: 6, fontSize: "var(--resume-body-size)" }}>{b}</li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p style={{ margin: 0, fontSize: "var(--resume-body-size)", lineHeight: 1.5 }}>{item.description}</p>
+                            )}
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </Template11Section>
+              ) : null}
+
+              {/* Projects */}
+              {sections.projects ? (
+                <Template11Section title="Projects" theme={theme}>
+                  <div>
+                    {(data.projects || []).map((project, i) => (
+                      <div key={`${project.name}-${i}`} style={{ marginBottom: 10 }}>
+                        <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700 }}>{project.name}</p>
+                        {hasText(project.description) ? <p style={{ margin: "4px 0 0", fontSize: "var(--resume-body-size)" }}>{project.description}</p> : null}
+                        {project.technologies && project.technologies.length > 0 ? (
+                          <p style={{ margin: "4px 0 0", fontSize: "var(--resume-item-meta-size)", color: theme.palette.mutedText }}>Technologies: {uniqueItems(project.technologies).join(", ")}</p>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </Template11Section>
+              ) : null}
+
+              {/* Certifications */}
+              {sections.certifications ? (
+                <Template11Section title="Certifications" theme={theme}>
+                  <ul style={{ margin: 0, paddingLeft: 18, listStyle: "disc", listStylePosition: "outside" }}>
+                    {sortCertificationsReverseChronological(data.certifications || []).map((c, i) => (
+                      <li key={`${c.name}-${i}`} style={{ marginBottom: 6, fontSize: "var(--resume-body-size)" }}>{c.name}{c.issuer ? ` — ${c.issuer}` : ""}{c.year ? `, ${formatMonthYear(c.year)}` : ""}</li>
+                    ))}
+                  </ul>
+                </Template11Section>
+              ) : null}
+            </div>
+          </main>
+        </div>
+      </div>
     </ResumePage>
   );
 };

@@ -130,7 +130,7 @@ const Template5Styles = ({
 
     .template5-name {
       margin: 0;
-      font-size: 27px;
+      font-size: ${ResumeTypography.name}px;
       line-height: 1.08;
       font-weight: 800;
       letter-spacing: -0.5px;
@@ -141,7 +141,7 @@ const Template5Styles = ({
 
     .template5-role {
       margin: 4px 0 0;
-      font-size: 14px;
+      font-size: ${ResumeTypography.role}px;
       line-height: 1.45;
       font-weight: 700;
       letter-spacing: 0.12em;
@@ -177,7 +177,7 @@ const Template5Styles = ({
 
     .template5-section-title {
       margin: 0 0 7px;
-      font-size: 11px;
+      font-size: ${ResumeTypography.heading}px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.18em;
@@ -201,7 +201,7 @@ const Template5Styles = ({
     }
 
     .template5-contact-label {
-      font-size: 10px;
+      font-size: ${ResumeTypography.meta}px;
       font-weight: 800;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -211,7 +211,7 @@ const Template5Styles = ({
     .template5-contact-value,
     .template5-body,
     .template5-item-text {
-      font-size: 10.9px;
+      font-size: ${ResumeTypography.contact}px;
       line-height: 1.45;
       color: ${theme.palette.text};
       overflow-wrap: anywhere;
@@ -228,7 +228,7 @@ const Template5Styles = ({
       align-items: center;
       padding: 4px 8px;
       border-radius: 999px;
-      font-size: 10.1px;
+      font-size: ${ResumeTypography.body}px;
       font-weight: 700;
       line-height: 1.15;
     }
@@ -250,7 +250,7 @@ const Template5Styles = ({
 
     .template5-item-title {
       margin: 0;
-      font-size: 12px;
+      font-size: ${ResumeTypography.title}px;
       line-height: 1.35;
       font-weight: 700;
       color: ${theme.palette.headingText || theme.palette.text};
@@ -258,7 +258,7 @@ const Template5Styles = ({
 
     .template5-item-sub {
       margin: 2px 0 0;
-      font-size: 10.7px;
+      font-size: ${ResumeTypography.subtitle}px;
       line-height: 1.35;
       font-weight: 600;
       color: ${theme.palette.mutedText};
@@ -269,7 +269,7 @@ const Template5Styles = ({
       flex-wrap: wrap;
       gap: 4px 10px;
       margin-top: 4px;
-      font-size: 10.4px;
+      font-size: ${ResumeTypography.meta}px;
       line-height: 1.35;
       color: ${theme.palette.mutedText};
     }
@@ -299,7 +299,7 @@ const Template5Styles = ({
     .template5-date {
       float: right;
       margin-left: 10px;
-      font-size: 10px;
+      font-size: ${ResumeTypography.meta}px;
       font-weight: 700;
       line-height: 1.35;
       color: ${theme.palette.mutedText};
@@ -313,7 +313,7 @@ const Template5Styles = ({
     }
 
     .template5-project-tech span {
-      font-size: 9.6px;
+      font-size: ${ResumeTypography.meta}px;
       font-weight: 700;
       line-height: 1.15;
       color: ${theme.palette.accent};
@@ -478,7 +478,7 @@ const template5Render = (data: ResumeData) => {
                           style={{
                             margin: "6px 0 0",
                             paddingLeft: "16px",
-                            fontSize: "10.9px",
+                            fontSize: `${ResumeTypography.list}px`,
                             lineHeight: 1.45,
                             color: theme.palette.text,
                           }}
@@ -525,7 +525,7 @@ const template5Render = (data: ResumeData) => {
                         style={{
                           margin: 0,
                           paddingLeft: "16px",
-                          fontSize: "10.9px",
+                          fontSize: `${ResumeTypography.list}px`,
                           lineHeight: 1.45,
                           color: theme.palette.text,
                         }}
@@ -597,7 +597,7 @@ const template5Render = (data: ResumeData) => {
                                 style={{
                                   margin: "6px 0 0",
                                   paddingLeft: "16px",
-                                  fontSize: "10.9px",
+                                  fontSize: `${ResumeTypography.list}px`,
                                   lineHeight: 1.45,
                                   color: theme.palette.text,
                                 }}

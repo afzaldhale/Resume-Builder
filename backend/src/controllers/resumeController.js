@@ -1,6 +1,58 @@
 import { db } from "../database.js";
 import { generateResumePDF } from "../services/pdfService.js";
+import { logger } from "../logger.js";
 import { validateResumePayload } from "../utils/resumeValidation.js";
+
+const nowMs = () => Number(process.hrtime.bigint()) / 1_000_000;
+
+const summarizeError = (error) => {
+  if (!error) return null;
+
+  return {
+    name: error.name,
+    message: error.message,
+    stack: error.stack,
+    code: error.code,
+  };
+};
+
+const getPrimaryStackFrame = (error) => {
+  const stack = error?.stack || "";
+  const frame = stack
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => line.startsWith("at ") && !line.includes("node:internal"));
+
+  if (!frame) {
+    return null;
+  }
+
+  const match =
+    frame.match(/^at\s+(.*?)\s+\((.*?):(\d+):(\d+)\)$/) ||
+    frame.match(/^at\s+(.*?):(\d+):(\d+)$/);
+
+  if (!match) {
+    return { raw: frame };
+  }
+
+  if (match.length === 5) {
+    return {
+      functionName: match[1],
+      file: match[2],
+      line: Number(match[3]),
+      column: Number(match[4]),
+      raw: frame,
+    };
+  }
+
+  return {
+    functionName: "(anonymous)",
+    file: match[1],
+    line: Number(match[2]),
+    column: Number(match[3]),
+    raw: frame,
+  };
+};
 
 /**
  * =====================================
@@ -404,7 +456,73 @@ export const getMyDownloadRequests = async (req, res) => {
  * =====================================
  */
 export const downloadResumePDF = async (req, res) => {
+  const diagId = `downloadResumePDF-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const startedAt = nowMs();
+  let currentStage = "downloadResumePDF:enter";
+  let requests;
+  let resumes;
+  let resumeData;
+  let pdfBuffer;
+
+  const getLocals = () => ({
+    resumeId: req.params?.id,
+    userId: req.user?.id,
+    requestCount: Array.isArray(requests) ? requests.length : null,
+    resumeCount: Array.isArray(resumes) ? resumes.length : null,
+    templateId: resumes?.[0]?.template_id ?? null,
+    pdfBytes: pdfBuffer?.length ?? null,
+  });
+
+  const log = (level, message, meta = {}) => {
+    logger[level](`[pdf-diag][${diagId}][downloadResumePDF] ${message}`, {
+      ...meta,
+      locals: getLocals(),
+    });
+  };
+
+  const runStage = async (stageName, stageLocals, action) => {
+    const stageStartedAt = nowMs();
+    currentStage = stageName;
+
+    log("info", "Entered stage", {
+      stage: stageName,
+      stageLocals,
+    });
+
+    try {
+      const result = await action();
+      log("info", "Completed stage", {
+        stage: stageName,
+        durationMs: Number((nowMs() - stageStartedAt).toFixed(2)),
+        stageLocals,
+      });
+      return result;
+    } catch (error) {
+      log("error", "Stage threw exception", {
+        stage: stageName,
+        durationMs: Number((nowMs() - stageStartedAt).toFixed(2)),
+        stageLocals,
+        error: summarizeError(error),
+        stackFrame: getPrimaryStackFrame(error),
+      });
+      throw error;
+    }
+  };
+
+  res.on("finish", () => {
+    log("info", "Completed stage", {
+      stage: "Response send",
+      durationMs: Number((nowMs() - startedAt).toFixed(2)),
+      statusCode: res.statusCode,
+      headersSent: res.headersSent,
+    });
+  });
+
   try {
+    log("info", "Entered pipeline", {
+      requestPath: req.originalUrl || `/api/resumes/${req.params?.id}/pdf`,
+      method: req.method || "GET",
+    });
     if (!req.user || !req.user.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -413,13 +531,21 @@ export const downloadResumePDF = async (req, res) => {
     const userId = req.user.id;
 
     // ✅ CHECK REQUEST STATUS
-    const [requests] = await db.query(
-      `
-      SELECT status
-      FROM download_requests
-      WHERE resume_id = ? AND user_id = ?
-      `,
-      [resumeId, userId]
+    [requests] = await runStage(
+      "Load download request status",
+      {
+        resumeId,
+        userId,
+      },
+      () =>
+        db.query(
+          `
+          SELECT status
+          FROM download_requests
+          WHERE resume_id = ? AND user_id = ?
+          `,
+          [resumeId, userId]
+        )
     );
 
     if (requests.length === 0) {
@@ -431,13 +557,21 @@ export const downloadResumePDF = async (req, res) => {
     }
 
     // ✅ FETCH RESUME
-    const [resumes] = await db.query(
-      `
-      SELECT resume_data, template_id
-      FROM resumes
-      WHERE id = ? AND user_id = ?
-      `,
-      [resumeId, userId]
+    [resumes] = await runStage(
+      "Load resume payload",
+      {
+        resumeId,
+        userId,
+      },
+      () =>
+        db.query(
+          `
+          SELECT resume_data, template_id
+          FROM resumes
+          WHERE id = ? AND user_id = ?
+          `,
+          [resumeId, userId]
+        )
     );
 
     if (resumes.length === 0) {
@@ -445,25 +579,58 @@ export const downloadResumePDF = async (req, res) => {
     }
 
     // 🔥 FIX: SAFE JSON HANDLING
-    const resumeData =
-      typeof resumes[0].resume_data === "string"
-        ? JSON.parse(resumes[0].resume_data)
-        : resumes[0].resume_data;
-
-    const pdfBuffer = await generateResumePDF(
-      resumeData,
-      resumes[0].template_id
+    resumeData = await runStage(
+      "Parse resume JSON",
+      {
+        resumeDataType: typeof resumes[0].resume_data,
+        templateId: resumes[0].template_id,
+      },
+      async () =>
+        typeof resumes[0].resume_data === "string"
+          ? JSON.parse(resumes[0].resume_data)
+          : resumes[0].resume_data
     );
 
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename=resume-${resumeId}.pdf`
+    pdfBuffer = await runStage(
+      "generateResumePDF()",
+      {
+        templateId: resumes[0].template_id,
+      },
+      () => generateResumePDF(resumeData, resumes[0].template_id)
     );
 
-    res.send(pdfBuffer);
+    await runStage("Response headers", { resumeId }, async () => {
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=resume-${resumeId}.pdf`
+      );
+    });
+
+    await runStage(
+      "Response send",
+      {
+        bufferBytes: pdfBuffer.length,
+      },
+      async () => {
+        res.send(pdfBuffer);
+      }
+    );
   } catch (error) {
     console.error("❌ PDF Download Error:", error);
+    log("error", "Pipeline threw", {
+      currentStage,
+      totalDurationMs: Number((nowMs() - startedAt).toFixed(2)),
+      error: summarizeError(error),
+      stackFrame: getPrimaryStackFrame(error),
+      responseStatusCode: res.statusCode,
+      headersSent: res.headersSent,
+      localVariables: {
+        requests,
+        resumes,
+        resumeDataType: resumeData ? typeof resumeData : null,
+      },
+    });
     res.status(500).json({ message: "PDF generation failed" });
   }
 };

@@ -1,7 +1,8 @@
 import React from "react";
-import type { ResumeData } from "./types";
-import { resolveTemplateTheme } from "./themeConfig";
+import { ResumeTypography } from "@/constants/resumeDesignSystem";
 import type { ResumeTemplateTheme } from "./templateThemeTypes";
+import { resolveTemplateTheme } from "./themeConfig";
+import type { ResumeData } from "./types";
 
 interface Template15Props {
   data: ResumeData;
@@ -9,29 +10,32 @@ interface Template15Props {
 
 const safeString = (value?: string | null) => (value || "").trim();
 const safeArray = <T,>(value?: T[] | null) => (Array.isArray(value) ? value.filter(Boolean) : []);
-
-const formatContactLine = (label: string, value?: string) =>
-  value ? `${label} ${value}` : "";
-
-const renderListItems = (items: string[]) =>
-  items.map((item, index) => <li key={`${item}-${index}`}>{item}</li>);
+const joinItems = (items: string[]) => items.filter(Boolean).join(", ");
 
 const renderSocialLinks = (links: Array<{ platform?: string; url?: string }>) =>
   safeArray(links).map((link, index) => {
     const label = link.platform?.trim() || "Website";
-    return (
-      <div key={`${label}-${index}`}>
-        {`🔗 ${label}: ${link.url || ""}`}
-      </div>
-    );
+    const value = safeString(link.url);
+
+    if (!value) {
+      return null;
+    }
+
+    return <div key={`${label}-${index}`}>{`${label}: ${value}`}</div>;
   });
+
+const renderTextLines = (value?: string) =>
+  safeString(value)
+    .split(/\r?\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
 
 const template15Styles = (theme: ResumeTemplateTheme) => `
   .template15-page {
     width: 794px;
     min-height: 1123px;
     margin: 0 auto;
-    font-family: ${theme.fontFamily || "Georgia, 'Times New Roman', serif"};
+    font-family: ${ResumeTypography.fontFamily};
     color: ${theme.palette.text};
     background: ${theme.palette.page};
     border: 1px solid ${theme.palette.border};
@@ -41,6 +45,14 @@ const template15Styles = (theme: ResumeTemplateTheme) => `
     display: grid;
     grid-template-columns: 30% 70%;
     min-height: 1123px;
+    align-content: start;
+    background: linear-gradient(
+      to right,
+      ${theme.palette.sidebarBg || theme.palette.accentSoft} 0,
+      ${theme.palette.sidebarBg || theme.palette.accentSoft} 30%,
+      ${theme.palette.page} 30%,
+      ${theme.palette.page} 100%
+    );
   }
 
   .template15-left {
@@ -53,23 +65,38 @@ const template15Styles = (theme: ResumeTemplateTheme) => `
     padding: 40px;
   }
 
+  .template15-layout > .resume-section {
+    grid-column: 2;
+    padding: 0 40px;
+  }
+
+  .template15-layout > .template15-sidebar-section {
+    grid-column: 1;
+    padding: 0 24px 0 32px;
+  }
+
   .template15-name {
-    font-size: 24px;
+    font-size: ${ResumeTypography.name}px;
     font-weight: 700;
+    line-height: 1.15;
     word-break: normal;
     overflow-wrap: break-word;
+    color: ${theme.palette.sidebarText || theme.palette.text};
   }
 
   .template15-role {
-    font-size: 13px;
-    color: ${theme.palette.mutedText};
     margin-top: 6px;
+    font-size: ${ResumeTypography.role}px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: ${theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText};
   }
 
   .template15-contact {
     margin-top: 20px;
-    font-size: 13px;
-    color: ${theme.palette.text};
+    font-size: ${ResumeTypography.contact}px;
+    line-height: ${ResumeTypography.lineHeight};
+    color: ${theme.palette.sidebarText || theme.palette.text};
   }
 
   .template15-contact div {
@@ -77,11 +104,22 @@ const template15Styles = (theme: ResumeTemplateTheme) => `
   }
 
   .template15-left-title {
-    font-size: 13px;
-    font-weight: 700;
-    border-bottom: 1px solid ${theme.palette.sidebarBorder || theme.palette.border};
-    padding-bottom: 4px;
     margin-top: 24px;
+    padding-bottom: 4px;
+    font-size: ${ResumeTypography.heading}px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: ${theme.palette.sidebarText || theme.palette.text};
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid ${theme.palette.sidebarBorder || theme.palette.border};
+  }
+
+  .template15-sidebar-copy {
+    margin-top: 6px;
+    font-size: ${ResumeTypography.body}px;
+    line-height: ${ResumeTypography.lineHeight};
+    color: ${theme.palette.sidebarText || theme.palette.text};
+    overflow-wrap: anywhere;
   }
 
   .template15-section {
@@ -89,33 +127,71 @@ const template15Styles = (theme: ResumeTemplateTheme) => `
   }
 
   .template15-section-title {
-    font-size: 14px;
-    font-weight: 700;
-    border-bottom: 2px solid ${theme.palette.text};
-    padding-bottom: 4px;
     margin-bottom: 10px;
+    padding-bottom: 4px;
+    font-size: ${ResumeTypography.heading}px;
+    font-weight: 700;
     letter-spacing: 0.05em;
     text-transform: uppercase;
+    border-bottom: 2px solid ${theme.palette.text};
   }
 
   .template15-body {
-    font-size: 13px;
-    line-height: 1.6;
-  }
-
-  .template15-list {
-    padding-left: 16px;
-    margin-top: 6px;
-  }
-
-  .template15-list li {
-    font-size: 13px;
-    margin-bottom: 4px;
+    font-size: ${ResumeTypography.body}px;
+    line-height: ${ResumeTypography.lineHeight};
   }
 
   .template15-sub {
-    font-size: 12px;
+    font-size: ${ResumeTypography.subtitle}px;
+    line-height: ${ResumeTypography.lineHeight};
     color: ${theme.palette.mutedText};
+  }
+
+  .template15-entry {
+    margin-bottom: 16px;
+  }
+
+  .template15-entry-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .template15-entry-bullet {
+    flex: 0 0 auto;
+    font-size: ${ResumeTypography.body}px;
+    line-height: ${ResumeTypography.lineHeight};
+    color: ${theme.palette.text};
+  }
+
+  .template15-entry-title {
+    font-size: ${ResumeTypography.title}px;
+    line-height: ${ResumeTypography.lineHeight};
+    font-weight: 700;
+    color: ${theme.palette.text};
+  }
+
+  .template15-entry-lines {
+    margin-top: 4px;
+    margin-left: 18px;
+  }
+
+  .template15-entry-lines .template15-body + .template15-body,
+  .template15-entry-lines .template15-sub + .template15-sub,
+  .template15-entry-lines .template15-sub + .template15-body,
+  .template15-entry-lines .template15-body + .template15-sub {
+    margin-top: 2px;
+  }
+
+  .template15-list {
+    margin-top: 6px;
+    padding-left: 16px;
+  }
+
+  .template15-list li {
+    font-size: ${ResumeTypography.list}px;
+    line-height: ${ResumeTypography.lineHeight};
+    margin-bottom: 4px;
   }
 
   .template15-extra-section,
@@ -131,8 +207,8 @@ const template15Styles = (theme: ResumeTemplateTheme) => `
   }
 
   .template15-extra-item {
-    font-size: 12px;
-    line-height: 1.5;
+    font-size: ${ResumeTypography.small}px;
+    line-height: ${ResumeTypography.lineHeight};
     margin-bottom: 4px;
   }
 
@@ -141,9 +217,9 @@ const template15Styles = (theme: ResumeTemplateTheme) => `
   }
 
   .template15-custom-title {
-    font-size: 12.5px;
-    font-weight: 700;
     margin-bottom: 2px;
+    font-size: ${ResumeTypography.subtitle}px;
+    font-weight: 700;
   }
 
   @media print {
@@ -159,7 +235,9 @@ const template15Styles = (theme: ResumeTemplateTheme) => `
 
 const formatSummary = (data: ResumeData) => {
   const isFresher = data.candidateType === "fresher" || safeArray(data.experience).length === 0;
-  const summaryText = isFresher ? safeString(data.careerObjective || data.summary) : safeString(data.summary || data.careerObjective);
+  const summaryText = isFresher
+    ? safeString(data.careerObjective || data.summary)
+    : safeString(data.summary || data.careerObjective);
   const summaryTitle = isFresher ? "CAREER OBJECTIVE" : "PROFESSIONAL SUMMARY";
   return { summaryText, summaryTitle };
 };
@@ -169,12 +247,12 @@ const renderSupplementarySections = (data: ResumeData) => {
 
   if (safeArray(data.achievements).length > 0) {
     sections.push(
-      <section key="achievements" className="template15-extra-section template15-section">
-        <div className="template15-section-title">Achievements</div>
-        <ul className="template15-extra-list">
+      <section key="achievements" className="template15-extra-section template15-section resume-section">
+        <div className="template15-section-title resume-section-title">Achievements</div>
+        <ul className="template15-extra-list resume-section-content">
           {safeArray(data.achievements).map((achievement, index) => (
             <li key={`achievement-${index}`} className="template15-extra-item">
-              {typeof achievement === "string" ? achievement : achievement.title || achievement.name || ""}
+              {achievement}
             </li>
           ))}
         </ul>
@@ -184,17 +262,14 @@ const renderSupplementarySections = (data: ResumeData) => {
 
   if (safeArray(data.references).length > 0) {
     sections.push(
-      <section key="references" className="template15-extra-section template15-section">
-        <div className="template15-section-title">References</div>
-        <ul className="template15-extra-list">
-          {safeArray(data.references).map((reference, index) => {
-            const title = typeof reference === "string" ? reference : `${reference.name || ""}${reference.role ? `, ${reference.role}` : ""}`;
-            return (
-              <li key={`reference-${index}`} className="template15-extra-item">
-                {title}
-              </li>
-            );
-          })}
+      <section key="references" className="template15-extra-section template15-section resume-section">
+        <div className="template15-section-title resume-section-title">References</div>
+        <ul className="template15-extra-list resume-section-content">
+          {safeArray(data.references).map((reference, index) => (
+            <li key={`reference-${index}`} className="template15-extra-item">
+              {reference}
+            </li>
+          ))}
         </ul>
       </section>
     );
@@ -202,18 +277,21 @@ const renderSupplementarySections = (data: ResumeData) => {
 
   if (safeArray(data.customSections).length > 0) {
     sections.push(
-      <section key="custom" className="template15-additional-section template15-section">
-        <div className="template15-section-title">Additional Information</div>
-        {safeArray(data.customSections).map((section, index) => {
-          const title = typeof section === "string" ? "" : section.title || "";
-          const content = typeof section === "string" ? section : section.description || section.content || "";
-          return (
-            <div key={`custom-${index}`} className="template15-custom-block">
-              {title ? <div className="template15-custom-title">{title}</div> : null}
-              {content ? <div className="template15-extra-item">{content}</div> : null}
-            </div>
-          );
-        })}
+      <section key="custom" className="template15-additional-section template15-section resume-section">
+        <div className="template15-section-title resume-section-title">Additional Information</div>
+        <div className="resume-section-content">
+          {safeArray(data.customSections).map((section, index) => {
+            const title = section.title || "";
+            const content = section.description || "";
+
+            return (
+              <div key={`custom-${index}`} className="template15-custom-block">
+                {title ? <div className="template15-custom-title">{title}</div> : null}
+                {content ? <div className="template15-extra-item">{content}</div> : null}
+              </div>
+            );
+          })}
+        </div>
       </section>
     );
   }
@@ -228,7 +306,6 @@ const template15Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
     email: safeString(data.email),
     phone: safeString(data.phone),
     address: safeString(data.address),
-    summary: safeString(data.summary),
     careerObjective: safeString(data.careerObjective),
     skills: safeArray(data.skills) as string[],
     strengths: safeArray(data.strengths) as string[],
@@ -242,120 +319,160 @@ const template15Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
   };
 
   const { summaryText, summaryTitle } = formatSummary(data);
-  const isFresher = data.candidateType === "fresher" || safe.experience.length === 0;
 
   return (
-    <div className="template15-page">
+    <div className="resume-theme-root resume-page sidebar-layout template15-page">
       <style>{template15Styles(theme)}</style>
       <div className="template15-layout">
         <div className="template15-left">
           <div className="template15-name">{safe.fullName}</div>
           {safe.role ? <div className="template15-role">{safe.role}</div> : null}
           <div className="template15-contact">
-            {formatContactLine("✉", safe.email) ? <div>{formatContactLine("✉", safe.email)}</div> : null}
-            {formatContactLine("📞", safe.phone) ? <div>{formatContactLine("📞", safe.phone)}</div> : null}
-            {formatContactLine("📍", safe.address) ? <div>{formatContactLine("📍", safe.address)}</div> : null}
+            {safe.email ? <div>{safe.email}</div> : null}
+            {safe.phone ? <div>{safe.phone}</div> : null}
+            {safe.address ? <div>{safe.address}</div> : null}
             {renderSocialLinks(data.socialLinks)}
           </div>
 
           {safe.skills.length > 0 ? (
-            <div>
-              <div className="template15-left-title">SKILLS</div>
-              <ul className="template15-list">{renderListItems(safe.skills)}</ul>
-            </div>
+            <section className="resume-section template15-sidebar-section">
+              <div className="template15-left-title resume-section-title">SKILLS</div>
+              <div className="template15-sidebar-copy resume-section-content">{joinItems(safe.skills)}</div>
+            </section>
           ) : null}
 
           {safe.strengths.length > 0 ? (
-            <div>
-              <div className="template15-left-title">STRENGTHS</div>
-              <ul className="template15-list">{renderListItems(safe.strengths)}</ul>
-            </div>
+            <section className="resume-section template15-sidebar-section">
+              <div className="template15-left-title resume-section-title">STRENGTHS</div>
+              <div className="template15-sidebar-copy resume-section-content">{joinItems(safe.strengths)}</div>
+            </section>
           ) : null}
 
           {safe.hobbies.length > 0 ? (
-            <div>
-              <div className="template15-left-title">HOBBIES</div>
-              <div>{safe.hobbies.join(", ")}</div>
-            </div>
+            <section className="resume-section template15-sidebar-section">
+              <div className="template15-left-title resume-section-title">HOBBIES</div>
+              <div className="template15-sidebar-copy resume-section-content">{safe.hobbies.join(", ")}</div>
+            </section>
           ) : null}
         </div>
 
         <div className="template15-right">
           {(summaryText || safe.careerObjective) && (
-            <div className="template15-section">
-              <div className="template15-section-title">{summaryTitle}</div>
-              <p className="template15-body">{summaryText || safe.careerObjective}</p>
-            </div>
+            <section className="template15-section resume-section">
+              <div className="template15-section-title resume-section-title">{summaryTitle}</div>
+              <div className="resume-section-content">
+                <p className="template15-body">{summaryText || safe.careerObjective}</p>
+              </div>
+            </section>
           )}
 
           {safe.experience.length > 0 && (
-            <div className="template15-section">
-              <div className="template15-section-title">WORK EXPERIENCE</div>
-              {safe.experience.map((experience, index) => (
-                <div key={`experience-${index}`} style={{ marginBottom: 16 }}>
-                  <p className="template15-body" style={{ fontWeight: 700 }}>
-                    {`${experience.role || ""}${experience.role && experience.company ? " — " : ""}${experience.company || ""}`}
-                  </p>
-                  <div className="template15-sub">{`${experience.startDate || ""}${experience.startDate && experience.endDate ? " - " : ""}${experience.endDate || ""}`}</div>
-                  {experience.description ? <p className="template15-body" style={{ marginTop: 6 }}>{experience.description}</p> : null}
-                </div>
-              ))}
-            </div>
+            <section className="template15-section resume-section">
+              <div className="template15-section-title resume-section-title">WORK EXPERIENCE</div>
+              <div className="resume-section-content">
+                {safe.experience.map((experience, index) => (
+                  <div key={`experience-${index}`} className="template15-entry">
+                    <div className="template15-entry-heading">
+                      <span className="template15-entry-bullet">•</span>
+                      <div className="template15-entry-title">
+                        {`${experience.role || ""}${experience.role && experience.company ? " at " : ""}${experience.company || ""}${(experience.role || experience.company) && (experience.startDate || experience.endDate) ? " — " : ""}${experience.startDate || ""}${experience.startDate && experience.endDate ? " - " : ""}${experience.endDate || ""}`}
+                      </div>
+                    </div>
+                    {renderTextLines(experience.description).length > 0 ? (
+                      <div className="template15-entry-lines">
+                        {renderTextLines(experience.description).map((line, lineIndex) => (
+                          <div key={`experience-${index}-line-${lineIndex}`} className="template15-body">
+                            {line}
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </section>
           )}
 
           {safe.education.length > 0 && (
-            <div className="template15-section">
-              <div className="template15-section-title">EDUCATION</div>
-              {safe.education.map((education, index) => (
-                <div key={`education-${index}`} style={{ marginBottom: 16 }}>
-                  <p className="template15-body" style={{ fontWeight: 700 }}>
-                    {education.degree || ""}
-                  </p>
-                  <div className="template15-sub">{`${education.school || ""}${education.school && (education.startYear || education.endYear) ? " | " : ""}${education.startYear || ""}${education.startYear && education.endYear ? " - " : ""}${education.endYear || ""}`}</div>
-                </div>
-              ))}
-            </div>
+            <section className="template15-section resume-section">
+              <div className="template15-section-title resume-section-title">EDUCATION</div>
+              <div className="resume-section-content">
+                {safe.education.map((education, index) => (
+                  <div key={`education-${index}`} className="template15-entry">
+                    <div className="template15-entry-heading">
+                      <span className="template15-entry-bullet">•</span>
+                      <div className="template15-entry-title">{education.degree || ""}</div>
+                    </div>
+                    <div className="template15-entry-lines">
+                      {education.school ? <div className="template15-body">{education.school}</div> : null}
+                      {education.startYear || education.endYear ? (
+                        <div className="template15-sub">
+                          {`${education.startYear || ""}${education.startYear && education.endYear ? " - " : ""}${education.endYear || ""}`}
+                        </div>
+                      ) : null}
+                      {education.gpa ? <div className="template15-sub">{`GPA: ${education.gpa}`}</div> : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
           )}
 
           {safe.certifications.length > 0 && (
-            <div className="template15-section">
-              <div className="template15-section-title">CERTIFICATIONS</div>
-              {safe.certifications.map((certification, index) => (
-                <div key={`certification-${index}`} style={{ marginBottom: 16 }}>
-                  <p className="template15-body" style={{ fontWeight: 700 }}>
-                    {certification.name || ""}
-                  </p>
-                  <div className="template15-sub">{`${certification.issuer || ""}${certification.issuer && certification.date ? " | " : ""}${certification.date || ""}`}</div>
-                </div>
-              ))}
-            </div>
+            <section className="template15-section resume-section">
+              <div className="template15-section-title resume-section-title">CERTIFICATIONS</div>
+              <div className="resume-section-content">
+                {safe.certifications.map((certification, index) => (
+                  <div key={`certification-${index}`} className="template15-entry">
+                    <div className="template15-entry-heading">
+                      <span className="template15-entry-bullet">•</span>
+                      <div className="template15-entry-title">{certification.name || ""}</div>
+                    </div>
+                    <div className="template15-entry-lines">
+                      <div className="template15-sub">
+                        {`${certification.issuer || ""}${certification.issuer && certification.year ? " | " : ""}${certification.year || ""}`}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
           )}
 
           {safe.projects.length > 0 && (
-            <div className="template15-section">
-              <div className="template15-section-title">PROJECTS</div>
-              {safe.projects.map((project, index) => (
-                <div key={`project-${index}`} style={{ marginBottom: 16 }}>
-                  <p className="template15-body" style={{ fontWeight: 700 }}>
-                    {project.name || ""}
-                  </p>
-                  <p className="template15-body">{project.description || ""}</p>
-                </div>
-              ))}
-            </div>
+            <section className="template15-section resume-section">
+              <div className="template15-section-title resume-section-title">PROJECTS</div>
+              <div className="resume-section-content">
+                {safe.projects.map((project, index) => (
+                  <div key={`project-${index}`} className="template15-entry">
+                    <div className="template15-entry-heading">
+                      <span className="template15-entry-bullet">•</span>
+                      <div className="template15-entry-title">{project.name || ""}</div>
+                    </div>
+                    <div className="template15-entry-lines">
+                      {project.description ? <div className="template15-body">{project.description}</div> : null}
+                      {project.technologies.length > 0 ? (
+                        <div className="template15-sub">{`Technologies: ${joinItems(project.technologies)}`}</div>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
           )}
 
           {safe.languages.length > 0 && (
-            <div className="template15-section">
-              <div className="template15-section-title">LANGUAGES</div>
-              <ul className="template15-list" style={{ listStyle: "none", padding: 0 }}>
+            <section className="template15-section resume-section">
+              <div className="template15-section-title resume-section-title">LANGUAGES</div>
+              <ul className="template15-list resume-section-content" style={{ listStyle: "none", padding: 0 }}>
                 {safe.languages.map((language, index) => (
                   <li key={`language-${index}`} style={{ marginBottom: 4 }}>
-                    • {language.language || ""}{language.level ? ` (${language.level})` : ""}
+                    • {language.language || ""}
+                    {language.level ? ` (${language.level})` : ""}
                   </li>
                 ))}
               </ul>
-            </div>
+            </section>
           )}
 
           {renderSupplementarySections(data)}

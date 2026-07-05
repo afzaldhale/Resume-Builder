@@ -141,7 +141,27 @@ export const templateThemeConfigs: Record<number, TemplateThemeConfig> = {
     ],
   },
   4: createMinimalConfig(4),
-  5: createSidebarConfig(5),
+  5: {
+    templateId: 5,
+    defaultColors: {
+      sidebarBackground: "#F5F5F5",
+      sidebarText: "#1F2937",
+      headingBar: "#1E293B",
+      headingText: "#0F172A",
+      nameText:
+        templateThemes[5].palette.nameText || templateThemes[5].palette.text,
+      titleText:
+        templateThemes[5].palette.titleText || templateThemes[5].palette.mutedText,
+    },
+    editableColors: [
+      { key: "sidebarBackground", label: "Sidebar Background" },
+      { key: "sidebarText", label: "Sidebar Text Color" },
+      { key: "headingBar", label: "Heading Bar Color" },
+      { key: "headingText", label: "Heading Text Color" },
+      { key: "nameText", label: "Name Color" },
+      { key: "titleText", label: "Role / Title Color" },
+    ],
+  },
   6: {
     templateId: 6,
     defaultColors: {

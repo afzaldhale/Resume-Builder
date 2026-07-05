@@ -269,6 +269,22 @@ All colors MUST be HSL.
   transform-origin: top left;
 }
 
+.resume-preview-container-template2 {
+  overflow: auto;
+  align-items: flex-start;
+}
+
+.resume-preview-outer-template2 {
+  width: var(--resume-page-width);
+  height: auto;
+}
+
+.resume-preview-inner-template2 {
+  width: var(--resume-page-width);
+  height: auto;
+  transform: none;
+}
+
 .resume-page {
   font-family: var(--resume-font-family);
   box-sizing: border-box;

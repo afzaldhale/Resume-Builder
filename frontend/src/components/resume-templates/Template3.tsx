@@ -7,6 +7,7 @@ import {
   sortEducationReverseChronological,
   sortExperienceReverseChronological,
 } from "./resumeSections";
+import { ResumeTypography } from "@/constants/resumeDesignSystem";
 import type { ResumeTemplateTheme } from "./templateThemeTypes";
 import type { ResumeData } from "./types";
 import { resolveTemplateTheme } from "./themeConfig";
@@ -115,7 +116,7 @@ const Template3Styles = ({
     .template3-name {
       margin: 0;
       font-family: Arial, sans-serif;
-      font-size: 24px;
+      font-size: ${ResumeTypography.name}px;
       line-height: 1.02;
       font-weight: 700;
       letter-spacing: 0.5px;
@@ -126,7 +127,7 @@ const Template3Styles = ({
     .template3-role {
       margin: 4px 0 0;
       font-family: Arial, sans-serif;
-      font-size: 12pt;
+      font-size: ${ResumeTypography.role}px;
       line-height: 1.1;
       font-weight: 600;
       letter-spacing: 1px;
@@ -146,7 +147,7 @@ const Template3Styles = ({
       grid-template-columns: max-content minmax(0, 1fr);
       column-gap: 6px;
       align-items: start;
-      font-size: 11pt;
+      font-size: ${ResumeTypography.contact}px;
       line-height: 1.35;
       color: ${theme.palette.mutedText};
     }
@@ -184,7 +185,7 @@ const Template3Styles = ({
     .template3-section-title {
       margin: 0 0 12px;
       font-family: Arial, sans-serif;
-      font-size: 14pt;
+      font-size: ${ResumeTypography.heading}px;
       line-height: 1.2;
       font-weight: 700;
       text-transform: uppercase;
@@ -196,7 +197,7 @@ const Template3Styles = ({
     .template3-meta,
     .template3-list {
       font-family: "Century Gothic", sans-serif;
-      font-size: 11pt;
+      font-size: ${ResumeTypography.body}px;
       line-height: 1.4;
       font-weight: 400;
       color: ${theme.palette.text};
@@ -213,7 +214,7 @@ const Template3Styles = ({
     .template3-item-title {
       margin: 0;
       font-family: Arial, sans-serif;
-      font-size: 11pt;
+      font-size: ${ResumeTypography.title}px;
       line-height: 1.2;
       font-weight: 700;
       color: ${theme.palette.headingText || theme.palette.text};
@@ -223,7 +224,7 @@ const Template3Styles = ({
     .template3-item-date {
       margin: 2px 0 0;
       font-family: "Century Gothic", sans-serif;
-      font-size: 10.5pt;
+      font-size: ${ResumeTypography.meta}px;
       line-height: 1.4;
       font-weight: 400;
       color: ${theme.palette.mutedText};
@@ -256,7 +257,7 @@ const Template3Styles = ({
 
     .template3-certification-title {
       font-family: Arial, sans-serif;
-      font-size: 11pt;
+      font-size: ${ResumeTypography.title}px;
       line-height: 1.2;
       font-weight: 700;
       color: ${theme.palette.headingText || theme.palette.text};
@@ -264,7 +265,7 @@ const Template3Styles = ({
 
     .template3-certification-detail {
       font-family: "Century Gothic", sans-serif;
-      font-size: 11pt;
+      font-size: ${ResumeTypography.body}px;
       line-height: 1.4;
       font-weight: 400;
       color: ${theme.palette.text};
@@ -273,7 +274,7 @@ const Template3Styles = ({
     .template3-group-title {
       margin: 0 0 4px;
       font-family: Arial, sans-serif;
-      font-size: 11pt;
+      font-size: ${ResumeTypography.title}px;
       line-height: 1.2;
       font-weight: 700;
       color: ${theme.palette.headingText || theme.palette.text};
