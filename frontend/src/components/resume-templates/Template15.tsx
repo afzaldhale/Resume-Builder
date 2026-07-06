@@ -78,7 +78,7 @@ const template15Styles = (theme: ResumeTemplateTheme) => `
   .template15-name {
     font-size: ${ResumeTypography.name}px;
     font-weight: 700;
-    line-height: 1.15;
+    line-height: ${ResumeTypography.lineHeight};
     word-break: normal;
     overflow-wrap: break-word;
     color: ${theme.palette.sidebarText || theme.palette.text};
@@ -88,7 +88,7 @@ const template15Styles = (theme: ResumeTemplateTheme) => `
     margin-top: 6px;
     font-size: ${ResumeTypography.role}px;
     font-weight: 600;
-    line-height: 1.2;
+    line-height: ${ResumeTypography.lineHeight};
     color: ${theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText};
   }
 
@@ -108,7 +108,7 @@ const template15Styles = (theme: ResumeTemplateTheme) => `
     padding-bottom: 4px;
     font-size: ${ResumeTypography.heading}px;
     font-weight: 700;
-    line-height: 1.2;
+    line-height: ${ResumeTypography.lineHeight};
     color: ${theme.palette.sidebarText || theme.palette.text};
     letter-spacing: 0.04em;
     border-bottom: 1px solid ${theme.palette.sidebarBorder || theme.palette.border};

@@ -97,6 +97,7 @@ interface ResumeSectionProps {
   sidebar?: boolean;
   compactMode?: boolean;
   summaryTitle?: string;
+  forcePageBreakBefore?: boolean;
   children: ReactNode;
 }
 
@@ -106,6 +107,7 @@ export const ResumeSection = ({
   sidebar = false,
   compactMode = false,
   summaryTitle,
+  forcePageBreakBefore = false,
   children,
 }: ResumeSectionProps) => {
   if (!children) return null;
@@ -117,7 +119,11 @@ export const ResumeSection = ({
   const headingStyles = getHeadingStyle(theme, sidebar, variant);
 
   return (
-    <section className="resume-section break-inside-avoid space-y-2" style={{ color: sidebar ? theme.palette.sidebarText || theme.palette.text : theme.palette.text }}>
+    <section
+      className="resume-section break-inside-avoid space-y-2"
+      data-force-page-break-before={forcePageBreakBefore ? "true" : undefined}
+      style={{ color: sidebar ? theme.palette.sidebarText || theme.palette.text : theme.palette.text }}
+    >
       <h2
         className={`resume-section-title resume-section-title-${variant}`}
         style={headingStyles}

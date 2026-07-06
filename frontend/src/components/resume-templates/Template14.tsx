@@ -12,6 +12,7 @@ import {
 } from "./resumeSections";
 import type { ResumeData } from "./types";
 import { ResumeSection } from "@/components/resume/ResumeSection";
+import { getStandardResumeTypographyVars } from "@/constants/resumeDesignSystem";
 import { resolveTemplateTheme } from "./themeConfig";
 
 type HeadingStyle = "bar" | "underline" | "accent";
@@ -453,7 +454,7 @@ const ResumePageStyles = () => (
 
     .resume-heading {
       font-size: var(--resume-heading-size);
-      line-height: 1.2;
+      line-height: var(--resume-line-height);
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -461,31 +462,31 @@ const ResumePageStyles = () => (
 
     .resume-body-copy {
       font-size: var(--resume-body-size);
-      line-height: 1.34;
+      line-height: var(--resume-line-height);
     }
 
     .resume-item-title {
       font-size: var(--resume-item-title-size);
-      line-height: 1.35;
+      line-height: var(--resume-line-height);
       font-weight: 700;
     }
 
     .resume-item-subtitle {
       font-size: var(--resume-item-subtitle-size);
-      line-height: 1.32;
+      line-height: var(--resume-line-height);
       color: var(--resume-page-text);
     }
 
     .resume-item-meta {
       font-size: var(--resume-item-meta-size);
-      line-height: 1.3;
+      line-height: var(--resume-line-height);
       color: var(--resume-muted-text);
     }
 
     .resume-section-title {
       display: block;
       font-size: var(--resume-heading-size);
-      line-height: 1.2;
+      line-height: var(--resume-line-height);
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -496,7 +497,7 @@ const ResumePageStyles = () => (
       margin: 0;
       padding-left: var(--resume-list-indent, 18px);
       font-size: var(--resume-list-size);
-      line-height: 1.34;
+      line-height: var(--resume-line-height);
     }
 
     .resume-bullet-list li + li {
@@ -518,7 +519,7 @@ const ResumePageStyles = () => (
     .resume-contact-item {
       display: inline-flex;
       align-items: center;
-      line-height: 1.35;
+      line-height: var(--resume-line-height);
       min-width: 0;
     }
 
@@ -958,15 +959,7 @@ const template14Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           "--resume-accent": theme.palette.accent,
           "--resume-accent-soft": theme.palette.accentSoft,
           "--resume-accent-text": theme.palette.accentText,
-          "--resume-heading-size": "16px",
-          "--resume-body-size": "11px",
-          "--resume-item-title-size": "13px",
-          "--resume-item-subtitle-size": "11px",
-          "--resume-item-meta-size": "10px",
-          "--resume-list-size": "11px",
-          "--resume-name-size": "32px",
-          "--resume-role-size": "13px",
-          "--resume-line-height": "1.5",
+          ...getStandardResumeTypographyVars(),
           "--resume-summary-box-padding": compactMode || densityMode !== "comfortable" ? "8px 10px" : "10px 12px",
           "--resume-list-indent": densityMode === "comfortable" ? "18px" : "16px",
           "--resume-contact-separator-gap": densityMode === "comfortable" ? "8px" : "6px",

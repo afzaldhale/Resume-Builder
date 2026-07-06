@@ -8,6 +8,8 @@ interface Template7Props {
 }
 
 const Template7: React.FC<Template7Props> = ({ data }) =>
-  template1Render(data, resolveTemplateTheme(7, data));
+  template1Render(data, resolveTemplateTheme(7, data), {
+    forcePageBreakBeforeSections: ["strengths"],
+  });
 
 export default Template7;

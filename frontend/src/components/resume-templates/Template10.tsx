@@ -8,7 +8,9 @@ import {
   type ResumeSectionKey,
 } from "./resumeSections";
 import type { ResumeData } from "./types";
-import { ResumeTypography } from "@/constants/resumeDesignSystem";
+import {
+  getStandardResumeTypographyVars,
+} from "@/constants/resumeDesignSystem";
 import { resolveTemplateTheme } from "./themeConfig";
 
 type HeadingStyle = "bar" | "underline" | "accent";
@@ -211,7 +213,7 @@ const ResumePageStyles = () => (
 
     .resume-heading {
       font-size: var(--resume-heading-size);
-      line-height: 1.2;
+      line-height: var(--resume-line-height);
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -219,31 +221,31 @@ const ResumePageStyles = () => (
 
     .resume-body-copy {
       font-size: var(--resume-body-size);
-      line-height: 1.34;
+      line-height: var(--resume-line-height);
     }
 
     .resume-item-title {
       font-size: var(--resume-item-title-size);
-      line-height: 1.35;
+      line-height: var(--resume-line-height);
       font-weight: 700;
     }
 
     .resume-item-subtitle {
       font-size: var(--resume-item-subtitle-size);
-      line-height: 1.32;
+      line-height: var(--resume-line-height);
       color: var(--resume-page-text);
     }
 
     .resume-item-meta {
       font-size: var(--resume-item-meta-size);
-      line-height: 1.3;
+      line-height: var(--resume-line-height);
       color: var(--resume-muted-text);
     }
 
     .resume-section-title {
       display: block;
       font-size: var(--resume-heading-size);
-      line-height: 1.2;
+      line-height: var(--resume-line-height);
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -254,7 +256,7 @@ const ResumePageStyles = () => (
       margin: 0;
       padding-left: var(--resume-list-indent, 18px);
       font-size: var(--resume-list-size);
-      line-height: 1.34;
+      line-height: var(--resume-line-height);
     }
 
     .resume-bullet-list li + li {
@@ -276,7 +278,7 @@ const ResumePageStyles = () => (
     .resume-contact-item {
       display: inline-flex;
       align-items: center;
-      line-height: 1.35;
+      line-height: var(--resume-line-height);
       min-width: 0;
     }
 
@@ -386,7 +388,7 @@ const Template10Section = ({
       style={{
         fontSize: "var(--resume-heading-size)",
         fontWeight: 700,
-        lineHeight: 1.25,
+        lineHeight: "var(--resume-line-height)",
         letterSpacing: "0.14em",
         textTransform: "uppercase",
         color: theme.palette.text,
@@ -452,14 +454,6 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
     (section) => hasText(section.title) || hasText(section.description) || (section.items || []).length > 0
   );
 
-  const typScale = theme.typographyScale || 1;
-  const nameSize = ResumeTypography.name * typScale;
-  const roleSize = ResumeTypography.role * typScale;
-  const headingSize = ResumeTypography.heading * typScale;
-  const bodySize = ResumeTypography.body * typScale;
-  const smallSize = ResumeTypography.small * typScale;
-  const lineHeight = ResumeTypography.lineHeight || 1.5;
-
   return (
     <ResumePage
       theme={theme}
@@ -473,15 +467,7 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           "--resume-accent": theme.palette.accent,
           "--resume-accent-soft": theme.palette.accentSoft,
           "--resume-accent-text": theme.palette.accentText,
-          "--resume-heading-size": `${Math.round(headingSize * 100) / 100}px`,
-          "--resume-body-size": `${Math.round(bodySize * 100) / 100}px`,
-          "--resume-item-title-size": `${Math.round(roleSize * 100) / 100}px`,
-          "--resume-item-subtitle-size": `${Math.round(bodySize * 100) / 100}px`,
-          "--resume-item-meta-size": `${Math.round(smallSize * 100) / 100}px`,
-          "--resume-list-size": `${Math.round(bodySize * 100) / 100}px`,
-          "--resume-name-size": `${Math.round(nameSize * 100) / 100}px`,
-          "--resume-role-size": `${Math.round(roleSize * 100) / 100}px`,
-          "--resume-line-height": `${lineHeight}`,
+          ...getStandardResumeTypographyVars(),
           "--resume-summary-box-padding": "10px 0",
           "--resume-list-indent": "16px",
           "--resume-contact-separator-gap": "8px",
@@ -498,7 +484,7 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           <h1
             style={{
               fontSize: "var(--resume-name-size)",
-              lineHeight: 1.15,
+              lineHeight: "var(--resume-line-height)",
               fontWeight: 700,
               letterSpacing: "0.04em",
               textTransform: "uppercase",
@@ -512,7 +498,7 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
             <p
               style={{
                 fontSize: "var(--resume-role-size)",
-                lineHeight: 1.35,
+                lineHeight: "var(--resume-line-height)",
                 margin: "6px 0 0",
                 color: theme.palette.titleText || theme.palette.mutedText,
                 letterSpacing: "0.14em",
@@ -535,7 +521,7 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                         style={{
                           margin: 0,
                           fontSize: "var(--resume-item-meta-size)",
-                          lineHeight: 1.3,
+                          lineHeight: "var(--resume-line-height)",
                           letterSpacing: "0.08em",
                           textTransform: "uppercase",
                           color: theme.palette.mutedText,
@@ -547,7 +533,7 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                         style={{
                           margin: 0,
                           fontSize: "var(--resume-body-size)",
-                          lineHeight: 1.45,
+                          lineHeight: "var(--resume-line-height)",
                           color: theme.palette.text,
                           wordBreak: "break-word",
                         }}
@@ -564,7 +550,7 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
               <Template10Section title="Skills" theme={theme}>
                 <ul className="template10-list">
                   {skills.map((skill, index) => (
-                    <li key={`${skill}-${index}`} style={{ fontSize: "var(--resume-body-size)", lineHeight: 1.45 }}>
+                    <li key={`${skill}-${index}`} style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
                       {skill}
                     </li>
                   ))}
@@ -576,7 +562,7 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
               <Template10Section title="Languages" theme={theme}>
                 <ul className="template10-list">
                   {languages.map((item, index) => (
-                    <li key={`${item.language}-${index}`} style={{ fontSize: "var(--resume-body-size)", lineHeight: 1.45 }}>
+                    <li key={`${item.language}-${index}`} style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
                       {hasText(item.level) ? `${item.language} (${item.level})` : item.language}
                     </li>
                   ))}
@@ -588,7 +574,7 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
               <Template10Section title="Strengths" theme={theme}>
                 <ul className="template10-list">
                   {strengths.map((value, index) => (
-                    <li key={`${value}-${index}`} style={{ fontSize: "var(--resume-body-size)", lineHeight: 1.45 }}>
+                    <li key={`${value}-${index}`} style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
                       {value}
                     </li>
                   ))}
@@ -602,19 +588,19 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                   {customSections.map((section, index) => (
                     <div key={`${section.title}-${index}`} className="template10-entry">
                       {hasText(section.title) ? (
-                        <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: 1.4 }}>
+                        <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: "var(--resume-line-height)" }}>
                           {section.title}
                         </p>
                       ) : null}
                       {hasText(section.description) ? (
-                        <p style={{ margin: "3px 0 0", fontSize: "var(--resume-body-size)", lineHeight: 1.4 }}>
+                        <p style={{ margin: "3px 0 0", fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
                           {section.description}
                         </p>
                       ) : null}
                       {(section.items || []).length > 0 ? (
                         <ul className="template10-list" style={{ marginTop: "4px" }}>
                           {(section.items || []).map((item, itemIndex) => (
-                            <li key={`${item}-${itemIndex}`} style={{ fontSize: "var(--resume-body-size)", lineHeight: 1.4 }}>
+                            <li key={`${item}-${itemIndex}`} style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
                               {item}
                             </li>
                           ))}
@@ -630,7 +616,7 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           <main className="template10-main">
             {hasText(summaryText) ? (
               <Template10Section title="Career Objective" theme={theme}>
-                <p style={{ margin: 0, fontSize: "var(--resume-body-size)", lineHeight: 1.55 }}>
+                <p style={{ margin: 0, fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
                   {summaryText}
                 </p>
               </Template10Section>
@@ -641,17 +627,17 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                 <ul className="template10-list">
                   {education.map((item, index) => (
                     <li key={`${item.school}-${item.degree}-${index}`} className="template10-entry">
-                      <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: 1.4 }}>
+                      <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: "var(--resume-line-height)" }}>
                         {item.degree}
                       </p>
-                      <p style={{ margin: "3px 0 0", fontSize: "var(--resume-body-size)", lineHeight: 1.4 }}>
+                      <p style={{ margin: "3px 0 0", fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
                         {item.school}
                       </p>
-                      <p style={{ margin: "3px 0 0", fontSize: "var(--resume-item-meta-size)", lineHeight: 1.4, color: theme.palette.mutedText }}>
+                      <p style={{ margin: "3px 0 0", fontSize: "var(--resume-item-meta-size)", lineHeight: "var(--resume-line-height)", color: theme.palette.mutedText }}>
                         {formatRange(item.startYear, item.endYear)}
                       </p>
                       {hasText(item.gpa) ? (
-                        <p style={{ margin: "3px 0 0", fontSize: "var(--resume-item-meta-size)", lineHeight: 1.4, color: theme.palette.mutedText }}>
+                        <p style={{ margin: "3px 0 0", fontSize: "var(--resume-item-meta-size)", lineHeight: "var(--resume-line-height)", color: theme.palette.mutedText }}>
                           GPA: {item.gpa}
                         </p>
                       ) : null}
@@ -667,15 +653,15 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                   {experience.map((item, index) => (
                     <li key={`${item.company}-${item.role}-${index}`} className="template10-entry">
                       <div style={{ display: "flex", justifyContent: "space-between", gap: "8px", alignItems: "baseline" }}>
-                        <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: 1.4 }}>
+                        <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: "var(--resume-line-height)" }}>
                           {item.role} at {item.company}
                         </p>
-                        <p style={{ margin: 0, fontSize: "var(--resume-item-meta-size)", lineHeight: 1.4, color: theme.palette.mutedText }}>
+                        <p style={{ margin: 0, fontSize: "var(--resume-item-meta-size)", lineHeight: "var(--resume-line-height)", color: theme.palette.mutedText }}>
                           {formatRange(item.startDate, item.endDate)}
                         </p>
                       </div>
                       {hasText(item.description) ? (
-                        <p style={{ margin: "5px 0 0", fontSize: "var(--resume-body-size)", lineHeight: 1.5 }}>
+                        <p style={{ margin: "5px 0 0", fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
                           {item.description}
                         </p>
                       ) : null}
@@ -690,16 +676,16 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                 <ul className="template10-list">
                   {projects.map((project, index) => (
                     <li key={`${project.name}-${index}`} className="template10-entry">
-                      <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: 1.4 }}>
+                      <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: "var(--resume-line-height)" }}>
                         {project.name}
                       </p>
                       {hasText(project.description) ? (
-                        <p style={{ margin: "5px 0 0", fontSize: "var(--resume-body-size)", lineHeight: 1.5 }}>
+                        <p style={{ margin: "5px 0 0", fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
                           {project.description}
                         </p>
                       ) : null}
                       {project.technologies.length > 0 ? (
-                        <p style={{ margin: "5px 0 0", fontSize: "var(--resume-item-meta-size)", lineHeight: 1.4, color: theme.palette.mutedText }}>
+                        <p style={{ margin: "5px 0 0", fontSize: "var(--resume-item-meta-size)", lineHeight: "var(--resume-line-height)", color: theme.palette.mutedText }}>
                           Technologies: {uniqueItems(project.technologies).join(", ")}
                         </p>
                       ) : null}
@@ -713,7 +699,7 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
               <Template10Section title="Certifications" theme={theme}>
                 <ul className="template10-list">
                   {certifications.map((item, index) => (
-                    <li key={`${item.name}-${item.issuer}-${index}`} style={{ fontSize: "var(--resume-body-size)", lineHeight: 1.45 }}>
+                    <li key={`${item.name}-${item.issuer}-${index}`} style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
                       {item.name}, {item.issuer}, {formatMonthYear(item.year)}
                     </li>
                   ))}

@@ -16,10 +16,10 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { API_BASE_URL } from "@/lib/apiBaseUrl";
 import UserSidebar from "@/components/UserSidebar";
 import EmptyTemplate from "@/components/resume-templates/EmptyTemplate";
 import ResumeDocument from "@/components/resume-templates/ResumeDocument";
+import { downloadResumePDF } from "@/components/pages/ResumePDF";
 
 import {
   CertificationItem,
@@ -398,7 +398,7 @@ const ResumeBuilder = () => {
     setIsDownloadingPdf(true);
 
     try {
-      window.open(`${API_BASE_URL}/api/resumes/${editingResumeId}/pdf`, "_blank", "noopener,noreferrer");
+      await downloadResumePDF(Number(editingResumeId));
     } catch (error) {
       console.error("PDF download error:", error);
       toast.error("Unable to open PDF download");

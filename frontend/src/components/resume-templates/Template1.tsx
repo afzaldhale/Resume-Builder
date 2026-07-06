@@ -24,12 +24,19 @@ import {
   type ResumeSectionKey,
 } from "./resumeSections";
 import type { ResumeData } from "./types";
-import { ResumeTypography } from "@/constants/resumeDesignSystem";
+import {
+  ResumeTypography,
+  getStandardResumeTypographyVars,
+} from "@/constants/resumeDesignSystem";
 
 type SectionKey = Exclude<ResumeSectionKey, "header">;
 
 interface Template1Props {
   data: ResumeData;
+}
+
+interface Template1RenderOptions {
+  forcePageBreakBeforeSections?: SectionKey[];
 }
 
 // === Helper Functions (Template1-specific) ===
@@ -231,7 +238,7 @@ const Template1Header = ({
         style={{
           display: "grid",
           gridTemplateColumns: "minmax(0, 1fr) minmax(220px, 320px)",
-          columnGap: "32px",
+          columnGap: "48px",
           alignItems: "flex-start",
         }}
       >
@@ -251,7 +258,7 @@ const Template1Header = ({
               letterSpacing: "0.5px",
               textTransform: "uppercase",
               color: theme.palette.nameText || theme.palette.text,
-              lineHeight: 1.1,
+              lineHeight: ResumeTypography.lineHeight,
             }}
           >
             {data.fullName}
@@ -265,7 +272,7 @@ const Template1Header = ({
                 letterSpacing: "0.5px",
                 textTransform: "uppercase",
                 color: theme.palette.titleText || theme.palette.mutedText,
-                lineHeight: 1.15,
+                lineHeight: ResumeTypography.lineHeight,
               }}
             >
               {data.role}
@@ -280,7 +287,7 @@ const Template1Header = ({
                 letterSpacing: "0.5px",
                 textTransform: "uppercase",
                 color: theme.palette.titleText || theme.palette.mutedText,
-                lineHeight: 1.15,
+                lineHeight: ResumeTypography.lineHeight,
               }}
             >
               {subtitle}
@@ -313,7 +320,7 @@ const Template1Header = ({
                     fontWeight: 700,
                     color: theme.palette.mutedText,
                     textAlign: "left",
-                    lineHeight: 1.35,
+                    lineHeight: ResumeTypography.lineHeight,
                     whiteSpace: "nowrap",
                     margin: 0,
                     padding: 0,
@@ -326,7 +333,7 @@ const Template1Header = ({
                     fontSize: `${ResumeTypography.contact}px`,
                     fontWeight: 500,
                     color: theme.palette.mutedText,
-                    lineHeight: 1.35,
+                    lineHeight: ResumeTypography.lineHeight,
                   }}
                 >
                   :
@@ -336,7 +343,7 @@ const Template1Header = ({
                     fontSize: `${ResumeTypography.contact}px`,
                     fontWeight: 500,
                     color: theme.palette.mutedText,
-                    lineHeight: 1.35,
+                    lineHeight: ResumeTypography.lineHeight,
                     wordBreak: "break-word",
                     overflowWrap: "anywhere",
                     minWidth: 0,
@@ -359,29 +366,37 @@ const Template1Section = ({
   theme,
   children,
   avoidBreakInside = true,
+  forcePageBreakBefore = false,
+  marginTop = 0,
 }: {
   title: string;
   summaryTitle: string;
   theme: ResumeTemplateTheme;
   children: ReactNode;
   avoidBreakInside?: boolean;
+  forcePageBreakBefore?: boolean;
+  marginTop?: number;
 }) => (
   <section
     className={`resume-section${avoidBreakInside ? " break-inside-avoid" : ""}`}
-    style={{ color: theme.palette.text }}
+    data-force-page-break-before={forcePageBreakBefore ? "true" : undefined}
+    style={{
+      color: theme.palette.text,
+      marginTop: `${marginTop}px`,
+    }}
   >
     <h2
       className="resume-section-title"
       style={{
         margin: "12px 0 8px",
-        padding: "6px 10px",
+        padding: "3px 10px",
         background: theme.palette.accent,
         color: theme.palette.headingText || theme.palette.accentText,
         fontSize: `${ResumeTypography.heading}px`,
         fontWeight: 700,
         textTransform: "uppercase",
         letterSpacing: "0.75pt",
-        lineHeight: 1.2,
+        lineHeight: 1.25,
       }}
     >
       {title}
@@ -583,7 +598,10 @@ const buildSectionMap = (data: ResumeData) => {
       (data.strengths || []).length > 0 ? (
         <Template1TagList items={data.strengths || []} />
       ) : null,
-    hobbies: (data.hobbies || []).length > 0 ? <ResumeTagList items={data.hobbies || []} /> : null,
+    hobbies:
+      (data.hobbies || []).length > 0 ? (
+        <Template1TagList items={data.hobbies || []} />
+      ) : null,
     references:
       (data.references || []).length > 0 ? <ResumeBulletList items={data.references || []} /> : null,
     custom:
@@ -616,32 +634,43 @@ const renderSections = ({
   sections,
   summaryTitle,
   theme,
+  sectionGap = 0,
+  forcePageBreakBeforeSections = [],
 }: {
   keys: SectionKey[];
   sections: Record<SectionKey, ReactNode>;
   summaryTitle: string;
   theme: ResumeTemplateTheme;
+  sectionGap?: number;
+  forcePageBreakBeforeSections?: SectionKey[];
 }) =>
-  keys.map((key) => {
-    const content = sections[key];
-    if (!content) return null;
+  keys
+    .filter((key) => Boolean(sections[key]))
+    .map((key, index) => {
+      const content = sections[key];
 
-    return (
-      <Template1Section
-        key={`main-${key}`}
-        title={getSectionLabel(key, summaryTitle)}
-        summaryTitle={summaryTitle}
-        theme={theme}
-        avoidBreakInside={key !== "languages" && key !== "strengths"}
-      >
-        {content}
-      </Template1Section>
-    );
-  });
+      return (
+        <Template1Section
+          key={`main-${key}`}
+          title={getSectionLabel(key, summaryTitle)}
+          summaryTitle={summaryTitle}
+          theme={theme}
+          avoidBreakInside={key !== "languages"}
+          forcePageBreakBefore={forcePageBreakBeforeSections.includes(key)}
+          marginTop={index === 0 ? 0 : sectionGap}
+        >
+          {content}
+        </Template1Section>
+      );
+    });
 
 // === Template1 Main Renderer ===
 
-export const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
+export const template1Render = (
+  data: ResumeData,
+  theme: ResumeTemplateTheme,
+  options: Template1RenderOptions = {}
+) => {
   const { sections, summaryTitle } = buildSectionMap(data);
   const fresherResume = isFresherResume(data);
   const compactMode = getCompactMode(data);
@@ -726,30 +755,7 @@ export const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) =>
 
   const experiencedSidebarKeys = theme.sidebarSections || DEFAULT_EXPERIENCED_SIDEBAR;
   const experiencedMainKeys = theme.mainSections || DEFAULT_EXPERIENCED_MAIN;
-
-  const densityScale =
-    densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.95 : 0.92;
-
-  const typScale = theme.typographyScale || 1;
-
-  const nameBase = ResumeTypography.name * typScale;
-  const roleBase = ResumeTypography.role * typScale;
-  const headingBase = ResumeTypography.heading * typScale;
-  const bodyBase = ResumeTypography.body * typScale;
-  const smallBase = ResumeTypography.small * typScale;
-  const lineHeight = ResumeTypography.lineHeight || 1.4;
-
-  const nameSize = nameBase * densityScale;
-  const roleSize = roleBase * densityScale;
-  const headingSize = headingBase * densityScale;
-  const bodySize = Math.max(10.5, bodyBase * densityScale);
-  const titleSize = Math.max(ResumeTypography.title, ResumeTypography.title * typScale * densityScale);
-  const subtitleSize = Math.max(
-    ResumeTypography.subtitle,
-    ResumeTypography.subtitle * typScale * densityScale
-  );
-  const metaSize = Math.max(ResumeTypography.meta, ResumeTypography.meta * typScale * densityScale);
-  const listSize = Math.max(ResumeTypography.list, ResumeTypography.list * typScale * densityScale);
+  const forcePageBreakBeforeSections = options.forcePageBreakBeforeSections || [];
 
   return (
     <ResumePage
@@ -765,15 +771,7 @@ export const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) =>
           "--resume-accent": theme.palette.accent,
           "--resume-accent-soft": theme.palette.accentSoft,
           "--resume-accent-text": theme.palette.accentText,
-          "--resume-heading-size": `${headingSize.toFixed(2)}px`,
-          "--resume-body-size": `${bodySize.toFixed(2)}px`,
-          "--resume-item-title-size": `${titleSize.toFixed(2)}px`,
-          "--resume-item-subtitle-size": `${subtitleSize.toFixed(2)}px`,
-          "--resume-item-meta-size": `${metaSize.toFixed(2)}px`,
-          "--resume-list-size": `${listSize.toFixed(2)}px`,
-          "--resume-name-size": `${Math.round(nameSize * 100) / 100}px`,
-          "--resume-role-size": `${Math.round(roleSize * 100) / 100}px`,
-          "--resume-line-height": `${lineHeight}`,
+          ...getStandardResumeTypographyVars(),
           "--resume-summary-box-padding":
             compactMode || densityMode !== "comfortable" ? "8px 10px" : "10px 12px",
           "--resume-list-indent":
@@ -812,12 +810,9 @@ export const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) =>
       ) : null}
 
       {theme.layout === "single" ? (
-        <div className="flex h-full flex-col" style={{ gap: `${sectionGap}px` }}>
+        <div style={{ height: "100%" }}>
           <Template1Header data={data} theme={theme} />
-          <div
-            className="flex flex-col"
-            style={{ gap: `${sectionGap}px` }}
-          >
+          <div style={{ marginTop: `${sectionGap}px` }}>
             {renderSections({
               keys: fresherResume
                 ? fresherSectionKeys
@@ -825,6 +820,8 @@ export const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) =>
               sections,
               summaryTitle,
               theme,
+              sectionGap,
+              forcePageBreakBeforeSections,
             })}
           </div>
         </div>
@@ -842,14 +839,16 @@ export const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) =>
                   />
                 ) : (
                   <>
-                    {renderSections({
-                      keys: fresherResume
-                        ? fresherSidebarKeys
-                        : experiencedSidebarKeys,
-                      sections,
-                      summaryTitle,
-                      theme,
-                    })}
+                {renderSections({
+                  keys: fresherResume
+                    ? fresherSidebarKeys
+                    : experiencedSidebarKeys,
+                  sections,
+                  summaryTitle,
+                  theme,
+                  sectionGap,
+                  forcePageBreakBeforeSections,
+                })}
                   </>
                 )}
               </div>
@@ -869,6 +868,8 @@ export const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) =>
                   sections,
                   summaryTitle,
                   theme,
+                  sectionGap,
+                  forcePageBreakBeforeSections,
                 })}
               </div>
             </div>
@@ -880,6 +881,8 @@ export const template1Render = (data: ResumeData, theme: ResumeTemplateTheme) =>
 };
 
 const Template1: React.FC<Template1Props> = ({ data }) =>
-  template1Render(data, resolveTemplateTheme(1, data));
+  template1Render(data, resolveTemplateTheme(1, data), {
+    forcePageBreakBeforeSections: ["strengths"],
+  });
 
 export default Template1;

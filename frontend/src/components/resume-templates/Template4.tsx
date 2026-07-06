@@ -1,5 +1,8 @@
 import React, { type CSSProperties, type ReactNode } from "react";
-import { ResumeTypography } from "@/constants/resumeDesignSystem";
+import {
+  ResumeTypography,
+  getStandardResumeTypographyVars,
+} from "@/constants/resumeDesignSystem";
 import {
   formatMonthYear,
   getResumeSectionOrder,
@@ -130,7 +133,7 @@ const getSectionLabel = (key: SectionKey, summaryTitle: string) => {
     case "strengths":
       return "Strengths";
     case "hobbies":
-      return "Additional Information";
+      return "Hobbies / Interests";
     case "references":
       return "References";
     case "custom":
@@ -225,7 +228,7 @@ const ResumePageStyles = () => (
     .template4-name {
       margin: 0;
       font-size: var(--resume-name-size);
-      line-height: 1.02;
+      line-height: ${ResumeTypography.lineHeight};
       font-weight: 800;
       letter-spacing: -0.02em;
       color: var(--resume-name-color);
@@ -234,7 +237,7 @@ const ResumePageStyles = () => (
     .template4-role {
       margin: 6px 0 0;
       font-size: var(--resume-role-size);
-      line-height: 1.28;
+      line-height: ${ResumeTypography.lineHeight};
       font-weight: 600;
       color: var(--resume-role-color);
     }
@@ -251,7 +254,7 @@ const ResumePageStyles = () => (
       min-width: 0;
       color: var(--resume-muted-text);
       font-size: var(--resume-contact-size);
-      line-height: 1.35;
+      line-height: ${ResumeTypography.lineHeight};
     }
 
     .template4-contact-label {
@@ -282,7 +285,7 @@ const ResumePageStyles = () => (
       margin: 0;
       padding-bottom: 6px;
       font-size: var(--resume-heading-size);
-      line-height: 1.2;
+      line-height: ${ResumeTypography.lineHeight};
       font-weight: 700;
       letter-spacing: 0;
       color: var(--resume-page-text);
@@ -304,7 +307,7 @@ const ResumePageStyles = () => (
     .resume-item-title {
       margin: 0;
       font-size: var(--resume-item-title-size);
-      line-height: 1.32;
+      line-height: ${ResumeTypography.lineHeight};
       font-weight: 700;
       color: var(--resume-page-text);
     }
@@ -312,14 +315,14 @@ const ResumePageStyles = () => (
     .resume-item-subtitle {
       margin: 0;
       font-size: var(--resume-item-subtitle-size);
-      line-height: 1.34;
+      line-height: ${ResumeTypography.lineHeight};
       color: var(--resume-page-text);
     }
 
     .resume-item-meta {
       margin: 0;
       font-size: var(--resume-item-meta-size);
-      line-height: 1.32;
+      line-height: ${ResumeTypography.lineHeight};
       color: var(--resume-muted-text);
     }
 
@@ -355,7 +358,7 @@ const ResumePageStyles = () => (
 
     .template4-bullet-marker {
       font-size: 14px;
-      line-height: 1.4;
+      line-height: ${ResumeTypography.lineHeight};
       color: var(--resume-page-text);
       text-align: center;
       padding-top: 1px;
@@ -364,7 +367,7 @@ const ResumePageStyles = () => (
     .template4-bullet-title {
       margin: 0;
       font-size: var(--resume-item-title-size);
-      line-height: 1.32;
+      line-height: ${ResumeTypography.lineHeight};
       font-weight: 700;
       color: var(--resume-page-text);
     }
@@ -379,7 +382,7 @@ const ResumePageStyles = () => (
     .template4-inline-meta {
       color: var(--resume-muted-text);
       font-size: var(--resume-item-meta-size);
-      line-height: 1.34;
+      line-height: ${ResumeTypography.lineHeight};
     }
 
     .template4-skills,
@@ -421,14 +424,19 @@ const Template4ContactRow = ({
 const Template4Section = ({
   title,
   children,
+  forcePageBreakBefore = false,
 }: {
   title: string;
   children: ReactNode;
+  forcePageBreakBefore?: boolean;
 }) => {
   if (!children) return null;
 
   return (
-    <section className="resume-section">
+    <section
+      className="resume-section"
+      data-force-page-break-before={forcePageBreakBefore ? "true" : undefined}
+    >
       <h2 className="resume-section-title template4-section-title">{title}</h2>
       <div className="resume-section-content">{children}</div>
     </section>
@@ -664,27 +672,6 @@ const template4Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
     ? fresherSectionKeys
     : (theme.mainSections || DEFAULT_SINGLE_ORDER).filter((key) => hasSectionData(key, data));
 
-  const densityScale =
-    densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.97 : 0.93;
-  const typScale = theme.typographyScale || 1;
-
-  const nameBase = ResumeTypography.name * typScale;
-  const roleBase = ResumeTypography.role * typScale;
-  const headingBase = ResumeTypography.heading * typScale;
-  const bodyBase = ResumeTypography.body * typScale;
-  const lineHeight = ResumeTypography.lineHeight || 1.4;
-
-  const nameSize = Math.max(30, nameBase * densityScale);
-  const roleSize = Math.max(14, roleBase * densityScale * 0.96);
-  const headingSize = Math.max(16, headingBase * densityScale * 0.95);
-  const bodySize = Math.max(11, bodyBase * densityScale * 0.98);
-  const titleSize = Math.max(ResumeTypography.title, ResumeTypography.title * typScale * densityScale * 0.94);
-  const subtitleSize = Math.max(
-    ResumeTypography.subtitle,
-    ResumeTypography.subtitle * typScale * densityScale * 0.98
-  );
-  const metaSize = Math.max(ResumeTypography.meta, ResumeTypography.meta * typScale * densityScale);
-
   return (
     <ResumePage
       theme={theme}
@@ -696,15 +683,7 @@ const template4Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
         ["--resume-border-strong" as string]: theme.palette.accent,
         ["--resume-name-color" as string]: theme.palette.nameText || theme.palette.text,
         ["--resume-role-color" as string]: theme.palette.titleText || theme.palette.mutedText,
-        ["--resume-heading-size" as string]: `${headingSize.toFixed(2)}px`,
-        ["--resume-body-size" as string]: `${bodySize.toFixed(2)}px`,
-        ["--resume-item-title-size" as string]: `${titleSize.toFixed(2)}px`,
-        ["--resume-item-subtitle-size" as string]: `${subtitleSize.toFixed(2)}px`,
-        ["--resume-item-meta-size" as string]: `${metaSize.toFixed(2)}px`,
-        ["--resume-contact-size" as string]: `${(ResumeTypography.contact * typScale * densityScale).toFixed(2)}px`,
-        ["--resume-name-size" as string]: `${Math.round(nameSize * 100) / 100}px`,
-        ["--resume-role-size" as string]: `${Math.round(roleSize * 100) / 100}px`,
-        ["--resume-line-height" as string]: `${Math.max(1.46, lineHeight)}`,
+        ...getStandardResumeTypographyVars(),
         ["--resume-font-family" as string]: theme.fontFamily || "Inter, Arial, Helvetica, sans-serif",
         ["--template4-page-padding" as string]: scalePxString(
           "42px 48px",
@@ -724,7 +703,11 @@ const template4Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
             if (!content) return null;
 
             return (
-              <Template4Section key={`template4-${key}`} title={getSectionLabel(key, summaryTitle)}>
+              <Template4Section
+                key={`template4-${key}`}
+                title={getSectionLabel(key, summaryTitle)}
+                forcePageBreakBefore={key === "hobbies"}
+              >
                 {content}
               </Template4Section>
             );

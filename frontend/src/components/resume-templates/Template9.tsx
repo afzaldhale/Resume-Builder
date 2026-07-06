@@ -1,5 +1,8 @@
 import React, { type CSSProperties, type ReactNode } from "react";
-import { ResumeTypography } from "@/constants/resumeDesignSystem";
+import {
+  ResumeTypography,
+  getStandardResumeTypographyVars,
+} from "@/constants/resumeDesignSystem";
 import { getCompactMode, getDensityMode, getSummaryConfig } from "./templatePolicy";
 import {
   formatMonthYear,
@@ -646,7 +649,7 @@ const ResumePageStyles = () => (
 
     .resume-heading {
       font-size: var(--resume-heading-size);
-      line-height: 1.16;
+      line-height: var(--resume-line-height);
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -654,31 +657,31 @@ const ResumePageStyles = () => (
 
     .resume-body-copy {
       font-size: var(--resume-body-size);
-      line-height: 1.68;
+      line-height: var(--resume-line-height);
     }
 
     .resume-item-title {
       font-size: var(--resume-item-title-size);
-      line-height: 1.42;
+      line-height: var(--resume-line-height);
       font-weight: 700;
     }
 
     .resume-item-subtitle {
       font-size: var(--resume-item-subtitle-size);
-      line-height: 1.42;
+      line-height: var(--resume-line-height);
       color: var(--resume-page-text);
     }
 
     .resume-item-meta {
       font-size: var(--resume-item-meta-size);
-      line-height: 1.45;
+      line-height: var(--resume-line-height);
       color: var(--resume-muted-text);
     }
 
     .resume-section-title {
       display: block;
       font-size: var(--resume-heading-size);
-      line-height: 1.18;
+      line-height: var(--resume-line-height);
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -691,7 +694,7 @@ const ResumePageStyles = () => (
       margin: 0;
       padding-left: var(--resume-list-indent, 18px);
       font-size: var(--resume-list-size);
-      line-height: 1.62;
+      line-height: var(--resume-line-height);
     }
 
     .resume-bullet-list li + li {
@@ -730,7 +733,7 @@ const ResumePageStyles = () => (
     .resume-contact-item {
       display: inline-flex;
       align-items: center;
-      line-height: 1.35;
+      line-height: var(--resume-line-height);
       min-width: 0;
     }
 
@@ -817,7 +820,7 @@ const ResumePageStyles = () => (
       padding-left: 16px;
       font-size: 13.5px;
       font-weight: 500;
-      line-height: 1.6;
+      line-height: var(--resume-line-height);
       color: #333333;
       break-inside: avoid;
       page-break-inside: avoid;
@@ -854,7 +857,7 @@ const ResumePageStyles = () => (
       position: relative;
       padding-left: 16px;
       font-size: var(--resume-list-size);
-      line-height: 1.55;
+      line-height: var(--resume-line-height);
     }
 
     .resume-two-column-list li::before {
@@ -1360,29 +1363,6 @@ const template9Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
     );
   }
 
-  const densityScale =
-    densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.95 : 0.92;
-
-  const typScale = theme.typographyScale || 1;
-
-  const nameBase = ResumeTypography.name * typScale;
-  const roleBase = ResumeTypography.role * typScale;
-  const headingBase = ResumeTypography.heading * typScale;
-  const bodyBase = ResumeTypography.body * typScale;
-  const lineHeight = ResumeTypography.lineHeight || 1.4;
-
-  const nameSize = nameBase * densityScale;
-  const roleSize = roleBase * densityScale;
-  const headingSize = headingBase * densityScale;
-  const bodySize = Math.max(12, bodyBase * densityScale);
-  const titleSize = Math.max(ResumeTypography.title, ResumeTypography.title * typScale * densityScale);
-  const subtitleSize = Math.max(
-    ResumeTypography.subtitle,
-    ResumeTypography.subtitle * typScale * densityScale
-  );
-  const metaSize = Math.max(ResumeTypography.meta, ResumeTypography.meta * typScale * densityScale);
-  const listSize = Math.max(ResumeTypography.list, ResumeTypography.list * typScale * densityScale);
-
   return (
     <ResumePage
       theme={theme}
@@ -1399,16 +1379,7 @@ const template9Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           "--resume-sidebar-bg": theme.palette.sidebarBg || theme.palette.accentSoft,
           "--resume-sidebar-border": theme.palette.sidebarBorder || theme.palette.border,
           "--resume-sidebar-width": resolveSidebarWidth(theme.sidebarWidth),
-          "--resume-heading-size": `${headingSize.toFixed(2)}px`,
-          "--resume-body-size": `${bodySize.toFixed(2)}px`,
-          "--resume-item-title-size": `${titleSize.toFixed(2)}px`,
-          "--resume-item-subtitle-size": `${subtitleSize.toFixed(2)}px`,
-          "--resume-item-meta-size": `${metaSize.toFixed(2)}px`,
-          "--resume-list-size": `${listSize.toFixed(2)}px`,
-          "--resume-contact-size": `${(ResumeTypography.contact * typScale * densityScale).toFixed(2)}px`,
-          "--resume-name-size": `${Math.round(nameSize * 100) / 100}px`,
-          "--resume-role-size": `${Math.round(roleSize * 100) / 100}px`,
-          "--resume-line-height": `${lineHeight}`,
+          ...getStandardResumeTypographyVars(),
           "--resume-summary-box-padding": compactMode || densityMode !== "comfortable" ? "12px 14px" : "14px 16px",
           "--resume-list-indent": densityMode === "comfortable" ? "20px" : "18px",
           "--resume-contact-separator-gap": densityMode === "comfortable" ? "10px" : "8px",

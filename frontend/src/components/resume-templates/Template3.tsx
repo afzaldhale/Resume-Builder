@@ -107,8 +107,8 @@ const Template3Styles = ({
 
     .template3-header {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 320px;
-      gap: 28px;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      column-gap: 52px;
       align-items: start;
       padding: 6px 0 8px;
     }
@@ -117,7 +117,7 @@ const Template3Styles = ({
       margin: 0;
       font-family: Arial, sans-serif;
       font-size: ${ResumeTypography.name}px;
-      line-height: 1.02;
+      line-height: ${ResumeTypography.lineHeight};
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
@@ -128,7 +128,7 @@ const Template3Styles = ({
       margin: 4px 0 0;
       font-family: Arial, sans-serif;
       font-size: ${ResumeTypography.role}px;
-      line-height: 1.1;
+      line-height: ${ResumeTypography.lineHeight};
       font-weight: 600;
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -140,6 +140,8 @@ const Template3Styles = ({
       gap: 2px;
       padding-top: 2px;
       font-family: Arial, sans-serif;
+      justify-self: end;
+      width: 100%;
     }
 
     .template3-contact-row {
@@ -148,7 +150,7 @@ const Template3Styles = ({
       column-gap: 6px;
       align-items: start;
       font-size: ${ResumeTypography.contact}px;
-      line-height: 1.35;
+      line-height: ${ResumeTypography.lineHeight};
       color: ${theme.palette.mutedText};
     }
 
@@ -186,7 +188,7 @@ const Template3Styles = ({
       margin: 0 0 12px;
       font-family: Arial, sans-serif;
       font-size: ${ResumeTypography.heading}px;
-      line-height: 1.2;
+      line-height: ${ResumeTypography.lineHeight};
       font-weight: 700;
       text-transform: uppercase;
       color: ${theme.palette.headingText || theme.palette.text};
@@ -198,7 +200,7 @@ const Template3Styles = ({
     .template3-list {
       font-family: "Century Gothic", sans-serif;
       font-size: ${ResumeTypography.body}px;
-      line-height: 1.4;
+      line-height: ${ResumeTypography.lineHeight};
       font-weight: 400;
       color: ${theme.palette.text};
     }
@@ -215,7 +217,7 @@ const Template3Styles = ({
       margin: 0;
       font-family: Arial, sans-serif;
       font-size: ${ResumeTypography.title}px;
-      line-height: 1.2;
+      line-height: ${ResumeTypography.lineHeight};
       font-weight: 700;
       color: ${theme.palette.headingText || theme.palette.text};
     }
@@ -225,7 +227,7 @@ const Template3Styles = ({
       margin: 2px 0 0;
       font-family: "Century Gothic", sans-serif;
       font-size: ${ResumeTypography.meta}px;
-      line-height: 1.4;
+      line-height: ${ResumeTypography.lineHeight};
       font-weight: 400;
       color: ${theme.palette.mutedText};
     }
@@ -244,7 +246,7 @@ const Template3Styles = ({
     .template3-list li {
       display: list-item !important;
       margin-bottom: 2px;
-      line-height: 1.4;
+      line-height: ${ResumeTypography.lineHeight};
     }
 
     .template3-list-tight li {
@@ -258,7 +260,7 @@ const Template3Styles = ({
     .template3-certification-title {
       font-family: Arial, sans-serif;
       font-size: ${ResumeTypography.title}px;
-      line-height: 1.2;
+      line-height: ${ResumeTypography.lineHeight};
       font-weight: 700;
       color: ${theme.palette.headingText || theme.palette.text};
     }
@@ -266,7 +268,7 @@ const Template3Styles = ({
     .template3-certification-detail {
       font-family: "Century Gothic", sans-serif;
       font-size: ${ResumeTypography.body}px;
-      line-height: 1.4;
+      line-height: ${ResumeTypography.lineHeight};
       font-weight: 400;
       color: ${theme.palette.text};
     }
@@ -275,7 +277,7 @@ const Template3Styles = ({
       margin: 0 0 4px;
       font-family: Arial, sans-serif;
       font-size: ${ResumeTypography.title}px;
-      line-height: 1.2;
+      line-height: ${ResumeTypography.lineHeight};
       font-weight: 700;
       color: ${theme.palette.headingText || theme.palette.text};
     }
@@ -291,14 +293,19 @@ const Template3Styles = ({
 const Section = ({
   title,
   children,
+  forcePageBreakBefore = false,
 }: {
   title: string;
   children: React.ReactNode;
+  forcePageBreakBefore?: boolean;
 }) => {
   if (!children) return null;
 
   return (
-    <section className="resume-section template3-section break-inside-avoid">
+    <section
+      className="resume-section template3-section break-inside-avoid"
+      data-force-page-break-before={forcePageBreakBefore ? "true" : undefined}
+    >
       <h2 className="resume-section-title template3-section-title">{title}</h2>
       <div className="resume-section-content">{children}</div>
     </section>
@@ -551,7 +558,7 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
           ) : null}
 
           {(data.hobbies || []).length > 0 ? (
-            <Section title="Hobbies & Interests">
+            <Section title="Hobbies & Interests" forcePageBreakBefore>
               <p className="template3-copy">{uniqueItems(data.hobbies || []).join(", ")}</p>
             </Section>
           ) : null}

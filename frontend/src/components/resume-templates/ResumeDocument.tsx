@@ -578,6 +578,14 @@ const ResumeDocumentComponent = ({
         };
 
         const appendSection = (sectionSource: HTMLElement) => {
+          const shouldStartOnFreshPage =
+            sectionSource.dataset.forcePageBreakBefore === "true" &&
+            currentPageBody.childNodes.length > 0;
+
+          if (shouldStartOnFreshPage) {
+            moveToNewPage();
+          }
+
           const sectionClone = sectionSource.cloneNode(true);
           const hadContent = currentPageBody.childNodes.length > 0;
           appendToCurrent(sectionClone);
@@ -1141,6 +1149,7 @@ const ResumeDocumentComponent = ({
 
       if (safeTemplateId === 9) {
         const layoutTemplate = contentWrapper.cloneNode(false) as HTMLElement;
+        const template9ContinuationTopOffsetPx = 24;
         const template9SectionSelector = ".resume-main-section, .resume-section";
         const styleNodes = Array.from(pageRoot.children).filter(
           (child) => child.nodeType === Node.ELEMENT_NODE && child.nodeName === "STYLE"
@@ -1238,6 +1247,9 @@ const ResumeDocumentComponent = ({
           sidebar.style.maxWidth = "none";
           sidebar.style.height = "100%";
           sidebar.style.minHeight = "100%";
+          sidebar.style.alignSelf = "stretch";
+          sidebar.style.background =
+            getComputedStyle(pageRoot).getPropertyValue("--resume-sidebar-bg").trim() || "transparent";
 
           main.style.width = "100%";
           main.style.minWidth = "0";
@@ -1255,6 +1267,10 @@ const ResumeDocumentComponent = ({
             const sidebarShell = sidebarTemplate.firstElementChild;
             if (sidebarShell instanceof HTMLElement) {
               const sidebarShellClone = sidebarShell.cloneNode(false) as HTMLElement;
+              sidebarShellClone.style.display = "flex";
+              sidebarShellClone.style.flexDirection = "column";
+              sidebarShellClone.style.width = "100%";
+              sidebarShellClone.style.flex = "1 1 auto";
               sidebarShellClone.style.height = "100%";
               sidebarShellClone.style.minHeight = "100%";
               sidebar.appendChild(sidebarShellClone);
@@ -1263,6 +1279,8 @@ const ResumeDocumentComponent = ({
 
           if (includeHeader && headerTemplate) {
             mainFlow.appendChild(headerTemplate.cloneNode(true));
+          } else {
+            mainFlow.style.paddingTop = `${template9ContinuationTopOffsetPx}px`;
           }
 
           mainInner.appendChild(mainFlow);
@@ -2065,6 +2083,15 @@ const ResumeDocumentComponent = ({
 
       const appendSection = (sectionEl: Element) => {
         const sectionSource = sectionEl as HTMLElement;
+        const shouldStartOnFreshPage =
+          (safeTemplateId === 4 || safeTemplateId === 7 || safeTemplateId === 8 || safeTemplateId === 12) &&
+          sectionSource.dataset.forcePageBreakBefore === "true" &&
+          hasCurrentPageContent();
+
+        if (shouldStartOnFreshPage) {
+          moveToNewPage();
+        }
+
         const sectionClone = sectionEl.cloneNode(true);
         const hadContent = hasCurrentPageContent();
         appendToCurrent(sectionClone);
@@ -2108,6 +2135,9 @@ const ResumeDocumentComponent = ({
 
       const getTemplate1SectionContent = (sectionSource: HTMLElement) =>
         sectionSource.querySelector<HTMLElement>(".resume-section-content");
+
+      const shouldForcePageBreakBefore = (sectionSource: HTMLElement) =>
+        sectionSource.dataset.forcePageBreakBefore === "true";
 
       const createStructuredSection = (sectionSource: HTMLElement) => {
         const section = sectionSource.cloneNode(false) as HTMLElement;
@@ -2385,6 +2415,9 @@ const ResumeDocumentComponent = ({
 
       const appendStructuredSection = (sectionEl: Element) => {
         const sectionSource = sectionEl as HTMLElement;
+        if (shouldForcePageBreakBefore(sectionSource) && hasCurrentPageContent()) {
+          moveToNewPage();
+        }
         const contentSource = getTemplate1SectionContent(sectionSource);
         const directChildren = contentSource ? getMeaningfulChildren(contentSource) : [];
         const firstChild = directChildren[0];

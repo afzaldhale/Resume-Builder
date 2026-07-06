@@ -1,64 +1,9 @@
-import axios, { AxiosError } from "axios";
-import { API_BASE_URL } from "../../lib/apiBaseUrl";
+import api from "@/api/axios";
 
-/**
- * =========================
- * AXIOS INSTANCE
- * =========================
- * - Used for ALL JSON APIs
- * - Cookies / sessions supported
- */
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  timeout: 10000,
-});
-
-/**
- * =========================
- * RESPONSE INTERCEPTOR
- * =========================
- */
-api.interceptors.response.use(
-  (response) => response,
-  (error: AxiosError) => {
-    if (error.response) {
-      console.error("API Error:", {
-        url: error.config?.url,
-        status: error.response.status,
-        data: error.response.data,
-      });
-    } else if (error.request) {
-      console.error("No response from server:", error.message);
-    } else {
-      console.error("Axios error:", error.message);
-    }
-
-    return Promise.reject(error);
-  }
-);
-
-export default api;
-
-/**
- * =========================
- * PDF DOWNLOAD HELPER
- * =========================
- * IMPORTANT:
- * - DO NOT use main `api` instance for blobs
- * - Browsers require separate config
- */
 export const downloadResumePDF = async (resumeId: number) => {
-  const response = await axios.get(
-    `${API_BASE_URL}/api/resumes/${resumeId}/pdf`,
-    {
-      responseType: "blob", // 🔴 REQUIRED
-      withCredentials: true,
-    }
-  );
+  const response = await api.get(`/api/resumes/${resumeId}/pdf`, {
+    responseType: "blob",
+  });
 
   const blob = new Blob([response.data], {
     type: "application/pdf",
@@ -75,3 +20,5 @@ export const downloadResumePDF = async (resumeId: number) => {
   link.remove();
   window.URL.revokeObjectURL(url);
 };
+
+export default downloadResumePDF;

@@ -8,8 +8,8 @@ import {
   type ResumeSectionKey,
 } from "./resumeSections";
 import type { ResumeData } from "./types";
-// Template11 uses inline structure; shared `ResumeSection` and `ResumeTypography` are not required here.
 import { resolveTemplateTheme } from "./themeConfig";
+import { getStandardResumeTypographyVars } from "@/constants/resumeDesignSystem";
 
 type HeadingStyle = "bar" | "underline" | "accent";
 type HeaderLayout = "stacked" | "split";
@@ -312,7 +312,7 @@ const ResumePageStyles = () => (
 
     .resume-heading {
       font-size: var(--resume-heading-size);
-      line-height: 1.2;
+      line-height: var(--resume-line-height);
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -320,31 +320,31 @@ const ResumePageStyles = () => (
 
     .resume-body-copy {
       font-size: var(--resume-body-size);
-      line-height: 1.34;
+      line-height: var(--resume-line-height);
     }
 
     .resume-item-title {
       font-size: var(--resume-item-title-size);
-      line-height: 1.35;
+      line-height: var(--resume-line-height);
       font-weight: 700;
     }
 
     .resume-item-subtitle {
       font-size: var(--resume-item-subtitle-size);
-      line-height: 1.32;
+      line-height: var(--resume-line-height);
       color: var(--resume-page-text);
     }
 
     .resume-item-meta {
       font-size: var(--resume-item-meta-size);
-      line-height: 1.3;
+      line-height: var(--resume-line-height);
       color: var(--resume-muted-text);
     }
 
     .resume-section-title {
       display: block;
       font-size: var(--resume-heading-size);
-      line-height: 1.2;
+      line-height: var(--resume-line-height);
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -355,7 +355,7 @@ const ResumePageStyles = () => (
       margin: 0;
       padding-left: var(--resume-list-indent, 18px);
       font-size: var(--resume-list-size);
-      line-height: 1.34;
+      line-height: var(--resume-line-height);
     }
 
     .resume-bullet-list li + li {
@@ -377,7 +377,7 @@ const ResumePageStyles = () => (
     .resume-contact-item {
       display: inline-flex;
       align-items: center;
-      line-height: 1.35;
+      line-height: var(--resume-line-height);
       min-width: 0;
     }
 
@@ -586,14 +586,7 @@ const template11Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           "--resume-accent": theme.palette.accent,
           "--resume-accent-soft": theme.palette.accentSoft,
           "--resume-accent-text": theme.palette.accentText,
-          /* Enforce Template 1 typography scale exactly */
-          "--resume-name-size": "32px",
-          "--resume-role-size": "13px",
-          "--resume-heading-size": "16px",
-          "--resume-body-size": "11px",
-          "--resume-item-meta-size": "10px",
-          "--resume-list-size": "11px",
-          "--resume-line-height": "1.5",
+          ...getStandardResumeTypographyVars(),
           "--resume-summary-box-padding": compactMode || densityMode !== "comfortable" ? "8px 10px" : "10px 12px",
           "--resume-list-indent": densityMode === "comfortable" ? "18px" : "16px",
           "--resume-contact-separator-gap": densityMode === "comfortable" ? "8px" : "6px",
@@ -627,7 +620,7 @@ const template11Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
         }}
       >
         <header style={{ textAlign: "center", paddingBottom: "8px" }}>
-          <h1 style={{ margin: 0, fontSize: "var(--resume-name-size)", lineHeight: "1.05", fontWeight: 700, textTransform: "uppercase", color: theme.palette.nameText || theme.palette.text }}>
+          <h1 style={{ margin: 0, fontSize: "var(--resume-name-size)", lineHeight: "var(--resume-line-height)", fontWeight: 700, textTransform: "uppercase", color: theme.palette.nameText || theme.palette.text }}>
             {data.fullName}
           </h1>
           {hasText(data.role) ? (
@@ -747,7 +740,7 @@ const template11Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                                 ))}
                               </ul>
                             ) : (
-                              <p style={{ margin: 0, fontSize: "var(--resume-body-size)", lineHeight: 1.5 }}>{item.description}</p>
+                              <p style={{ margin: 0, fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>{item.description}</p>
                             )}
                           </div>
                         ) : null}
