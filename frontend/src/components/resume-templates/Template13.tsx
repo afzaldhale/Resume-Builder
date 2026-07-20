@@ -13,6 +13,10 @@ import {
 import type { ResumeData } from "./types";
 import { getStandardResumeTypographyVars } from "@/constants/resumeDesignSystem";
 import { resolveTemplateTheme } from "./themeConfig";
+import {
+  ResumeStructuredExperienceBlock,
+  ResumeStructuredProjectBlock,
+} from "./templatePrimitives";
 
 type HeadingStyle = "bar" | "underline" | "accent";
 type HeaderLayout = "stacked" | "split";
@@ -119,20 +123,6 @@ const DEFAULT_FRESHER_SIDEBAR: SectionKey[] = ["languages", "strengths", "hobbie
 const DEFAULT_FRESHER_MAIN: SectionKey[] = ["summary", "skills", "experience", "education", "certifications"];
 
 const hasText = (value?: string | null) => Boolean(value && value.trim());
-
-const toBulletItems = (value?: string | null) =>
-  (value || "")
-    .split("\n")
-    .map((item) => item.trim())
-    .filter(Boolean);
-
-const toLineItems = (value?: string[] | string | null) => {
-  if (Array.isArray(value)) {
-    return value.map((item) => item?.trim()).filter(Boolean) as string[];
-  }
-
-  return toBulletItems(value);
-};
 
 const uniqueItems = (items: string[]) => [...new Set(items.filter(Boolean))];
 
@@ -293,18 +283,14 @@ const buildSectionMap = (data: ResumeData) => {
     experience:
       experience.length > 0 ? (
         <div style={{ display: "grid", rowGap: "18px" }}>
-          {experience.map((item, index) => {
-            const title = [item.role, item.company].filter(hasText).join(" at ");
-
-            return (
-              <Template13ExperienceEntry
-                key={`${item.company}-${item.role}-${index}`}
-                title={title}
-                dates={formatRange(item.startDate, item.endDate)}
-                descriptions={toLineItems(item.description as string | string[] | null | undefined)}
-              />
-            );
-          })}
+          {experience.map((item, index) => (
+            <ResumeStructuredExperienceBlock
+              key={`${item.company}-${item.role}-${index}`}
+              title={[item.role, item.company].filter(Boolean).join(" at ")}
+              meta={formatRange(item.startDate, item.endDate)}
+              description={item.description}
+            />
+          ))}
         </div>
       ) : null,
     education:
@@ -325,11 +311,12 @@ const buildSectionMap = (data: ResumeData) => {
       data.projects.length > 0 ? (
         <div style={{ display: "grid", rowGap: "18px" }}>
           {data.projects.map((project, index) => (
-            <Template13ProjectEntry
+            <ResumeStructuredProjectBlock
               key={`${project.name}-${index}`}
               title={project.name}
               description={project.description}
               technologies={project.technologies}
+              meta={hasText(project.link) ? project.link : undefined}
             />
           ))}
         </div>
@@ -553,6 +540,10 @@ const ResumePageStyles = () => (
     .resume-section {
       display: grid;
       row-gap: var(--resume-section-vertical-gap, 8px);
+    }
+
+    .resume-section-content {
+      padding-left: var(--resume-section-content-indent, 16px);
     }
   `}</style>
 );
@@ -901,29 +892,6 @@ const Template13BulletTitle = ({ text }: { text: string }) => (
   </div>
 );
 
-const Template13ExperienceEntry = ({
-  title,
-  dates,
-  descriptions,
-}: {
-  title: string;
-  dates?: string;
-  descriptions: string[];
-}) => (
-  <div className="resume-meta-block break-inside-avoid">
-    <Template13BulletTitle text={[title, dates].filter(Boolean).join(" — ")} />
-    {descriptions.length > 0 ? (
-      <div style={{ marginLeft: "18px", marginTop: "6px", display: "grid", rowGap: "4px" }}>
-        {descriptions.map((description, index) => (
-          <p key={`${description}-${index}`} className="resume-body-copy" style={{ margin: 0 }}>
-            {description}
-          </p>
-        ))}
-      </div>
-    ) : null}
-  </div>
-);
-
 const Template13EducationEntry = ({
   degree,
   school,
@@ -941,28 +909,6 @@ const Template13EducationEntry = ({
       {hasText(school) ? <p className="resume-body-copy" style={{ margin: 0 }}>{school}</p> : null}
       {hasText(dates) ? <p className="resume-item-meta" style={{ margin: 0 }}>{dates}</p> : null}
       {hasText(gpa) ? <p className="resume-body-copy" style={{ margin: 0 }}>GPA: {gpa}</p> : null}
-    </div>
-  </div>
-);
-
-const Template13ProjectEntry = ({
-  title,
-  description,
-  technologies,
-}: {
-  title: string;
-  description?: string;
-  technologies: string[];
-}) => (
-  <div className="resume-meta-block break-inside-avoid">
-    <Template13BulletTitle text={title} />
-    <div style={{ marginLeft: "18px", marginTop: "6px", display: "grid", rowGap: "4px" }}>
-      {hasText(description) ? <p className="resume-body-copy" style={{ margin: 0 }}>{description}</p> : null}
-      {technologies.length > 0 ? (
-        <p className="resume-item-meta" style={{ margin: 0 }}>
-          Technologies: {uniqueItems(technologies).join(", ")}
-        </p>
-      ) : null}
     </div>
   </div>
 );
@@ -1218,3 +1164,4 @@ const Template13: React.FC<Template13Props> = ({ data }) =>
   template13Render(data, resolveTemplateTheme(13, data));
 
 export default Template13;
+

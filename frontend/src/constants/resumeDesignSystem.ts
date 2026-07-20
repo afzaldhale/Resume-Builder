@@ -27,12 +27,14 @@ export const getStandardResumeTypographyVars = () => ({
   "--resume-name-size": `${ResumeTypography.name}px`,
   "--resume-role-size": `${ResumeTypography.role}px`,
   "--resume-line-height": `${ResumeTypography.lineHeight}`,
+  "--resume-section-content-indent": "16px",
 });
 
 export const ResumeSpacing = {
   pagePaddingX: 48,
   pagePaddingY: 52,
   sectionGap: 16,
+  sectionContentIndent: 16,
   paragraphGap: 8,
   itemGap: 6,
 };

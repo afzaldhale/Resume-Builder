@@ -307,7 +307,9 @@ const Section = ({
       data-force-page-break-before={forcePageBreakBefore ? "true" : undefined}
     >
       <h2 className="resume-section-title template3-section-title">{title}</h2>
-      <div className="resume-section-content">{children}</div>
+      <div className="resume-section-content" style={{ paddingLeft: "var(--resume-section-content-indent, 16px)" }}>
+        {children}
+      </div>
     </section>
   );
 };
@@ -354,30 +356,6 @@ const MetaBlock = ({
     {children ? <div className="template3-item-body">{children}</div> : null}
   </div>
 );
-
-const PlainTextGroup = ({
-  items,
-  fallbackText,
-}: {
-  items: string[];
-  fallbackText?: string;
-}) => {
-  const filteredItems = items.filter(Boolean);
-
-  if (filteredItems.length === 0) {
-    return hasText(fallbackText) ? <p className="template3-copy">{fallbackText}</p> : null;
-  }
-
-  return (
-    <div>
-      {filteredItems.map((item, index) => (
-        <p key={`${item}-${index}`} className="template3-copy">
-          {item}
-        </p>
-      ))}
-    </div>
-  );
-};
 
 const CertificationList = ({
   items,
@@ -478,11 +456,10 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
                   return (
                     <MetaBlock
                       key={`${item.company}-${item.role}-${index}`}
-                      title={`${TEMPLATE3_BULLET} ${experienceTitle}${
-                        hasText(experienceDate) ? ` at ${experienceDate}` : ""
-                      }`}
+                      title={experienceTitle || "Experience"}
+                      date={experienceDate}
                     >
-                      <PlainTextGroup items={toBulletItems(item.description)} fallbackText={item.description} />
+                      <BulletList items={toBulletItems(item.description)} fallbackText={item.description} />
                     </MetaBlock>
                   );
                 })}
@@ -519,15 +496,18 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
                 {data.projects.map((project, index) => (
                   <MetaBlock
                     key={`${project.name}-${index}`}
-                    title={`${TEMPLATE3_BULLET} ${project.name}`}
+                    title={project.name}
                     date={hasText(project.link) ? project.link : undefined}
                   >
-                    {hasText(project.description) ? <p className="template3-copy">{project.description}</p> : null}
-                    {project.technologies.length > 0 ? (
-                      <p className="template3-copy">
-                        <strong>Technologies:</strong> {uniqueItems(project.technologies).join(", ")}
-                      </p>
-                    ) : null}
+                    <BulletList
+                      items={[
+                        ...toBulletItems(project.description),
+                        ...(project.technologies.length > 0
+                          ? [`Technologies: ${uniqueItems(project.technologies).join(", ")}`]
+                          : []),
+                      ]}
+                      fallbackText={project.description}
+                    />
                   </MetaBlock>
                 ))}
               </div>

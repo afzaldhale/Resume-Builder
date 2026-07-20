@@ -384,17 +384,17 @@ const Template10Section = ({
   children: ReactNode;
 }) => (
   <section className="template10-section break-inside-avoid">
-    <h3
-      style={{
-        fontSize: "var(--resume-heading-size)",
-        fontWeight: 700,
-        lineHeight: "var(--resume-line-height)",
-        letterSpacing: "0.14em",
-        textTransform: "uppercase",
-        color: theme.palette.text,
-        margin: "0 0 8px",
-      }}
-    >
+      <h3
+        style={{
+          fontSize: "var(--resume-heading-size)",
+          fontWeight: 700,
+          lineHeight: "var(--resume-line-height)",
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: theme.palette.headingText || theme.palette.text,
+          margin: "0 0 8px",
+        }}
+      >
       {title}
     </h3>
     <div
@@ -405,9 +405,11 @@ const Template10Section = ({
         marginBottom: "10px",
       }}
     />
-    <div>{children}</div>
-  </section>
-);
+      <div className="resume-section-content" style={{ paddingLeft: "var(--resume-section-content-indent, 16px)" }}>
+        {children}
+      </div>
+    </section>
+  );
 
 const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
   const compactMode = getCompactMode(data);
@@ -647,52 +649,65 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
               </Template10Section>
             ) : null}
 
-            {experience.length > 0 ? (
-              <Template10Section title="Work Experience" theme={theme}>
-                <ul className="template10-list">
-                  {experience.map((item, index) => (
-                    <li key={`${item.company}-${item.role}-${index}`} className="template10-entry">
-                      <div style={{ display: "flex", justifyContent: "space-between", gap: "8px", alignItems: "baseline" }}>
-                        <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: "var(--resume-line-height)" }}>
-                          {item.role} at {item.company}
-                        </p>
-                        <p style={{ margin: 0, fontSize: "var(--resume-item-meta-size)", lineHeight: "var(--resume-line-height)", color: theme.palette.mutedText }}>
-                          {formatRange(item.startDate, item.endDate)}
-                        </p>
-                      </div>
-                      {hasText(item.description) ? (
-                        <p style={{ margin: "5px 0 0", fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
-                          {item.description}
-                        </p>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              </Template10Section>
-            ) : null}
+              {experience.length > 0 ? (
+                <Template10Section title="Work Experience" theme={theme}>
+                  <ul className="template10-list">
+                    {experience.map((item, index) => (
+                      <li key={`${item.company}-${item.role}-${index}`} className="template10-entry">
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: "8px", alignItems: "baseline" }}>
+                          <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: "var(--resume-line-height)" }}>
+                            {item.role} at {item.company}
+                          </p>
+                          <p style={{ margin: 0, fontSize: "var(--resume-item-meta-size)", lineHeight: "var(--resume-line-height)", color: theme.palette.mutedText }}>
+                            {formatRange(item.startDate, item.endDate)}
+                          </p>
+                        </div>
+                        {hasText(item.description) ? (
+                          <ul className="template10-list" style={{ marginTop: "5px" }}>
+                            {item.description
+                              .split(/\r?\n/)
+                              .map((line) => line.trim())
+                              .filter(Boolean)
+                              .map((line, lineIndex) => (
+                                <li
+                                  key={`${item.company}-${item.role}-${index}-detail-${lineIndex}`}
+                                  style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}
+                                >
+                                  {line}
+                                </li>
+                              ))}
+                          </ul>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </Template10Section>
+              ) : null}
 
-            {projects.length > 0 ? (
-              <Template10Section title="Projects" theme={theme}>
-                <ul className="template10-list">
-                  {projects.map((project, index) => (
-                    <li key={`${project.name}-${index}`} className="template10-entry">
-                      <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: "var(--resume-line-height)" }}>
-                        {project.name}
-                      </p>
-                      {hasText(project.description) ? (
-                        <p style={{ margin: "5px 0 0", fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
-                          {project.description}
+              {projects.length > 0 ? (
+                <Template10Section title="Projects" theme={theme}>
+                  <ul className="template10-list">
+                    {projects.map((project, index) => (
+                      <li key={`${project.name}-${index}`} className="template10-entry">
+                        <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: "var(--resume-line-height)" }}>
+                          {project.name}
                         </p>
-                      ) : null}
-                      {project.technologies.length > 0 ? (
-                        <p style={{ margin: "5px 0 0", fontSize: "var(--resume-item-meta-size)", lineHeight: "var(--resume-line-height)", color: theme.palette.mutedText }}>
-                          Technologies: {uniqueItems(project.technologies).join(", ")}
-                        </p>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              </Template10Section>
+                        <ul className="template10-list" style={{ marginTop: "5px" }}>
+                          {hasText(project.description) ? (
+                            <li style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
+                              {project.description}
+                            </li>
+                          ) : null}
+                          {project.technologies.length > 0 ? (
+                            <li style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
+                              Technologies: {uniqueItems(project.technologies).join(", ")}
+                            </li>
+                          ) : null}
+                        </ul>
+                      </li>
+                    ))}
+                  </ul>
+                </Template10Section>
             ) : null}
 
             {certifications.length > 0 ? (

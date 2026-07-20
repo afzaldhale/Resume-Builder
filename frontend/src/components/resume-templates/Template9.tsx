@@ -16,6 +16,10 @@ import {
 } from "./resumeSections";
 import type { ResumeData } from "./types";
 import { resolveTemplateTheme } from "./themeConfig";
+import {
+  ResumeStructuredExperienceBlock,
+  ResumeStructuredProjectBlock,
+} from "./templatePrimitives";
 
 type HeadingStyle = "bar" | "underline" | "accent";
 type HeaderLayout = "stacked" | "split";
@@ -102,12 +106,6 @@ const DEFAULT_SINGLE_ORDER: SectionKey[] = [
 
 const hasText = (value?: string | null) => Boolean(value && value.trim());
 
-const toBulletItems = (value?: string | null) =>
-  (value || "")
-    .split("\n")
-    .map((item) => item.trim())
-    .filter(Boolean);
-
 const uniqueItems = (items: string[]) => [...new Set(items.filter(Boolean))];
 
 const scalePxString = (value: string, factor: number) =>
@@ -183,8 +181,8 @@ const ResumeSidebarSection = ({
   title: string;
   children: ReactNode;
   theme: ResumeTemplateTheme;
-}) => (
-  <section className="break-inside-avoid" style={{ display: "grid", rowGap: "14px" }}>
+  }) => (
+    <section className="break-inside-avoid" style={{ display: "grid", rowGap: "14px" }}>
     <div
       style={{
         width: "100%",
@@ -204,7 +202,9 @@ const ResumeSidebarSection = ({
       >
         {title}
       </h2>
-      {children}
+      <div className="resume-section-content" style={{ paddingLeft: "var(--resume-section-content-indent, 16px)" }}>
+        {children}
+      </div>
     </div>
   </section>
 );
@@ -251,7 +251,9 @@ const ResumeMainSection = ({
         {title}
       </h2>
     </div>
-    <div className="resume-section-content">{children}</div>
+    <div className="resume-section-content" style={{ paddingLeft: "var(--resume-section-content-indent, 16px)" }}>
+      {children}
+    </div>
   </section>
 );
 
@@ -461,25 +463,14 @@ const buildSectionMap = (data: ResumeData) => {
     experience:
       experience.length > 0 ? (
         <div className="grid" style={{ rowGap: "24px" }}>
-          {experience.map((item, index) => {
-            const experienceDate = formatRange(item.startDate, item.endDate);
-            const experienceTitle = [item.role, item.company].filter(hasText).join(" at ");
-            const descriptionItems = toBulletItems(item.description);
-            const [firstDescription, ...remainingDescriptions] = descriptionItems;
-            const fallbackDescription = hasText(item.description) ? item.description.trim() : "";
-            const inlineDescription = firstDescription || fallbackDescription;
-
-            return (
-              <ResumeMetaBlock
-                key={`${item.company}-${item.role}-${index}`}
-                title={`\u2022 ${experienceTitle}${hasText(experienceDate) ? ` at ${experienceDate}` : ""}${
-                  hasText(inlineDescription) ? ` at ${inlineDescription}` : ""
-                }`}
-              >
-                <ResumePlainTextGroup items={remainingDescriptions} />
-              </ResumeMetaBlock>
-            );
-          })}
+          {experience.map((item, index) => (
+            <ResumeStructuredExperienceBlock
+              key={`${item.company}-${item.role}-${index}`}
+              title={[item.role, item.company].filter(Boolean).join(" at ")}
+              meta={formatRange(item.startDate, item.endDate)}
+              description={item.description}
+            />
+          ))}
         </div>
       ) : null,
     education:
@@ -502,16 +493,13 @@ const buildSectionMap = (data: ResumeData) => {
       data.projects.length > 0 ? (
         <div className="grid" style={{ rowGap: "22px" }}>
           {data.projects.map((project, index) => (
-            <ResumeMetaBlock
+            <ResumeStructuredProjectBlock
               key={`${project.name}-${index}`}
-              title={`\u2022 ${project.name}`}
+              title={project.name}
               meta={hasText(project.link) ? project.link : undefined}
-            >
-              {hasText(project.description) ? <p className="resume-body-copy">{project.description}</p> : null}
-              {project.technologies.length > 0 ? (
-                <p className="resume-item-meta mt-2">{uniqueItems(project.technologies).join(", ")}</p>
-              ) : null}
-            </ResumeMetaBlock>
+              description={project.description}
+              technologies={project.technologies}
+            />
           ))}
         </div>
       ) : null,
@@ -1092,31 +1080,6 @@ const ResumeBulletList = ({
         <li key={`${item}-${index}`}>{item}</li>
       ))}
     </ul>
-  );
-};
-
-const ResumePlainTextGroup = ({
-  items,
-  fallbackText,
-}: {
-  items: string[];
-  fallbackText?: string;
-}) => {
-  const filteredItems = items.filter(Boolean);
-  if (filteredItems.length === 0 && !hasText(fallbackText)) return null;
-
-  const resolvedItems =
-    filteredItems.length > 0 ? filteredItems : hasText(fallbackText) ? [fallbackText!.trim()] : [];
-  if (resolvedItems.length === 0) return null;
-
-  return (
-    <div style={{ display: "grid", rowGap: "2px" }}>
-      {resolvedItems.map((item, index) => (
-        <p key={`${item}-${index}`} className="resume-body-copy" style={{ margin: 0 }}>
-          {item}
-        </p>
-      ))}
-    </div>
   );
 };
 

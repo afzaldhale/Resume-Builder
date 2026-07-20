@@ -29,6 +29,7 @@ export const PROFESSIONAL_COLOR_PRESETS = [
   { label: "Corporate Blue", value: "#2563EB" },
   { label: "Teal", value: "#0F766E" },
   { label: "Dark Navy", value: "#0F172A" },
+  { label: "White", value: "#FFFFFF" },
   { label: "Emerald", value: "#047857" },
   { label: "Slate", value: "#334155" },
   { label: "Sky Blue", value: "#38BDF8" },
@@ -46,7 +47,7 @@ const createSingleBarConfig = (templateId: number, accentOverride?: string): Tem
     accent: accentOverride || templateThemes[templateId].palette.accent,
   },
   editableColors: [
-    { key: "headingBar", label: "Heading Bar Color" },
+    { key: "headingBar", label: "Heading Background Color" },
     { key: "headingText", label: "Heading Text Color" },
     { key: "nameText", label: "Name Color" },
     { key: "bodyText", label: "Body Text Color" },
@@ -67,7 +68,7 @@ const createSidebarConfig = (templateId: number): TemplateThemeConfig => ({
   editableColors: [
     { key: "sidebarBackground", label: "Sidebar Background" },
     { key: "sidebarText", label: "Sidebar Text Color" },
-    { key: "headingBar", label: "Heading Bar Color" },
+    { key: "headingBar", label: "Heading Background Color" },
     { key: "headingText", label: "Heading Text Color" },
     { key: "nameText", label: "Name Color" },
     { key: "titleText", label: "Role / Title Color" },
@@ -77,13 +78,17 @@ const createSidebarConfig = (templateId: number): TemplateThemeConfig => ({
 const createMinimalConfig = (templateId: number): TemplateThemeConfig => ({
   templateId,
   defaultColors: {
+    headingBar:
+      templateThemes[templateId].palette.accentBorder ||
+      templateThemes[templateId].palette.accent,
     headingText: templateThemes[templateId].palette.text,
     accentBorder: templateThemes[templateId].palette.accent,
     nameText: templateThemes[templateId].palette.text,
     bodyText: templateThemes[templateId].palette.text,
   },
   editableColors: [
-    { key: "headingText", label: "Heading Color" },
+    { key: "headingBar", label: "Heading Background Color" },
+    { key: "headingText", label: "Heading Text Color" },
     { key: "accentBorder", label: "Accent Border Color" },
     { key: "nameText", label: "Name Color" },
     { key: "bodyText", label: "Body Text Color" },
@@ -108,7 +113,8 @@ export const templateThemeConfigs: Record<number, TemplateThemeConfig> = {
       dividerColor: templateThemes[1].palette.border,
     },
     editableColors: [
-      { key: "headingBar", label: "Heading Color" },
+      { key: "headingBar", label: "Heading Background Color" },
+      { key: "headingText", label: "Heading Text Color" },
       { key: "accentBorder", label: "Accent Border Color" },
       { key: "nameText", label: "Name Color" },
       { key: "bodyText", label: "Body Text Color" },
@@ -133,7 +139,7 @@ export const templateThemeConfigs: Record<number, TemplateThemeConfig> = {
       dividerColor: templateThemes[3].palette.border,
     },
     editableColors: [
-      { key: "headingBar", label: "Heading Color" },
+      { key: "headingBar", label: "Heading Background Color" },
       { key: "headingText", label: "Heading Text Color" },
       { key: "nameText", label: "Name Color" },
       { key: "bodyText", label: "Body Text Color" },
@@ -156,7 +162,7 @@ export const templateThemeConfigs: Record<number, TemplateThemeConfig> = {
     editableColors: [
       { key: "sidebarBackground", label: "Sidebar Background" },
       { key: "sidebarText", label: "Sidebar Text Color" },
-      { key: "headingBar", label: "Heading Bar Color" },
+      { key: "headingBar", label: "Heading Background Color" },
       { key: "headingText", label: "Heading Text Color" },
       { key: "nameText", label: "Name Color" },
       { key: "titleText", label: "Role / Title Color" },
@@ -167,6 +173,13 @@ export const templateThemeConfigs: Record<number, TemplateThemeConfig> = {
     defaultColors: {
       sidebarBackground: templateThemes[6].palette.sidebarBg,
       sidebarText: templateThemes[6].palette.sidebarText,
+      headingBar:
+        templateThemes[6].palette.accentBorder ||
+        templateThemes[6].palette.accent,
+      headingText:
+        templateThemes[6].palette.headingText ||
+        templateThemes[6].palette.accentText ||
+        templateThemes[6].palette.text,
       nameText: templateThemes[6].palette.nameText || templateThemes[6].palette.text,
       titleText: templateThemes[6].palette.titleText || templateThemes[6].palette.mutedText,
       bodyText: templateThemes[6].palette.text,
@@ -175,6 +188,8 @@ export const templateThemeConfigs: Record<number, TemplateThemeConfig> = {
     editableColors: [
       { key: "sidebarBackground", label: "Sidebar Background" },
       { key: "sidebarText", label: "Sidebar Text" },
+      { key: "headingBar", label: "Heading Background Color" },
+      { key: "headingText", label: "Heading Text Color" },
       { key: "nameText", label: "Name Color" },
       { key: "titleText", label: "Role / Title Color" },
       { key: "bodyText", label: "Body Text Color" },

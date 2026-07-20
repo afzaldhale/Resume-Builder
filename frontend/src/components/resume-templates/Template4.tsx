@@ -29,6 +29,7 @@ interface Palette {
   border: string;
   nameText?: string;
   titleText?: string;
+  headingText?: string;
 }
 
 interface ResumeTemplateTheme {
@@ -295,6 +296,7 @@ const ResumePageStyles = () => (
     .resume-section-content {
       min-width: 0;
       max-width: 100%;
+      padding-left: var(--resume-section-content-indent, 16px);
     }
 
     .resume-body-copy {
@@ -526,18 +528,21 @@ const buildSectionMap = (data: ResumeData) => {
         <div className="template4-entry-list">
           {experience.map((item, index) => (
             <article key={`${item.company}-${item.role}-${index}`} className="template4-entry">
-              <Template4BulletHeading
-                title={
-                  joinNonEmpty(
-                    [
-                      [item.role, item.company].filter(hasText).join(" at "),
-                      formatRange(item.startDate, item.endDate),
-                    ],
-                    " at "
-                  ) || "Experience"
-                }
-              />
-              <ResumeBulletList items={toBulletItems(item.description)} />
+              <p className="template4-bullet-title">
+                {[item.role, item.company].filter(hasText).join(" at ") || "Experience"}
+              </p>
+              {hasText(formatRange(item.startDate, item.endDate)) ? (
+                <p className="resume-item-meta">{formatRange(item.startDate, item.endDate)}</p>
+              ) : null}
+              {toBulletItems(item.description).length > 0 ? (
+                <ul className="resume-bullet-list" style={{ margin: "6px 0 0", paddingLeft: "18px" }}>
+                  {toBulletItems(item.description).map((detail, detailIndex) => (
+                    <li key={`${detail}-${detailIndex}`} className="resume-body-copy">
+                      {detail}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </article>
           ))}
         </div>
@@ -564,14 +569,16 @@ const buildSectionMap = (data: ResumeData) => {
         <div className="template4-entry-list">
           {data.projects.map((project, index) => (
             <article key={`${project.name}-${index}`} className="template4-entry">
-              <Template4BulletHeading title={project.name} />
-              <div className="template4-detail-lines">
-                {hasText(project.description) ? <p className="resume-body-copy">{project.description}</p> : null}
-                {project.technologies.length > 0 ? (
-                  <p className="resume-item-meta">{`Technologies: ${uniqueItems(project.technologies).join(", ")}`}</p>
+              <p className="template4-bullet-title">{project.name}</p>
+              <ul className="resume-bullet-list" style={{ margin: "6px 0 0", paddingLeft: "18px" }}>
+                {hasText(project.description) ? (
+                  <li className="resume-body-copy">{project.description}</li>
                 ) : null}
-                {hasText(project.link) ? <p className="resume-item-meta template4-long-text">{project.link}</p> : null}
-              </div>
+                {project.technologies.length > 0 ? (
+                  <li className="resume-body-copy">{`Technologies: ${uniqueItems(project.technologies).join(", ")}`}</li>
+                ) : null}
+              </ul>
+              {hasText(project.link) ? <p className="resume-item-meta template4-long-text">{project.link}</p> : null}
             </article>
           ))}
         </div>
@@ -676,20 +683,22 @@ const template4Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
     <ResumePage
       theme={theme}
       style={{
-        ["--resume-page-bg" as string]: theme.palette.page,
-        ["--resume-page-text" as string]: theme.palette.text,
-        ["--resume-muted-text" as string]: theme.palette.mutedText,
-        ["--resume-border" as string]: theme.palette.border,
-        ["--resume-border-strong" as string]: theme.palette.accent,
-        ["--resume-name-color" as string]: theme.palette.nameText || theme.palette.text,
-        ["--resume-role-color" as string]: theme.palette.titleText || theme.palette.mutedText,
-        ...getStandardResumeTypographyVars(),
-        ["--resume-font-family" as string]: theme.fontFamily || "Inter, Arial, Helvetica, sans-serif",
-        ["--template4-page-padding" as string]: scalePxString(
-          "42px 48px",
-          densityFactor * baseSpacingFactor * compactSpacingFactor
-        ),
-        ["--template4-section-gap" as string]: `${sectionGap}px`,
+        ...({
+          ["--resume-page-bg" as string]: theme.palette.page,
+          ["--resume-page-text" as string]: theme.palette.text,
+          ["--resume-muted-text" as string]: theme.palette.mutedText,
+          ["--resume-border" as string]: theme.palette.border,
+          ["--resume-border-strong" as string]: theme.palette.accent,
+          ["--resume-name-color" as string]: theme.palette.nameText || theme.palette.text,
+          ["--resume-role-color" as string]: theme.palette.titleText || theme.palette.mutedText,
+          ...getStandardResumeTypographyVars(),
+          ["--resume-font-family" as string]: theme.fontFamily || "Inter, Arial, Helvetica, sans-serif",
+          ["--template4-page-padding" as string]: scalePxString(
+            "42px 48px",
+            densityFactor * baseSpacingFactor * compactSpacingFactor
+          ),
+          ["--template4-section-gap" as string]: `${sectionGap}px`,
+        } as CSSProperties),
       }}
       data-density-mode={densityMode}
     >

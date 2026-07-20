@@ -14,6 +14,10 @@ import type { ResumeData } from "./types";
 import { ResumeSection } from "@/components/resume/ResumeSection";
 import { getStandardResumeTypographyVars } from "@/constants/resumeDesignSystem";
 import { resolveTemplateTheme } from "./themeConfig";
+import {
+  ResumeStructuredExperienceBlock,
+  ResumeStructuredProjectBlock,
+} from "./templatePrimitives";
 
 type HeadingStyle = "bar" | "underline" | "accent";
 type HeaderLayout = "stacked" | "split";
@@ -282,14 +286,12 @@ const buildSectionMap = (data: ResumeData) => {
       experience.length > 0 ? (
         <div className="space-y-3.5">
           {experience.map((item, index) => (
-            <ResumeMetaBlock
+            <ResumeStructuredExperienceBlock
               key={`${item.company}-${item.role}-${index}`}
-              title={item.role}
-              subtitle={item.company}
+              title={[item.role, item.company].filter(Boolean).join(" at ")}
               meta={formatRange(item.startDate, item.endDate)}
-            >
-              <ResumeBulletList items={toBulletItems(item.description)} fallbackText={item.description} />
-            </ResumeMetaBlock>
+              description={item.description}
+            />
           ))}
         </div>
       ) : null,
@@ -312,16 +314,13 @@ const buildSectionMap = (data: ResumeData) => {
       data.projects.length > 0 ? (
         <div className="space-y-3.5">
           {data.projects.map((project, index) => (
-            <ResumeMetaBlock
+            <ResumeStructuredProjectBlock
               key={`${project.name}-${index}`}
               title={project.name}
               meta={hasText(project.link) ? project.link : undefined}
-            >
-              {hasText(project.description) ? <p className="resume-body-copy">{project.description}</p> : null}
-              {project.technologies.length > 0 ? (
-                <p className="resume-item-meta mt-2">{uniqueItems(project.technologies).join(", ")}</p>
-              ) : null}
-            </ResumeMetaBlock>
+              description={project.description}
+              technologies={project.technologies}
+            />
           ))}
         </div>
       ) : null,
@@ -560,6 +559,10 @@ const ResumePageStyles = () => (
     .resume-section {
       display: grid;
       row-gap: var(--resume-section-vertical-gap, 8px);
+    }
+
+    .resume-section-content {
+      padding-left: var(--resume-section-content-indent, 16px);
     }
   `}</style>
 );

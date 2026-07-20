@@ -134,6 +134,7 @@ export const ResumeSection = ({
         className={`resume-section-content ${
           theme.summaryStyle === "plain" && title === summaryTitle ? "resume-section-summary-plain" : ""
         }`.trim()}
+        style={{ paddingLeft: "var(--resume-section-content-indent, 16px)" }}
       >
         {children}
       </div>

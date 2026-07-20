@@ -346,10 +346,14 @@ const Template5Styles = ({
       height: 100%;
     }
 
-    .template5-section-grid-item .resume-section-content {
-      display: grid;
-      height: 100%;
-    }
+      .template5-section-grid-item .resume-section-content {
+        display: grid;
+        height: 100%;
+      }
+
+      .resume-section-content {
+        padding-left: var(--resume-section-content-indent, 16px);
+      }
 
     .template5-section-grid-item .template5-sidebar-card {
       height: 100%;
@@ -496,26 +500,30 @@ const template5Render = (data: ResumeData) => {
 
             <div className="template5-split-grid">
               <div className="template5-main">
-                {data.projects.length > 0 ? (
-                  <Template5Section title="Projects">
-                    <div className="template5-main-card template5-stack">
-                      {data.projects.map((project, index) => (
-                        <div key={`${project.name}-${index}`}>
-                          <p className="template5-item-title">{project.name}</p>
-                          {hasText(project.description) ? (
-                            <p className="template5-item-text">{project.description}</p>
-                          ) : null}
-                          {project.technologies.length > 0 ? (
-                            <div className="template5-project-tech">
-                              {uniqueItems(project.technologies).map((tech, techIndex) => (
-                                <span key={`${tech}-${techIndex}`}>{tech}</span>
-                              ))}
-                            </div>
-                          ) : null}
-                        </div>
-                      ))}
-                    </div>
-                  </Template5Section>
+                  {data.projects.length > 0 ? (
+                    <Template5Section title="Projects">
+                      <div className="template5-main-card template5-stack">
+                        {data.projects.map((project, index) => (
+                          <div key={`${project.name}-${index}`}>
+                            <p className="template5-item-title">{project.name}</p>
+                            <ul
+                              style={{
+                                margin: "6px 0 0",
+                                paddingLeft: "16px",
+                                fontSize: `${ResumeTypography.list}px`,
+                                lineHeight: ResumeTypography.lineHeight,
+                                color: theme.palette.text,
+                              }}
+                            >
+                              {hasText(project.description) ? <li>{project.description}</li> : null}
+                              {project.technologies.length > 0 ? (
+                                <li>{`Technologies: ${uniqueItems(project.technologies).join(", ")}`}</li>
+                              ) : null}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </Template5Section>
                 ) : null}
 
                 {(data.achievements || []).length > 0 ? (

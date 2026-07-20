@@ -16,6 +16,10 @@ import {
   getStandardResumeTypographyVars,
 } from "@/constants/resumeDesignSystem";
 import { resolveTemplateTheme } from "./themeConfig";
+import {
+  ResumeStructuredExperienceBlock,
+  ResumeStructuredProjectBlock,
+} from "./templatePrimitives";
 
 type HeadingStyle = "bar" | "underline" | "accent";
 type HeaderLayout = "stacked" | "split";
@@ -130,12 +134,6 @@ const DEFAULT_FRESHER_MAIN: SectionKey[] = [
 ];
 
 const hasText = (value?: string | null) => Boolean(value && value.trim());
-
-const toBulletItems = (value?: string | null) =>
-  (value || "")
-    .split("\n")
-    .map((item) => item.trim())
-    .filter(Boolean);
 
 const buildCertificationBullets = ({
   issuer,
@@ -272,6 +270,7 @@ const ResumeSidebarContactCard = ({
   theme: ResumeTemplateTheme;
   compactMode?: boolean;
 }) => {
+  void compactMode;
   const items = getContactItems(data);
 
   if (items.length === 0) return null;
@@ -374,14 +373,12 @@ const buildSectionMap = (data: ResumeData) => {
       experience.length > 0 ? (
         <div className="space-y-3.5">
           {experience.map((item, index) => (
-            <ResumeMetaBlock
+            <ResumeStructuredExperienceBlock
               key={`${item.company}-${item.role}-${index}`}
-              title={`• ${item.role}`}
-              subtitle={item.company}
+              title={[item.role, item.company].filter(Boolean).join(" at ")}
               meta={formatRange(item.startDate, item.endDate)}
-            >
-              <ResumePlainTextList items={toBulletItems(item.description)} fallbackText={item.description} />
-            </ResumeMetaBlock>
+              description={item.description}
+            />
           ))}
         </div>
       ) : null,
@@ -403,19 +400,13 @@ const buildSectionMap = (data: ResumeData) => {
       data.projects.length > 0 ? (
         <div className="space-y-3.5">
           {data.projects.map((project, index) => (
-            <ResumeMetaBlock
+            <ResumeStructuredProjectBlock
               key={`${project.name}-${index}`}
-              title={`• ${project.name}`}
+              title={project.name}
               meta={hasText(project.link) ? project.link : undefined}
-            >
-              <ResumePlainTextList
-                items={toBulletItems(project.description)}
-                fallbackText={project.description}
-              />
-              {project.technologies.length > 0 ? (
-                <p className="resume-item-meta mt-2">{uniqueItems(project.technologies).join(", ")}</p>
-              ) : null}
-            </ResumeMetaBlock>
+              description={project.description}
+              technologies={project.technologies}
+            />
           ))}
         </div>
       ) : null,
@@ -723,6 +714,10 @@ const ResumePageStyles = () => (
     .resume-section {
       display: grid;
       row-gap: var(--resume-section-vertical-gap, 8px);
+    }
+
+    .resume-section-content {
+      padding-left: var(--resume-section-content-indent, 16px);
     }
   `}</style>
 );
@@ -1217,9 +1212,6 @@ const template6Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
   const experiencedSidebarKeys = theme.sidebarSections || DEFAULT_EXPERIENCED_SIDEBAR;
   const experiencedMainKeys = theme.mainSections || DEFAULT_EXPERIENCED_MAIN;
 
-  const densityScale =
-    densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.95 : 0.92;
-
   return (
     <ResumePage
       theme={theme}
@@ -1320,5 +1312,7 @@ const Template6: React.FC<Template6Props> = ({ data }) =>
   template6Render(data, resolveTemplateTheme(6, data));
 
 export default Template6;
+
+
 
 

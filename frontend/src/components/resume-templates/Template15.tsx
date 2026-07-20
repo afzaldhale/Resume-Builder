@@ -109,7 +109,7 @@ const template15Styles = (theme: ResumeTemplateTheme) => `
     font-size: ${ResumeTypography.heading}px;
     font-weight: 700;
     line-height: ${ResumeTypography.lineHeight};
-    color: ${theme.palette.sidebarText || theme.palette.text};
+    color: ${theme.palette.headingText || theme.palette.sidebarText || theme.palette.text};
     letter-spacing: 0.04em;
     border-bottom: 1px solid ${theme.palette.sidebarBorder || theme.palette.border};
   }
@@ -133,6 +133,7 @@ const template15Styles = (theme: ResumeTemplateTheme) => `
     font-weight: 700;
     letter-spacing: 0.05em;
     text-transform: uppercase;
+    color: ${theme.palette.headingText || theme.palette.text};
     border-bottom: 2px solid ${theme.palette.text};
   }
 
@@ -210,6 +211,10 @@ const template15Styles = (theme: ResumeTemplateTheme) => `
     font-size: ${ResumeTypography.small}px;
     line-height: ${ResumeTypography.lineHeight};
     margin-bottom: 4px;
+  }
+
+  .resume-section-content {
+    padding-left: var(--resume-section-content-indent, 16px);
   }
 
   .template15-custom-block + .template15-custom-block {
@@ -372,20 +377,22 @@ const template15Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
               <div className="resume-section-content">
                 {safe.experience.map((experience, index) => (
                   <div key={`experience-${index}`} className="template15-entry">
-                    <div className="template15-entry-heading">
-                      <span className="template15-entry-bullet">•</span>
-                      <div className="template15-entry-title">
-                        {`${experience.role || ""}${experience.role && experience.company ? " at " : ""}${experience.company || ""}${(experience.role || experience.company) && (experience.startDate || experience.endDate) ? " — " : ""}${experience.startDate || ""}${experience.startDate && experience.endDate ? " - " : ""}${experience.endDate || ""}`}
-                      </div>
+                    <div className="template15-entry-title">
+                      {`${experience.role || ""}${experience.role && experience.company ? " at " : ""}${experience.company || ""}`}
                     </div>
-                    {renderTextLines(experience.description).length > 0 ? (
-                      <div className="template15-entry-lines">
-                        {renderTextLines(experience.description).map((line, lineIndex) => (
-                          <div key={`experience-${index}-line-${lineIndex}`} className="template15-body">
-                            {line}
-                          </div>
-                        ))}
+                    {experience.startDate || experience.endDate ? (
+                      <div className="template15-sub" style={{ marginTop: 2 }}>
+                        {`${experience.startDate || ""}${experience.startDate && experience.endDate ? " - " : ""}${experience.endDate || ""}`}
                       </div>
+                    ) : null}
+                    {renderTextLines(experience.description).length > 0 ? (
+                      <ul className="template15-list">
+                        {renderTextLines(experience.description).map((line, lineIndex) => (
+                          <li key={`experience-${index}-line-${lineIndex}`} className="template15-body">
+                            {line}
+                          </li>
+                        ))}
+                      </ul>
                     ) : null}
                   </div>
                 ))}
@@ -445,16 +452,13 @@ const template15Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
               <div className="resume-section-content">
                 {safe.projects.map((project, index) => (
                   <div key={`project-${index}`} className="template15-entry">
-                    <div className="template15-entry-heading">
-                      <span className="template15-entry-bullet">•</span>
-                      <div className="template15-entry-title">{project.name || ""}</div>
-                    </div>
-                    <div className="template15-entry-lines">
-                      {project.description ? <div className="template15-body">{project.description}</div> : null}
+                    <div className="template15-entry-title">{project.name || ""}</div>
+                    <ul className="template15-list">
+                      {project.description ? <li className="template15-body">{project.description}</li> : null}
                       {project.technologies.length > 0 ? (
-                        <div className="template15-sub">{`Technologies: ${joinItems(project.technologies)}`}</div>
+                        <li className="template15-body">{`Technologies: ${joinItems(project.technologies)}`}</li>
                       ) : null}
-                    </div>
+                    </ul>
                   </div>
                 ))}
               </div>
@@ -464,7 +468,7 @@ const template15Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           {safe.languages.length > 0 && (
             <section className="template15-section resume-section">
               <div className="template15-section-title resume-section-title">LANGUAGES</div>
-              <ul className="template15-list resume-section-content" style={{ listStyle: "none", padding: 0 }}>
+              <ul className="template15-list resume-section-content" style={{ listStyle: "none" }}>
                 {safe.languages.map((language, index) => (
                   <li key={`language-${index}`} style={{ marginBottom: 4 }}>
                     • {language.language || ""}
@@ -473,7 +477,7 @@ const template15Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                 ))}
               </ul>
             </section>
-          )}
+           )}
 
           {renderSupplementarySections(data)}
         </div>
@@ -486,3 +490,4 @@ const Template15: React.FC<Template15Props> = ({ data }) =>
   template15Render(data, resolveTemplateTheme(15, data));
 
 export default Template15;
+

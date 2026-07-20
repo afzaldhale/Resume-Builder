@@ -405,6 +405,7 @@ const Template1Section = ({
       className={`resume-section-content ${
         title === summaryTitle ? "resume-section-summary-plain" : ""
       }`.trim()}
+      style={{ paddingLeft: "var(--resume-section-content-indent, 16px)" }}
     >
       {children}
     </div>
@@ -421,12 +422,18 @@ const Template1ProjectEntry = ({
   technologies: string[];
 }) => (
   <div className="resume-meta-block break-inside-avoid">
-    <Template1BulletLine text={title} title />
-    <div style={{ marginLeft: `${TEMPLATE1_BULLET_INDENT}px` }}>
-      {hasText(description) ? <p className="resume-body-copy mt-2.5">{description}</p> : null}
-      {technologies.length > 0 ? (
-        <p className="resume-item-meta mt-2">{uniqueItems(technologies).join(", ")}</p>
-      ) : null}
+    <h3 className="resume-item-title" style={{ margin: 0 }}>
+      {title}
+    </h3>
+    <div style={{ marginTop: "10px" }}>
+      <Template1BulletList
+        items={[
+          ...toTemplate1BulletItems(description),
+          ...(technologies.length > 0
+            ? [`Technologies: ${uniqueItems(technologies).join(", ")}`]
+            : []),
+        ]}
+      />
     </div>
   </div>
 );
@@ -531,13 +538,22 @@ const buildSectionMap = (data: ResumeData) => {
             );
 
             return (
-              <Template1StructuredEntry
+              <div
                 key={`${item.company}-${item.role}-${index}`}
-                title={title}
-                meta={formatRange(item.startDate, item.endDate)}
-                bullets={responsibilities}
-                bulletAsBody
-              />
+                className="resume-meta-block break-inside-avoid"
+              >
+                <h3 className="resume-item-title" style={{ margin: 0 }}>
+                  {title}
+                </h3>
+                {hasText(formatRange(item.startDate, item.endDate)) ? (
+                  <p className="resume-item-meta mt-1.5">{formatRange(item.startDate, item.endDate)}</p>
+                ) : null}
+                {responsibilities.length > 0 ? (
+                  <div className="mt-2.5">
+                    <Template1BulletList items={responsibilities} />
+                  </div>
+                ) : null}
+              </div>
             );
           })}
         </div>
@@ -665,7 +681,7 @@ const renderSections = ({
     });
 
 // === Template1 Main Renderer ===
-
+// eslint-disable-next-line react-refresh/only-export-components
 export const template1Render = (
   data: ResumeData,
   theme: ResumeTemplateTheme,

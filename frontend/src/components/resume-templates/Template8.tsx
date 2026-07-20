@@ -16,6 +16,10 @@ import {
   getStandardResumeTypographyVars,
 } from "@/constants/resumeDesignSystem";
 import { resolveTemplateTheme } from "./themeConfig";
+import {
+  ResumeStructuredExperienceBlock,
+  ResumeStructuredProjectBlock,
+} from "./templatePrimitives";
 
 type HeadingStyle = "bar" | "underline" | "accent";
 type HeaderLayout = "stacked" | "split";
@@ -123,12 +127,6 @@ const DEFAULT_FRESHER_MAIN: SectionKey[] = ["summary", "skills", "experience", "
 
 const hasText = (value?: string | null) => Boolean(value && value.trim());
 
-const toBulletItems = (value?: string | null) =>
-  (value || "")
-    .split("\n")
-    .map((item) => item.trim())
-    .filter(Boolean);
-
 const uniqueItems = (items: string[]) => [...new Set(items.filter(Boolean))];
 
 const scalePxString = (value: string, factor: number) =>
@@ -199,6 +197,7 @@ const ResumeSidebarContactCard = ({
   theme: ResumeTemplateTheme;
   compactMode?: boolean;
 }) => {
+  void compactMode;
   const items = getContactItems(data);
 
   if (items.length === 0) return null;
@@ -283,22 +282,12 @@ const buildSectionMap = (data: ResumeData) => {
       experience.length > 0 ? (
         <div className="space-y-3.5">
           {experience.map((item, index) => (
-            <div key={`${item.company}-${item.role}-${index}`} className="resume-meta-block break-inside-avoid">
-              <ResumeBulletLead
-                text={[
-                  item.role,
-                  item.company ? `at ${item.company}` : "",
-                  formatRange(item.startDate, item.endDate)
-                    ? `at ${formatRange(item.startDate, item.endDate)}`
-                    : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              />
-              <div className="mt-2.5" style={{ paddingLeft: "20px" }}>
-                <ResumeBulletList items={toBulletItems(item.description)} fallbackText={item.description} />
-              </div>
-            </div>
+            <ResumeStructuredExperienceBlock
+              key={`${item.company}-${item.role}-${index}`}
+              title={[item.role, item.company].filter(Boolean).join(" at ")}
+              meta={formatRange(item.startDate, item.endDate)}
+              description={item.description}
+            />
           ))}
         </div>
       ) : null,
@@ -323,18 +312,13 @@ const buildSectionMap = (data: ResumeData) => {
       data.projects.length > 0 ? (
         <div className="space-y-3.5">
           {data.projects.map((project, index) => (
-            <div key={`${project.name}-${index}`} className="resume-meta-block break-inside-avoid">
-              <ResumeBulletLead text={project.name} />
-              <div className="mt-2.5" style={{ paddingLeft: "20px" }}>
-                {hasText(project.description) ? <p className="resume-body-copy">{project.description}</p> : null}
-                {project.technologies.length > 0 ? (
-                  <p className="resume-item-meta mt-2">
-                    Technologies: {uniqueItems(project.technologies).join(", ")}
-                  </p>
-                ) : null}
-                {hasText(project.link) ? <p className="resume-item-meta mt-1.5">{project.link}</p> : null}
-              </div>
-            </div>
+            <ResumeStructuredProjectBlock
+              key={`${project.name}-${index}`}
+              title={project.name}
+              description={project.description}
+              technologies={project.technologies}
+              meta={hasText(project.link) ? project.link : undefined}
+            />
           ))}
         </div>
       ) : null,
@@ -573,6 +557,10 @@ const ResumePageStyles = () => (
       display: grid;
       row-gap: var(--resume-section-vertical-gap, 8px);
     }
+
+    .resume-section-content {
+      padding-left: var(--resume-section-content-indent, 16px);
+    }
   `}</style>
 );
 
@@ -580,16 +568,16 @@ const ResumeContactRow = ({
   items,
   align = "left",
   color,
-  compactMode: _compactMode = false,
+  compactMode = false,
   densityMode = "comfortable",
 }: {
   items: ContactItem[];
   align?: "left" | "right";
   color: string;
-  _compactMode?: boolean;
+  compactMode?: boolean;
   densityMode?: "comfortable" | "compact" | "ultra-compact";
 }) => {
-  void _compactMode;
+  void compactMode;
 
   const gapX = densityMode === "ultra-compact" ? 10 : densityMode === "compact" ? 12 : 14;
   const gapY = densityMode === "ultra-compact" ? 4 : densityMode === "compact" ? 6 : 8;
@@ -971,9 +959,6 @@ const template8Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
 
   const experiencedSidebarKeys = theme.sidebarSections || DEFAULT_EXPERIENCED_SIDEBAR;
   const experiencedMainKeys = theme.mainSections || DEFAULT_EXPERIENCED_MAIN;
-
-  const densityScale =
-    densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.95 : 0.92;
 
   return (
     <ResumePage

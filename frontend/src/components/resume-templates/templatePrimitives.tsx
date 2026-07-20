@@ -191,12 +191,30 @@ export const ResumePageStyles = () => (
       display: grid;
       row-gap: var(--resume-section-vertical-gap, 8px);
     }
+
+    .resume-section-content {
+      padding-left: var(--resume-section-content-indent, 16px);
+    }
   `}</style>
 );
 
 const hasText = (value?: string | null) => Boolean(value && value.trim());
 
 const uniqueItems = (items: string[]) => [...new Set(items.filter(Boolean))];
+
+export const toStructuredBulletItems = (value?: string[] | string | null) => {
+  if (Array.isArray(value)) {
+    return value
+      .flatMap((item) => `${item ?? ""}`.split(/\r?\n/))
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return (value || "")
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
 
 const scalePxString = (value: string, factor: number) =>
   value.replace(/(\d+(?:\.\d+)?)px/g, (_, amount: string) => {
@@ -314,6 +332,47 @@ export const ResumeMetaBlock = ({
     {children ? <div className="mt-2.5">{children}</div> : null}
   </div>
 );
+
+export const ResumeStructuredExperienceBlock = ({
+  title,
+  meta,
+  description,
+}: {
+  title: string;
+  meta?: string;
+  description?: string[] | string | null;
+}) => {
+  const bulletItems = toStructuredBulletItems(description);
+
+  return (
+    <ResumeMetaBlock title={title} meta={meta}>
+      {bulletItems.length > 0 ? <ResumeBulletList items={bulletItems} /> : null}
+    </ResumeMetaBlock>
+  );
+};
+
+export const ResumeStructuredProjectBlock = ({
+  title,
+  description,
+  technologies = [],
+  meta,
+}: {
+  title: string;
+  description?: string[] | string | null;
+  technologies?: string[];
+  meta?: string;
+}) => {
+  const bulletItems = [
+    ...toStructuredBulletItems(description),
+    ...(technologies.length > 0 ? [`Technologies: ${uniqueItems(technologies).join(", ")}`] : []),
+  ];
+
+  return (
+    <ResumeMetaBlock title={title} meta={meta}>
+      {bulletItems.length > 0 ? <ResumeBulletList items={bulletItems} /> : null}
+    </ResumeMetaBlock>
+  );
+};
 
 export const ResumeTwoColumnLayout = ({
   sidebar,

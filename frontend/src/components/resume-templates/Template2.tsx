@@ -713,25 +713,27 @@ const template2Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
     <ResumePage
       theme={theme}
       style={{
-        ["--resume-page-bg" as string]: theme.palette.page,
-        ["--resume-page-text" as string]: theme.palette.text,
-        ["--resume-muted-text" as string]: theme.palette.mutedText,
-        ["--resume-border" as string]: theme.palette.border,
-        ["--resume-border-strong" as string]: theme.palette.accent,
-        ["--resume-name-color" as string]: theme.palette.nameText || theme.palette.text,
-        ["--resume-role-color" as string]: theme.palette.titleText || theme.palette.mutedText,
-        ["--resume-summary-bg" as string]: theme.palette.accentSoft || "rgba(0,0,0,0.03)",
-        ["--resume-card-bg" as string]: theme.palette.page,
-        ["--resume-chip-bg" as string]: theme.palette.accentSoft || "rgba(0,0,0,0.03)",
-        ["--resume-chip-border" as string]: theme.palette.border,
-        ["--resume-chip-text" as string]: theme.palette.text,
-        ...getStandardResumeTypographyVars(),
-        ["--resume-font-family" as string]: theme.fontFamily || "Inter, Arial, Helvetica, sans-serif",
-        ["--template2-page-padding" as string]: scalePxString(
-          "40px 44px",
-          densityFactor * baseSpacingFactor * compactSpacingFactor
-        ),
-        ["--template2-section-gap" as string]: `${sectionGap}px`,
+        ...({
+          ["--resume-page-bg" as string]: theme.palette.page,
+          ["--resume-page-text" as string]: theme.palette.text,
+          ["--resume-muted-text" as string]: theme.palette.mutedText,
+          ["--resume-border" as string]: theme.palette.border,
+          ["--resume-border-strong" as string]: theme.palette.accent,
+          ["--resume-name-color" as string]: theme.palette.nameText || theme.palette.text,
+          ["--resume-role-color" as string]: theme.palette.titleText || theme.palette.mutedText,
+          ["--resume-summary-bg" as string]: theme.palette.accentSoft || "rgba(0,0,0,0.03)",
+          ["--resume-card-bg" as string]: theme.palette.page,
+          ["--resume-chip-bg" as string]: theme.palette.accentSoft || "rgba(0,0,0,0.03)",
+          ["--resume-chip-border" as string]: theme.palette.border,
+          ["--resume-chip-text" as string]: theme.palette.text,
+          ...getStandardResumeTypographyVars(),
+          ["--resume-font-family" as string]: theme.fontFamily || "Inter, Arial, Helvetica, sans-serif",
+          ["--template2-page-padding" as string]: scalePxString(
+            "40px 44px",
+            densityFactor * baseSpacingFactor * compactSpacingFactor
+          ),
+          ["--template2-section-gap" as string]: `${sectionGap}px`,
+        } as CSSProperties),
       }}
       data-density-mode={densityMode}
     >
