@@ -5,18 +5,10 @@ import {
   sortCertificationsReverseChronological,
   sortEducationReverseChronological,
   sortExperienceReverseChronological,
-  type ResumeSectionKey,
 } from "./resumeSections";
 import type { ResumeData } from "./types";
-import {
-  getStandardResumeTypographyVars,
-} from "@/constants/resumeDesignSystem";
+import { getStandardResumeTypographyVars } from "@/constants/resumeDesignSystem";
 import { resolveTemplateTheme } from "./themeConfig";
-
-type HeadingStyle = "bar" | "underline" | "accent";
-type HeaderLayout = "stacked" | "split";
-type SidebarTone = "dark" | "light";
-type SectionKey = Exclude<ResumeSectionKey, "header">;
 
 interface Palette {
   page: string;
@@ -42,34 +34,16 @@ interface Palette {
 interface ResumeTemplateTheme {
   name: string;
   layout: "single" | "two-column";
-  headerLayout: HeaderLayout;
-  headingStyle: HeadingStyle;
+  headerLayout: "stacked" | "split";
+  headingStyle: "bar" | "underline" | "accent";
   fontFamily?: string;
   palette: Palette;
-  sidebarWidth?: string;
-  sidebarTone?: SidebarTone;
-  sidebarSections?: SectionKey[];
-  mainSections?: SectionKey[];
   sectionSpacing?: number;
   pagePadding?: string;
   contentPadding?: string;
-  sidebarPadding?: string;
   mainPadding?: string;
-  layoutType?: "single-column" | "sidebar";
-  headingVariant?: "full-width-bar" | "label-bar" | "underline" | "plain";
-  headingInset?: boolean;
   typographyScale?: number;
   spacingScale?: number;
-  headerDivider?: boolean;
-  headerBand?: boolean;
-  topAccentBar?: boolean;
-  leftAccentLine?: boolean;
-  summaryInHeader?: boolean;
-  summaryStyle?: "boxed" | "plain";
-  sidebarMode?: "profile" | "contact-only";
-  sidebarHeading?: string;
-  fresherMainSections?: SectionKey[];
-  showHeaderContact?: boolean;
 }
 
 interface ContactItem {
@@ -83,7 +57,97 @@ interface Template10Props {
 
 const hasText = (value?: string | null) => Boolean(value && value.trim());
 
-const uniqueItems = (items: string[]) => [...new Set(items.filter(Boolean))];
+const toDisplayText = (value: unknown): string => {
+  if (typeof value === "string") return value.trim();
+  if (typeof value === "number") return String(value);
+  if (!value || typeof value !== "object") return "";
+
+  const candidate = value as Record<string, unknown>;
+  const joined = [
+    candidate.name,
+    candidate.degree,
+    candidate.school,
+    candidate.institution,
+    candidate.issuer,
+    candidate.company,
+    candidate.role,
+    candidate.email,
+    candidate.phone,
+    candidate.url,
+    candidate.link,
+    candidate.language,
+    candidate.level,
+    candidate.year,
+    candidate.credentialId,
+    candidate.description,
+    candidate.value,
+    candidate.label,
+  ]
+    .map((item) => (typeof item === "string" || typeof item === "number" ? String(item).trim() : ""))
+    .filter(Boolean)
+    .join(", ");
+
+  return joined;
+};
+
+const toStringArray = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value.map((item) => toDisplayText(item)).filter(Boolean);
+  }
+
+  const singleValue = toDisplayText(value);
+  return singleValue ? [singleValue] : [];
+};
+
+const uniqueItems = (items: unknown) => [...new Set(toStringArray(items))];
+
+const toBulletItems = (value?: string[] | string | null) => {
+  if (Array.isArray(value)) {
+    return value
+      .flatMap((item) => `${item ?? ""}`.split(/\r?\n/))
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return (value || "")
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
+
+const toLanguageItems = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => {
+      if (typeof item === "string") {
+        return item.trim();
+      }
+
+      if (!item || typeof item !== "object") {
+        return "";
+      }
+
+      const languageItem = item as Record<string, unknown>;
+      const language = toDisplayText(languageItem.language);
+      const level = toDisplayText(languageItem.level);
+
+      if (!language) return "";
+      return level ? `${language} (${level})` : language;
+    })
+    .filter(Boolean);
+};
+
+const toCertificationText = (item: unknown): string => {
+  if (typeof item === "string") return item.trim();
+  if (!item || typeof item !== "object") return "";
+
+  const record = item as Record<string, unknown>;
+  return [record.name, record.issuer, hasText(toDisplayText(record.year)) ? formatMonthYear(toDisplayText(record.year)) : ""]
+    .map((part) => toDisplayText(part))
+    .filter(Boolean)
+    .join(", ");
+};
 
 const scalePxString = (value: string, factor: number) =>
   value.replace(/(\d+(?:\.\d+)?)px/g, (_, amount: string) => {
@@ -123,9 +187,9 @@ const getSocialLabel = (platform?: string | null, url?: string | null) => {
 const getContactItems = (data: ResumeData): ContactItem[] => {
   const items: ContactItem[] = [];
 
-  if (hasText(data.phone)) items.push({ label: "Phone", value: data.phone });
-  if (hasText(data.email)) items.push({ label: "Email", value: data.email });
   if (hasText(data.address)) items.push({ label: "Location", value: data.address });
+  if (hasText(data.email)) items.push({ label: "Email", value: data.email });
+  if (hasText(data.phone)) items.push({ label: "Phone", value: data.phone });
 
   (data.socialLinks || []).forEach((link) => {
     if (hasText(link.url)) {
@@ -146,7 +210,7 @@ const ResumePage = ({
   style?: CSSProperties;
 }) => (
   <div
-    className={`resume-theme-root resume-page ${theme.layout === "single" ? "single-column" : "sidebar-layout"}`}
+    className="resume-theme-root resume-page template10-root"
     style={{
       width: "794px",
       height: "1123px",
@@ -155,7 +219,7 @@ const ResumePage = ({
       position: "relative",
       overflow: "visible",
       border: `1px solid ${theme.palette.border}`,
-      fontFamily: theme.fontFamily || "var(--resume-font-family, Inter, Arial, Helvetica, sans-serif)",
+      fontFamily: theme.fontFamily || "Georgia, 'Times New Roman', serif",
       margin: "0 auto",
       ...style,
     }}
@@ -166,281 +230,291 @@ const ResumePage = ({
 
 const ResumePageStyles = () => (
   <style>{`
-    .resume-theme-root {
-      background: var(--resume-page-bg);
-      color: var(--resume-page-text);
-      height: 1123px;
-    }
-
-    .resume-page,
-    .resume-page,
-    .resume-page * {
+    .template10-root,
+    .template10-root * {
       box-sizing: border-box;
     }
 
-    .resume-page {
+    .template10-root {
       width: var(--resume-page-width);
       height: var(--resume-page-height);
       overflow: visible;
       page-break-after: always;
       break-after: page;
-      font-family: var(--resume-font-family, Inter, Arial, Helvetica, sans-serif);
-    }
-    .resume-page.single-column {
-      padding: var(--resume-page-padding-y) var(--resume-page-padding-x);
-    }
-    .resume-page.sidebar-layout {
-      padding: 0;
+      background: var(--resume-page-bg);
+      color: var(--resume-page-text);
+      font-family: var(--resume-font-family, Georgia, 'Times New Roman', serif);
     }
 
-    .resume-page p,
-    .resume-page div,
-    .resume-page span,
-    .resume-page li {
+    .template10-root p,
+    .template10-root div,
+    .template10-root span,
+    .template10-root li {
+      min-width: 0;
+      max-width: 100%;
       white-space: normal;
       overflow-wrap: break-word;
       word-break: normal;
-      min-width: 0;
-      max-width: 100%;
     }
 
-    .resume-page a,
-    .resume-contact-item,
-    .resume-long-text {
+    .template10-root a,
+    .template10-long-text {
+      color: inherit;
+      text-decoration: none;
       overflow-wrap: anywhere;
       word-break: break-word;
     }
 
-    .resume-heading {
-      font-size: var(--resume-heading-size);
-      line-height: var(--resume-line-height);
+    .template10-page {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      gap: var(--template10-page-gap, 16px);
+      padding: var(--template10-page-padding, 40px 36px);
+    }
+
+    .template10-header {
+      display: grid;
+      row-gap: 8px;
+      text-align: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.12);
+    }
+
+    .template10-name {
+      margin: 0;
+      font-size: var(--resume-name-size);
+      line-height: 1.06;
       font-weight: 700;
+      letter-spacing: 0;
+      color: var(--resume-name-color);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    .template10-role {
+      margin: 0;
+      font-size: var(--resume-role-size);
+      line-height: 1.25;
+      font-weight: 600;
       letter-spacing: 0.12em;
       text-transform: uppercase;
+      color: var(--resume-role-color);
     }
 
-    .resume-body-copy {
-      font-size: var(--resume-body-size);
-      line-height: var(--resume-line-height);
-    }
-
-    .resume-item-title {
-      font-size: var(--resume-item-title-size);
-      line-height: var(--resume-line-height);
-      font-weight: 700;
-    }
-
-    .resume-item-subtitle {
-      font-size: var(--resume-item-subtitle-size);
-      line-height: var(--resume-line-height);
-      color: var(--resume-page-text);
-    }
-
-    .resume-item-meta {
-      font-size: var(--resume-item-meta-size);
-      line-height: var(--resume-line-height);
-      color: var(--resume-muted-text);
-    }
-
-    .resume-section-title {
-      display: block;
-      font-size: var(--resume-heading-size);
-      line-height: var(--resume-line-height);
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin: 0 0 0.35em;
-    }
-
-    .resume-bullet-list {
+    .template10-contact-line {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px 10px;
       margin: 0;
-      padding-left: var(--resume-list-indent, 18px);
-      font-size: var(--resume-list-size);
-      line-height: var(--resume-line-height);
+      color: var(--resume-muted-text);
+      font-size: var(--resume-contact-size);
+      line-height: 1.35;
     }
 
-    .resume-bullet-list li + li {
-      margin-top: 2px;
-    }
-
-    .resume-summary-box {
-      border-left: 4px solid var(--resume-accent);
-      background: var(--resume-accent-soft);
-      padding: var(--resume-summary-box-padding, 10px 12px);
-    }
-
-    .resume-section-summary-plain .resume-summary-box {
-      border-left: none;
-      background: transparent;
-      padding: 0;
-    }
-
-    .resume-contact-item {
+    .template10-contact-item {
       display: inline-flex;
       align-items: center;
-      line-height: var(--resume-line-height);
+      gap: 10px;
       min-width: 0;
     }
 
-    .resume-contact-item:not(:last-child)::after {
+    .template10-contact-item:not(:last-child)::after {
       content: "|";
-      margin-left: var(--resume-contact-separator-gap, 8px);
       color: var(--resume-muted-text);
     }
 
-    .resume-meta-block + .resume-meta-block {
-      margin-top: 8px;
+    .template10-body {
+      display: flex;
+      flex-direction: column;
+      gap: var(--template10-section-gap, 14px);
+      min-width: 0;
     }
 
-    .break-inside-avoid {
+    .template10-section {
+      display: grid;
+      row-gap: 6px;
+      min-width: 0;
       break-inside: avoid;
       page-break-inside: avoid;
     }
 
-    .resume-two-column-layout {
-      width: 100%;
-      min-width: 0;
-    }
-
-    .resume-sidebar {
-      min-width: 0;
-    }
-
-    .resume-main,
-    .resume-section,
-    .resume-section-content,
-    .resume-summary-box,
-    .resume-skills,
-    .resume-meta-block {
-      min-width: 0;
-      max-width: 100%;
-    }
-
-    .resume-section {
-      display: grid;
-      row-gap: var(--resume-section-vertical-gap, 8px);
-    }
-
-    .template10-document {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      gap: 24px;
-    }
-
-    .template10-header {
-      text-align: center;
-      padding-bottom: 14px;
-      border-bottom: 1px solid rgba(15, 23, 42, 0.12);
-    }
-
-    .template10-columns {
-      display: flex;
-      align-items: flex-start;
-      gap: 28px;
-      flex: 1 1 auto;
-      min-height: 0;
-    }
-
-    .template10-sidebar {
-      width: 31%;
-      flex: 0 0 31%;
-      min-width: 0;
-    }
-
-    .template10-main {
-      width: 69%;
-      flex: 1 1 auto;
-      min-width: 0;
-    }
-
-    .template10-section + .template10-section {
-      margin-top: 18px;
-    }
-
-    .template10-list {
+    .template10-section-title {
       margin: 0;
+      padding-bottom: 4px;
+      font-size: var(--resume-heading-size);
+      line-height: 1.2;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--resume-heading-color);
+      border-bottom: 2px solid rgba(17, 24, 39, 0.72);
+    }
+
+    .template10-section-content {
+      min-width: 0;
+    }
+
+    .template10-summary {
+      margin: 0;
+      font-size: var(--resume-body-size);
+      line-height: 1.42;
+      color: var(--resume-page-text);
+    }
+
+    .template10-entry-list {
+      display: grid;
+      row-gap: 14px;
+    }
+
+    .template10-entry {
+      display: grid;
+      row-gap: 3px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .template10-entry-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) max-content;
+      gap: 8px 16px;
+      align-items: baseline;
+    }
+
+    .template10-entry-title {
+      margin: 0;
+      font-size: var(--resume-item-title-size);
+      line-height: 1.3;
+      font-weight: 700;
+      color: var(--resume-page-text);
+    }
+
+    .template10-entry-subtitle {
+      margin: 0;
+      font-size: var(--resume-item-subtitle-size);
+      line-height: 1.35;
+      font-weight: 600;
+      color: var(--resume-page-text);
+    }
+
+    .template10-entry-meta {
+      margin: 0;
+      font-size: var(--resume-item-meta-size);
+      line-height: 1.35;
+      color: var(--resume-muted-text);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .template10-entry-copy {
+      margin: 0;
+      font-size: var(--resume-body-size);
+      line-height: 1.42;
+      color: var(--resume-page-text);
+    }
+
+    .template10-bullet-list {
+      margin: 2px 0 0;
       padding-left: 18px;
-      list-style: disc;
+      list-style-type: disc;
+      list-style-position: outside;
     }
 
-    .template10-list li + li {
-      margin-top: 6px;
+    .template10-bullet-list li + li {
+      margin-top: 4px;
     }
 
-    .template10-entry + .template10-entry {
-      margin-top: 12px;
+    .template10-bullet-list li {
+      font-size: var(--resume-body-size);
+      line-height: 1.42;
+      color: var(--resume-page-text);
+    }
+
+    .template10-inline-text {
+      margin: 0;
+      font-size: var(--resume-body-size);
+      line-height: 1.42;
+      color: var(--resume-page-text);
+    }
+
+    .template10-education-list {
+      display: grid;
+      row-gap: 12px;
+    }
+
+    .template10-custom-list {
+      display: grid;
+      row-gap: 12px;
     }
   `}</style>
 );
 
 const Template10Section = ({
   title,
-  theme,
   children,
 }: {
   title: string;
-  theme: ResumeTemplateTheme;
   children: ReactNode;
-}) => (
-  <section className="template10-section break-inside-avoid">
-      <h3
-        style={{
-          fontSize: "var(--resume-heading-size)",
-          fontWeight: 700,
-          lineHeight: "var(--resume-line-height)",
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          color: theme.palette.headingText || theme.palette.text,
-          margin: "0 0 8px",
-        }}
-      >
-      {title}
-    </h3>
-    <div
-      style={{
-        height: "1px",
-        background: theme.palette.border,
-        opacity: 0.3,
-        marginBottom: "10px",
-      }}
-    />
-      <div className="resume-section-content" style={{ paddingLeft: "var(--resume-section-content-indent, 16px)" }}>
-        {children}
-      </div>
+}) => {
+  if (!children) return null;
+
+  return (
+    <section className="template10-section">
+      <h2 className="template10-section-title">{title}</h2>
+      <div className="template10-section-content">{children}</div>
     </section>
   );
+};
+
+const InlineValue = ({
+  items,
+}: {
+  items: string[];
+}) => {
+  const filteredItems = uniqueItems(items.map((item) => item.trim()).filter(Boolean));
+  if (filteredItems.length === 0) return null;
+
+  return <p className="template10-inline-text">{filteredItems.join(", ")}</p>;
+};
+
+const BulletList = ({
+  items,
+}: {
+  items: string[];
+}) => {
+  const filteredItems = items.map((item) => item.trim()).filter(Boolean);
+  if (filteredItems.length === 0) return null;
+
+  return (
+    <ul className="template10-bullet-list">
+      {filteredItems.map((item, index) => (
+        <li key={`${item}-${index}`}>{item}</li>
+      ))}
+    </ul>
+  );
+};
 
 const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
   const compactMode = getCompactMode(data);
   const densityMode = getDensityMode(data);
   const compactLevel = data.compactLevel || 0;
-  const densityFactor =
-    densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.88 : 0.82;
-  const baseSpacingFactor = compactMode ? 0.92 : 1;
-  const compactSpacingFactor = compactLevel === 1 ? 0.9 : compactLevel >= 2 ? 0.8 : 1;
+  const densityFactor = densityMode === "comfortable" ? 1 : densityMode === "compact" ? 0.9 : 0.84;
+  const baseSpacingFactor = compactMode ? 0.94 : 1;
+  const compactSpacingFactor = compactLevel === 1 ? 0.92 : compactLevel >= 2 ? 0.84 : 1;
 
   const clampPadding = (padding: string) => {
     try {
-      const parts = padding.trim().split(/\s+/).map((p) => parseInt(p, 10) || 0);
-      let vert = parts.length === 4 ? parts[0] + parts[2] : parts[0] || 36;
-      let horiz = parts.length === 4 ? parts[1] + parts[3] : parts[1] || parts[0] || 32;
-      vert = Math.round(vert / (parts.length === 4 ? 2 : 1));
-      horiz = Math.round(horiz / (parts.length === 4 ? 2 : 1));
-      const minPadding = densityMode === "comfortable" && compactLevel === 0 ? 32 : densityMode === "compact" || compactLevel >= 1 ? 28 : 24;
-      vert = Math.max(minPadding, Math.min(40, vert));
-      horiz = Math.max(minPadding, Math.min(40, horiz));
-      return `${vert}px ${horiz}px`;
+      const parts = padding.trim().split(/\s+/).map((part) => parseInt(part, 10) || 0);
+      let vertical = parts.length === 4 ? parts[0] + parts[2] : parts[0] || 40;
+      let horizontal = parts.length === 4 ? parts[1] + parts[3] : parts[1] || parts[0] || 36;
+      vertical = Math.round(vertical / (parts.length === 4 ? 2 : 1));
+      horizontal = Math.round(horizontal / (parts.length === 4 ? 2 : 1));
+      vertical = Math.max(28, Math.min(42, vertical));
+      horizontal = Math.max(28, Math.min(42, horizontal));
+      return `${vertical}px ${horizontal}px`;
     } catch {
-      return "36px 32px";
+      return "40px 36px";
     }
-  };
-
-  const pageStyle: CSSProperties = {
-    padding: scalePxString(
-      clampPadding(theme.pagePadding || "40px 36px"),
-      densityFactor * baseSpacingFactor * compactSpacingFactor
-    ),
   };
 
   const summaryText = getSummaryConfig(data).summaryText;
@@ -448,287 +522,222 @@ const template10Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
   const education = sortEducationReverseChronological(data.education || []);
   const certifications = sortCertificationsReverseChronological(data.certifications || []);
   const contactItems = getContactItems(data);
-  const skills = (data.skills || []).filter(Boolean);
-  const languages = (data.languages || []).filter((item) => hasText(item.language));
-  const strengths = (data.strengths || []).filter(Boolean);
-  const projects = data.projects || [];
+  const skills = uniqueItems(data.skills);
+  const languages = toLanguageItems(data.languages);
+  const strengths = uniqueItems(data.strengths);
+  const hobbies = uniqueItems(data.hobbies);
+  const achievements = uniqueItems(data.achievements);
+  const references = uniqueItems(data.references);
+  const projects = Array.isArray(data.projects) ? data.projects : [];
   const customSections = (data.customSections || []).filter(
-    (section) => hasText(section.title) || hasText(section.description) || (section.items || []).length > 0
+    (section) =>
+      hasText(section.title) ||
+      hasText(section.description) ||
+      hasText(section.date) ||
+      (section.items || []).some((item) => hasText(item))
+  );
+
+  const sectionGap = Math.max(
+    12,
+    Math.min(
+      16,
+      Math.round((theme.sectionSpacing || 16) * densityFactor * baseSpacingFactor * compactSpacingFactor)
+    )
+  );
+
+  const pagePadding = scalePxString(
+    clampPadding(theme.pagePadding || theme.mainPadding || theme.contentPadding || "40px 36px"),
+    densityFactor * baseSpacingFactor * compactSpacingFactor
   );
 
   return (
     <ResumePage
       theme={theme}
       style={{
-        ...pageStyle,
         ...({
-          "--resume-page-bg": theme.palette.page,
-          "--resume-page-text": theme.palette.text,
-          "--resume-muted-text": theme.palette.mutedText,
-          "--resume-border": theme.palette.border,
-          "--resume-accent": theme.palette.accent,
-          "--resume-accent-soft": theme.palette.accentSoft,
-          "--resume-accent-text": theme.palette.accentText,
+          "--resume-page-bg": "#FFFFFF",
+          "--resume-page-text": "#2F3A4A",
+          "--resume-muted-text": "#5E6A77",
+          "--resume-border": "#D9DEE5",
+          "--resume-heading-color": "#111827",
+          "--resume-name-color": "#334155",
+          "--resume-role-color": "#6B7280",
+          "--template10-page-padding": pagePadding,
+          "--template10-page-gap": `${sectionGap}px`,
+          "--template10-section-gap": `${sectionGap}px`,
           ...getStandardResumeTypographyVars(),
-          "--resume-summary-box-padding": "10px 0",
-          "--resume-list-indent": "16px",
-          "--resume-contact-separator-gap": "8px",
-          "--resume-section-vertical-gap": "8px",
-          "--resume-font-family": theme.fontFamily || "Inter, Arial, Helvetica, sans-serif",
+          "--resume-font-family": "Georgia, 'Times New Roman', serif",
         } as CSSProperties),
       }}
-      data-density-mode={densityMode}
     >
       <ResumePageStyles />
 
-      <div className="template10-document">
+      <div className="template10-page">
         <header className="template10-header">
-          <h1
-            style={{
-              fontSize: "var(--resume-name-size)",
-              lineHeight: "var(--resume-line-height)",
-              fontWeight: 700,
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              margin: 0,
-              color: theme.palette.nameText || theme.palette.text,
-            }}
-          >
-            {data.fullName}
-          </h1>
-          {hasText(data.role) ? (
-            <p
-              style={{
-                fontSize: "var(--resume-role-size)",
-                lineHeight: "var(--resume-line-height)",
-                margin: "6px 0 0",
-                color: theme.palette.titleText || theme.palette.mutedText,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-              }}
-            >
-              {data.role}
-            </p>
+          <h1 className="template10-name">{data.fullName}</h1>
+          {hasText(data.role) ? <p className="template10-role">{data.role}</p> : null}
+          {contactItems.length > 0 ? (
+            <div className="template10-contact-line">
+              {contactItems.map((item, index) => (
+                <span key={`${item.label}-${item.value}-${index}`} className="template10-contact-item">
+                  <span className="template10-long-text">{item.value}</span>
+                </span>
+              ))}
+            </div>
           ) : null}
         </header>
 
-        <div className="template10-columns">
-          <aside className="template10-sidebar">
-            {contactItems.length > 0 ? (
-              <Template10Section title="Contact" theme={theme}>
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                  {contactItems.map((item, index) => (
-                    <div key={`${item.label}-${item.value}-${index}`} style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: "var(--resume-item-meta-size)",
-                          lineHeight: "var(--resume-line-height)",
-                          letterSpacing: "0.08em",
-                          textTransform: "uppercase",
-                          color: theme.palette.mutedText,
-                        }}
-                      >
-                        {item.label}
-                      </p>
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: "var(--resume-body-size)",
-                          lineHeight: "var(--resume-line-height)",
-                          color: theme.palette.text,
-                          wordBreak: "break-word",
-                        }}
-                      >
-                        {item.value}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </Template10Section>
-            ) : null}
+        <main className="template10-body">
+          {hasText(summaryText) ? (
+            <Template10Section title="Professional Summary">
+              <p className="template10-summary">{summaryText}</p>
+            </Template10Section>
+          ) : null}
 
-            {skills.length > 0 ? (
-              <Template10Section title="Skills" theme={theme}>
-                <ul className="template10-list">
-                  {skills.map((skill, index) => (
-                    <li key={`${skill}-${index}`} style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
-                      {skill}
-                    </li>
-                  ))}
-                </ul>
-              </Template10Section>
-            ) : null}
-
-            {languages.length > 0 ? (
-              <Template10Section title="Languages" theme={theme}>
-                <ul className="template10-list">
-                  {languages.map((item, index) => (
-                    <li key={`${item.language}-${index}`} style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
-                      {hasText(item.level) ? `${item.language} (${item.level})` : item.language}
-                    </li>
-                  ))}
-                </ul>
-              </Template10Section>
-            ) : null}
-
-            {strengths.length > 0 ? (
-              <Template10Section title="Strengths" theme={theme}>
-                <ul className="template10-list">
-                  {strengths.map((value, index) => (
-                    <li key={`${value}-${index}`} style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
-                      {value}
-                    </li>
-                  ))}
-                </ul>
-              </Template10Section>
-            ) : null}
-
-            {customSections.length > 0 ? (
-              <Template10Section title="Additional Information" theme={theme}>
-                <div>
-                  {customSections.map((section, index) => (
-                    <div key={`${section.title}-${index}`} className="template10-entry">
-                      {hasText(section.title) ? (
-                        <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: "var(--resume-line-height)" }}>
-                          {section.title}
-                        </p>
-                      ) : null}
-                      {hasText(section.description) ? (
-                        <p style={{ margin: "3px 0 0", fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
-                          {section.description}
-                        </p>
-                      ) : null}
-                      {(section.items || []).length > 0 ? (
-                        <ul className="template10-list" style={{ marginTop: "4px" }}>
-                          {(section.items || []).map((item, itemIndex) => (
-                            <li key={`${item}-${itemIndex}`} style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-              </Template10Section>
-            ) : null}
-          </aside>
-
-          <main className="template10-main">
-            {hasText(summaryText) ? (
-              <Template10Section title="Career Objective" theme={theme}>
-                <p style={{ margin: 0, fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
-                  {summaryText}
-                </p>
-              </Template10Section>
-            ) : null}
-
-            {education.length > 0 ? (
-              <Template10Section title="Education" theme={theme}>
-                <ul className="template10-list">
-                  {education.map((item, index) => (
-                    <li key={`${item.school}-${item.degree}-${index}`} className="template10-entry">
-                      <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: "var(--resume-line-height)" }}>
-                        {item.degree}
-                      </p>
-                      <p style={{ margin: "3px 0 0", fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
-                        {item.school}
-                      </p>
-                      <p style={{ margin: "3px 0 0", fontSize: "var(--resume-item-meta-size)", lineHeight: "var(--resume-line-height)", color: theme.palette.mutedText }}>
-                        {formatRange(item.startYear, item.endYear)}
-                      </p>
-                      {hasText(item.gpa) ? (
-                        <p style={{ margin: "3px 0 0", fontSize: "var(--resume-item-meta-size)", lineHeight: "var(--resume-line-height)", color: theme.palette.mutedText }}>
-                          GPA: {item.gpa}
-                        </p>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              </Template10Section>
-            ) : null}
-
-              {experience.length > 0 ? (
-                <Template10Section title="Work Experience" theme={theme}>
-                  <ul className="template10-list">
-                    {experience.map((item, index) => (
-                      <li key={`${item.company}-${item.role}-${index}`} className="template10-entry">
-                        <div style={{ display: "flex", justifyContent: "space-between", gap: "8px", alignItems: "baseline" }}>
-                          <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: "var(--resume-line-height)" }}>
-                            {item.role} at {item.company}
-                          </p>
-                          <p style={{ margin: 0, fontSize: "var(--resume-item-meta-size)", lineHeight: "var(--resume-line-height)", color: theme.palette.mutedText }}>
-                            {formatRange(item.startDate, item.endDate)}
-                          </p>
-                        </div>
-                        {hasText(item.description) ? (
-                          <ul className="template10-list" style={{ marginTop: "5px" }}>
-                            {item.description
-                              .split(/\r?\n/)
-                              .map((line) => line.trim())
-                              .filter(Boolean)
-                              .map((line, lineIndex) => (
-                                <li
-                                  key={`${item.company}-${item.role}-${index}-detail-${lineIndex}`}
-                                  style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}
-                                >
-                                  {line}
-                                </li>
-                              ))}
-                          </ul>
+          {experience.length > 0 ? (
+            <Template10Section title="Professional Experience">
+              <div className="template10-entry-list">
+                {experience.map((item, index) => (
+                  <article key={`${item.company}-${item.role}-${index}`} className="template10-entry">
+                    <div className="template10-entry-header">
+                      <div>
+                        <p className="template10-entry-title">{item.role || "Experience"}</p>
+                        {hasText(item.company) ? (
+                          <p className="template10-entry-subtitle">{item.company}</p>
                         ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                </Template10Section>
-              ) : null}
+                      </div>
+                      {hasText(formatRange(item.startDate, item.endDate)) ? (
+                        <p className="template10-entry-meta">{formatRange(item.startDate, item.endDate)}</p>
+                      ) : null}
+                    </div>
+                    <BulletList items={toBulletItems(item.description)} />
+                  </article>
+                ))}
+              </div>
+            </Template10Section>
+          ) : null}
 
-              {projects.length > 0 ? (
-                <Template10Section title="Projects" theme={theme}>
-                  <ul className="template10-list">
-                    {projects.map((project, index) => (
-                      <li key={`${project.name}-${index}`} className="template10-entry">
-                        <p style={{ margin: 0, fontSize: "var(--resume-body-size)", fontWeight: 700, lineHeight: "var(--resume-line-height)" }}>
-                          {project.name}
-                        </p>
-                        <ul className="template10-list" style={{ marginTop: "5px" }}>
-                          {hasText(project.description) ? (
-                            <li style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
-                              {project.description}
-                            </li>
-                          ) : null}
-                          {project.technologies.length > 0 ? (
-                            <li style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
-                              Technologies: {uniqueItems(project.technologies).join(", ")}
-                            </li>
-                          ) : null}
-                        </ul>
-                      </li>
-                    ))}
-                  </ul>
-                </Template10Section>
-            ) : null}
+          {projects.length > 0 ? (
+            <Template10Section title="Projects">
+              <div className="template10-entry-list">
+                {projects.map((project, index) => (
+                  <article key={`${project.name}-${index}`} className="template10-entry">
+                    <p className="template10-entry-title">{project.name}</p>
+                    {hasText(project.link) ? (
+                      <p className="template10-entry-meta" style={{ textAlign: "left", whiteSpace: "normal" }}>
+                        {project.link}
+                      </p>
+                    ) : null}
+                    <BulletList
+                      items={[
+                        ...toBulletItems(project.description),
+                        ...(uniqueItems((project as { technologies?: unknown }).technologies).length > 0
+                          ? [`Technologies: ${uniqueItems((project as { technologies?: unknown }).technologies).join(", ")}`]
+                          : []),
+                      ]}
+                    />
+                  </article>
+                ))}
+              </div>
+            </Template10Section>
+          ) : null}
 
-            {certifications.length > 0 ? (
-              <Template10Section title="Certifications" theme={theme}>
-                <ul className="template10-list">
-                  {certifications.map((item, index) => (
-                    <li key={`${item.name}-${item.issuer}-${index}`} style={{ fontSize: "var(--resume-body-size)", lineHeight: "var(--resume-line-height)" }}>
-                      {item.name}, {item.issuer}, {formatMonthYear(item.year)}
-                    </li>
-                  ))}
-                </ul>
-              </Template10Section>
-            ) : null}
-          </main>
-        </div>
+          {education.length > 0 ? (
+            <Template10Section title="Education">
+              <div className="template10-education-list">
+                {education.map((item, index) => (
+                  <article key={`${item.school}-${item.degree}-${index}`} className="template10-entry">
+                    <div className="template10-entry-header">
+                      <div>
+                        <p className="template10-entry-title">{item.degree}</p>
+                        {hasText(item.school) ? (
+                          <p className="template10-entry-subtitle" style={{ fontWeight: 400 }}>
+                            {item.school}
+                          </p>
+                        ) : null}
+                      </div>
+                      {hasText(formatRange(item.startYear, item.endYear)) ? (
+                        <p className="template10-entry-meta">{formatRange(item.startYear, item.endYear)}</p>
+                      ) : null}
+                    </div>
+                    {hasText(item.gpa) ? <p className="template10-entry-copy">GPA: {item.gpa}</p> : null}
+                  </article>
+                ))}
+              </div>
+            </Template10Section>
+          ) : null}
+
+          {certifications.length > 0 ? (
+            <Template10Section title="Certifications">
+              <BulletList items={certifications.map((item) => toCertificationText(item)).filter(Boolean)} />
+            </Template10Section>
+          ) : null}
+
+          {skills.length > 0 ? (
+            <Template10Section title="Skills">
+              <InlineValue items={skills} />
+            </Template10Section>
+          ) : null}
+
+          {languages.length > 0 ? (
+            <Template10Section title="Languages">
+              <InlineValue items={languages} />
+            </Template10Section>
+          ) : null}
+
+          {strengths.length > 0 ? (
+            <Template10Section title="Strengths">
+              <BulletList items={strengths} />
+            </Template10Section>
+          ) : null}
+
+          {hobbies.length > 0 ? (
+            <Template10Section title="Hobbies">
+              <BulletList items={hobbies} />
+            </Template10Section>
+          ) : null}
+
+          {achievements.length > 0 ? (
+            <Template10Section title="Achievements">
+              <BulletList items={achievements} />
+            </Template10Section>
+          ) : null}
+
+          {references.length > 0 ? (
+            <Template10Section title="References">
+              <BulletList items={references} />
+            </Template10Section>
+          ) : null}
+
+          {customSections.length > 0 ? (
+            <Template10Section title="Additional Information">
+              <div className="template10-custom-list">
+                {customSections.map((section, index) => (
+                  <article key={`${section.title}-${index}`} className="template10-entry">
+                    {hasText(section.title) ? (
+                      <div className="template10-entry-header">
+                        <p className="template10-entry-title">{section.title}</p>
+                        {hasText(section.date) ? <p className="template10-entry-meta">{section.date}</p> : null}
+                      </div>
+                    ) : null}
+                    {hasText(section.description) ? (
+                      <p className="template10-entry-copy">{section.description}</p>
+                    ) : null}
+                    {(section.items || []).some((item) => hasText(item)) ? (
+                      <BulletList items={(section.items || []).filter((item) => hasText(item)) as string[]} />
+                    ) : null}
+                  </article>
+                ))}
+              </div>
+            </Template10Section>
+          ) : null}
+        </main>
       </div>
     </ResumePage>
   );
 };
 
 const Template10: React.FC<Template10Props> = ({ data }) =>
-  template10Render(data, resolveTemplateTheme(10, data));
+  template10Render(data, resolveTemplateTheme(10, data) as ResumeTemplateTheme);
 
 export default Template10;

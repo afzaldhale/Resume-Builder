@@ -73,7 +73,7 @@ const Template3Styles = ({
       bottom: 36px;
       width: 80px;
       min-height: calc(var(--resume-page-height, 1123px) - 72px);
-      background: ${theme.palette.accent};
+      background: ${theme.palette.sidebarBg || theme.palette.accent};
       z-index: 1;
       pointer-events: none;
     }
@@ -219,7 +219,7 @@ const Template3Styles = ({
       font-size: ${ResumeTypography.title}px;
       line-height: ${ResumeTypography.lineHeight};
       font-weight: 700;
-      color: ${theme.palette.headingText || theme.palette.text};
+      color: ${theme.palette.text};
     }
 
     .template3-item-subtitle,
@@ -234,6 +234,12 @@ const Template3Styles = ({
 
     .template3-item-body {
       margin-top: 5px;
+    }
+
+    .template3-education-details {
+      display: grid;
+      row-gap: 2px;
+      padding-left: 20px;
     }
 
     .template3-list {
@@ -262,7 +268,7 @@ const Template3Styles = ({
       font-size: ${ResumeTypography.title}px;
       line-height: ${ResumeTypography.lineHeight};
       font-weight: 700;
-      color: ${theme.palette.headingText || theme.palette.text};
+      color: ${theme.palette.text};
     }
 
     .template3-certification-detail {
@@ -279,7 +285,7 @@ const Template3Styles = ({
       font-size: ${ResumeTypography.title}px;
       line-height: ${ResumeTypography.lineHeight};
       font-weight: 700;
-      color: ${theme.palette.headingText || theme.palette.text};
+      color: ${theme.palette.text};
     }
 
     .template3-divider {
@@ -354,6 +360,27 @@ const MetaBlock = ({
     {hasText(subtitle) ? <p className="template3-item-subtitle">{subtitle}</p> : null}
     {hasText(date) ? <p className="template3-item-date">{date}</p> : null}
     {children ? <div className="template3-item-body">{children}</div> : null}
+  </div>
+);
+
+const EducationBlock = ({
+  degree,
+  school,
+  date,
+  gpa,
+}: {
+  degree: string;
+  school?: string;
+  date?: string;
+  gpa?: string;
+}) => (
+  <div className="template3-meta-block break-inside-avoid">
+    <p className="template3-item-title">{`${TEMPLATE3_BULLET} ${degree}`}</p>
+    <div className="template3-education-details">
+      {hasText(school) ? <p className="template3-item-subtitle">{school}</p> : null}
+      {hasText(date) ? <p className="template3-item-date">{date}</p> : null}
+      {hasText(gpa) ? <p className="template3-copy">{`GPA: ${gpa}`}</p> : null}
+    </div>
   </div>
 );
 
@@ -471,14 +498,13 @@ const Template3: React.FC<Template3Props> = ({ data }) => {
             <Section title="Education">
               <div>
                 {education.map((item, index) => (
-                  <MetaBlock
+                  <EducationBlock
                     key={`${item.school}-${item.degree}-${index}`}
-                    title={`${TEMPLATE3_BULLET} ${item.degree}`}
-                    subtitle={item.school}
+                    degree={item.degree || "Education"}
+                    school={item.school}
                     date={formatRange(item.startYear, item.endYear)}
-                  >
-                    {hasText(item.gpa) ? <p className="template3-copy">GPA: {item.gpa}</p> : null}
-                  </MetaBlock>
+                    gpa={item.gpa}
+                  />
                 ))}
               </div>
             </Section>

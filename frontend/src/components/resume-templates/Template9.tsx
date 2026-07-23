@@ -477,14 +477,12 @@ const buildSectionMap = (data: ResumeData) => {
       education.length > 0 ? (
         <div className="grid" style={{ rowGap: "20px" }}>
           {education.map((item, index) => (
-            <ResumeDetailBulletGroup
+            <ResumeEducationBulletBlock
               key={`${item.school}-${item.degree}-${index}`}
-              items={[
-                { content: item.degree, className: "resume-item-title" },
-                { content: item.school, className: "resume-item-subtitle" },
-                { content: formatRange(item.startYear, item.endYear), className: "resume-item-meta" },
-                ...(hasText(item.gpa) ? [{ content: `GPA: ${item.gpa}`, className: "resume-item-meta" }] : []),
-              ]}
+              degree={item.degree}
+              school={item.school}
+              date={formatRange(item.startYear, item.endYear)}
+              gpa={item.gpa}
             />
           ))}
         </div>
@@ -683,6 +681,8 @@ const ResumePageStyles = () => (
       padding-left: var(--resume-list-indent, 18px);
       font-size: var(--resume-list-size);
       line-height: var(--resume-line-height);
+      list-style-type: disc;
+      list-style-position: outside;
     }
 
     .resume-bullet-list li + li {
@@ -707,9 +707,9 @@ const ResumePageStyles = () => (
     }
 
     .resume-summary-box {
-      border-left: 4px solid var(--resume-accent);
-      background: var(--resume-accent-soft);
-      padding: var(--resume-summary-box-padding, 14px 16px);
+      border-left: none;
+      background: transparent;
+      padding: 0;
     }
 
     .resume-section-summary-plain .resume-summary-box {
@@ -1112,6 +1112,45 @@ const ResumeDetailBulletGroup = ({
         </li>
       ))}
     </ul>
+  );
+};
+
+const ResumeEducationBulletBlock = ({
+  degree,
+  school,
+  date,
+  gpa,
+}: {
+  degree?: string;
+  school?: string;
+  date?: string;
+  gpa?: string;
+}) => {
+  if (!hasText(degree) && !hasText(school) && !hasText(date) && !hasText(gpa)) {
+    return null;
+  }
+
+  return (
+    <div className="break-inside-avoid" style={{ display: "grid", rowGap: "8px" }}>
+      {hasText(degree) ? (
+        <ul className="resume-bullet-list">
+          <li>
+            <span className="resume-item-title">{degree}</span>
+          </li>
+        </ul>
+      ) : null}
+      <div
+        style={{
+          display: "grid",
+          rowGap: "6px",
+          paddingLeft: "var(--resume-list-indent, 18px)",
+        }}
+      >
+        {hasText(school) ? <p className="resume-item-subtitle">{school}</p> : null}
+        {hasText(date) ? <p className="resume-item-meta">{date}</p> : null}
+        {hasText(gpa) ? <p className="resume-item-meta">{`GPA: ${gpa}`}</p> : null}
+      </div>
+    </div>
   );
 };
 

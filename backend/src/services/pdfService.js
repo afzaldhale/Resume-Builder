@@ -9,21 +9,21 @@ const FRONTEND_RENDER_URL =
   "http://127.0.0.1:8080";
 
 const TEMPLATE_NAMES = {
-  1: "Clean Single Column",
-  2: "Corporate Sidebar Blue",
-  3: "Colored Heading Corporate",
-  4: "Left Accent Teal",
-  5: "Premium Gray Sidebar",
-  6: "Professional Sidebar Teal",
-  7: "Muted Coral Corporate",
-  8: "Compact ATS Single",
-  9: "Premium Charcoal Sidebar",
-  10: "Blue Heading Corporate",
-  11: "Classic Two Column",
-  12: "Soft Green Corporate",
-  13: "Rose Sidebar Corporate",
-  14: "Minimal Left Accent",
-  15: "Corporate Clean",
+  1: "Recruiter Choice",
+  2: "Premium Executive",
+  3: "Prime Executive",
+  4: "Elite Executive",
+  5: "Executive Signature",
+  6: "Executive Edge",
+  7: "Classic Executive",
+  8: "Corporate Standard",
+  9: "Career Pro",
+  10: "Classic Professional",
+  11: "Corporate Professional",
+  12: "Modern Professional",
+  13: "Career Essential",
+  14: "Career Prime",
+  15: "Executive Prestige",
 };
 
 const normalizeResumeData = (resumeData = {}) => ({

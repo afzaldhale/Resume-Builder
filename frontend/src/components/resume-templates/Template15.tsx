@@ -134,7 +134,7 @@ const template15Styles = (theme: ResumeTemplateTheme) => `
     letter-spacing: 0.05em;
     text-transform: uppercase;
     color: ${theme.palette.headingText || theme.palette.text};
-    border-bottom: 2px solid ${theme.palette.text};
+    border-bottom: 1.5px solid ${theme.palette.border};
   }
 
   .template15-body {
@@ -187,6 +187,8 @@ const template15Styles = (theme: ResumeTemplateTheme) => `
   .template15-list {
     margin-top: 6px;
     padding-left: 16px;
+    list-style-type: disc;
+    list-style-position: outside;
   }
 
   .template15-list li {
@@ -338,27 +340,6 @@ const template15Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
             {safe.address ? <div>{safe.address}</div> : null}
             {renderSocialLinks(data.socialLinks)}
           </div>
-
-          {safe.skills.length > 0 ? (
-            <section className="resume-section template15-sidebar-section">
-              <div className="template15-left-title resume-section-title">SKILLS</div>
-              <div className="template15-sidebar-copy resume-section-content">{joinItems(safe.skills)}</div>
-            </section>
-          ) : null}
-
-          {safe.strengths.length > 0 ? (
-            <section className="resume-section template15-sidebar-section">
-              <div className="template15-left-title resume-section-title">STRENGTHS</div>
-              <div className="template15-sidebar-copy resume-section-content">{joinItems(safe.strengths)}</div>
-            </section>
-          ) : null}
-
-          {safe.hobbies.length > 0 ? (
-            <section className="resume-section template15-sidebar-section">
-              <div className="template15-left-title resume-section-title">HOBBIES</div>
-              <div className="template15-sidebar-copy resume-section-content">{safe.hobbies.join(", ")}</div>
-            </section>
-          ) : null}
         </div>
 
         <div className="template15-right">
@@ -442,6 +423,33 @@ const template15Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                     </div>
                   </div>
                 ))}
+              </div>
+            </section>
+          )}
+
+          {safe.skills.length > 0 && (
+            <section className="template15-section resume-section">
+              <div className="template15-section-title resume-section-title">SKILLS</div>
+              <div className="resume-section-content">
+                <p className="template15-body">{joinItems(safe.skills)}</p>
+              </div>
+            </section>
+          )}
+
+          {safe.strengths.length > 0 && (
+            <section className="template15-section resume-section">
+              <div className="template15-section-title resume-section-title">STRENGTHS</div>
+              <div className="resume-section-content">
+                <p className="template15-body">{joinItems(safe.strengths)}</p>
+              </div>
+            </section>
+          )}
+
+          {safe.hobbies.length > 0 && (
+            <section className="template15-section resume-section">
+              <div className="template15-section-title resume-section-title">HOBBIES / INTERESTS</div>
+              <div className="resume-section-content">
+                <p className="template15-body">{joinItems(safe.hobbies)}</p>
               </div>
             </section>
           )}

@@ -338,7 +338,7 @@ const buildSectionMap = (data: ResumeData) => {
       (data.achievements || []).length > 0 ? <ResumeBulletList items={data.achievements || []} /> : null,
     languages:
       data.languages.length > 0 ? (
-        <ResumeBulletList
+        <ResumeTagList
           items={data.languages.map((item) =>
             hasText(item.level) ? `${item.language} (${item.level})` : item.language
           )}
@@ -491,9 +491,16 @@ const ResumePageStyles = () => (
 
     .resume-bullet-list {
       margin: 0;
-      padding-left: var(--resume-list-indent, 18px);
+      padding-left: calc(var(--resume-list-indent, 18px) + 6px);
       font-size: var(--resume-list-size);
       line-height: var(--resume-line-height);
+      list-style-type: disc;
+      list-style-position: outside;
+    }
+
+    .resume-bullet-list li {
+      margin-left: 0;
+      padding-left: 0;
     }
 
     .resume-bullet-list li + li {
@@ -788,12 +795,11 @@ const ResumeBulletLead = ({
 }: {
   text: string;
 }) => (
-  <p className="resume-item-title" style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
-    <span aria-hidden="true" style={{ lineHeight: "var(--resume-line-height)" }}>
-      •
-    </span>
-    <span>{text}</span>
-  </p>
+  <ul className="resume-bullet-list">
+    <li>
+      <span className="resume-item-title">{text}</span>
+    </li>
+  </ul>
 );
 
 const ResumeTwoColumnLayout = ({

@@ -125,11 +125,17 @@ const DEFAULT_FRESHER_MAIN: SectionKey[] = ["summary", "skills", "experience", "
 const hasText = (value?: string | null) => Boolean(value && value.trim());
 
 const uniqueItems = (items: string[]) => [...new Set(items.filter(Boolean))];
+const toBulletItems = (value?: string | null) =>
+  (value || "")
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
 
 const TEMPLATE13_PAGE_PADDING = "36px 48px";
 const TEMPLATE13_SIDEBAR_WIDTH = "30%";
 const TEMPLATE13_COLUMN_GAP = "28px";
 const TEMPLATE13_BULLET = "\u2022";
+const TEMPLATE13_BODY_BULLET_INDENT = 12;
 
 const scalePxString = (value: string, factor: number) =>
   value.replace(/(\d+(?:\.\d+)?)px/g, (_, amount: string) => {
@@ -189,6 +195,149 @@ const getSectionLabel = (key: SectionKey, summaryTitle: string) => {
       return "";
   }
 };
+
+const toTemplate13BodyBulletItems = (value?: string[] | string | null) => {
+  if (Array.isArray(value)) {
+    return value.map((item) => item?.trim()).filter(Boolean) as string[];
+  }
+
+  return toBulletItems(value);
+};
+
+const Template13BodyBulletLine = ({
+  text,
+  title = false,
+}: {
+  text: string;
+  title?: boolean;
+}) => (
+  <div
+    style={{
+      display: "flex",
+      alignItems: "flex-start",
+      gap: "6px",
+    }}
+  >
+    <span
+      aria-hidden="true"
+      style={{
+        fontSize: "var(--resume-list-size)",
+        lineHeight: "1.34",
+        color: "var(--resume-page-text)",
+        flexShrink: 0,
+      }}
+    >
+      {TEMPLATE13_BULLET}
+    </span>
+    <div
+      className={title ? "resume-item-title" : "resume-body-copy"}
+      style={
+        title
+          ? {
+              flex: 1,
+              minWidth: 0,
+              fontWeight: 700,
+              color: "var(--resume-page-text)",
+            }
+          : {
+              flex: 1,
+              minWidth: 0,
+            }
+      }
+    >
+      {text}
+    </div>
+  </div>
+);
+
+const Template13BodyBulletList = ({
+  items,
+  className = "",
+}: {
+  items: string[];
+  className?: string;
+}) => {
+  const filteredItems = items.filter(Boolean);
+  if (filteredItems.length === 0) return null;
+
+  return (
+    <div
+      className={className}
+      style={{
+        marginLeft: `${TEMPLATE13_BODY_BULLET_INDENT}px`,
+        paddingLeft: 0,
+        display: "grid",
+        rowGap: "2px",
+      }}
+    >
+      {filteredItems.map((item, index) => (
+        <Template13BodyBulletLine key={`${item}-${index}`} text={item} />
+      ))}
+    </div>
+  );
+};
+
+const Template13BodyTagList = ({
+  items,
+}: {
+  items: string[];
+}) => {
+  const filteredItems = uniqueItems(items.filter(Boolean));
+  if (filteredItems.length === 0) return null;
+
+  return (
+    <p className="resume-body-copy resume-skills" style={{ margin: 0 }}>
+      {filteredItems.join(", ")}
+    </p>
+  );
+};
+
+const Template13BodyStructuredEntry = ({
+  title,
+  subtitle,
+  meta,
+  details,
+}: {
+  title: string;
+  subtitle?: string;
+  meta?: string;
+  details?: ReactNode;
+}) => (
+  <div className="resume-meta-block break-inside-avoid">
+    <Template13BodyBulletLine text={title} title />
+    <div style={{ marginLeft: `${TEMPLATE13_BODY_BULLET_INDENT}px` }}>
+      {hasText(subtitle) ? <p className="resume-item-subtitle mt-1">{subtitle}</p> : null}
+      {hasText(meta) ? <p className="resume-item-meta mt-1.5">{meta}</p> : null}
+      {details}
+    </div>
+  </div>
+);
+
+const Template13BodyProjectEntry = ({
+  title,
+  description,
+  technologies,
+}: {
+  title: string;
+  description?: string;
+  technologies: string[];
+}) => (
+  <div className="resume-meta-block break-inside-avoid">
+    <h3 className="resume-item-title" style={{ margin: 0 }}>
+      {title}
+    </h3>
+    <div style={{ marginTop: "10px" }}>
+      <Template13BodyBulletList
+        items={[
+          ...toTemplate13BodyBulletItems(description),
+          ...(technologies.length > 0
+            ? [`Technologies: ${uniqueItems(technologies).join(", ")}`]
+            : []),
+        ]}
+      />
+    </div>
+  </div>
+);
 
 const ResumeSidebarContactCard = ({
   data,
@@ -267,7 +416,7 @@ const ResumeSidebarContactCard = ({
   );
 };
 
-const buildSectionMap = (data: ResumeData) => {
+const buildBodySectionMap = (data: ResumeData) => {
   const { summaryText, summaryTitle } = getSummaryConfig(data);
   const experience = sortExperienceReverseChronological(data.experience || []);
   const education = sortEducationReverseChronological(data.education || []);
@@ -282,72 +431,99 @@ const buildSectionMap = (data: ResumeData) => {
     skills: data.skills.length > 0 ? <ResumeTagList items={data.skills} /> : null,
     experience:
       experience.length > 0 ? (
-        <div style={{ display: "grid", rowGap: "18px" }}>
-          {experience.map((item, index) => (
-            <ResumeStructuredExperienceBlock
-              key={`${item.company}-${item.role}-${index}`}
-              title={[item.role, item.company].filter(Boolean).join(" at ")}
-              meta={formatRange(item.startDate, item.endDate)}
-              description={item.description}
-            />
-          ))}
+        <div className="space-y-3.5">
+          {experience.map((item, index) => {
+            const title = [item.role, item.company].filter(hasText).join(" at ");
+            const responsibilities = toTemplate13BodyBulletItems(
+              item.description as string | string[] | null | undefined
+            );
+
+            return (
+              <div
+                key={`${item.company}-${item.role}-${index}`}
+                className="resume-meta-block break-inside-avoid"
+              >
+                <h3 className="resume-item-title" style={{ margin: 0 }}>
+                  {title}
+                </h3>
+                {hasText(formatRange(item.startDate, item.endDate)) ? (
+                  <p className="resume-item-meta mt-1.5">{formatRange(item.startDate, item.endDate)}</p>
+                ) : null}
+                {responsibilities.length > 0 ? (
+                  <div className="mt-2.5">
+                    <Template13BodyBulletList items={responsibilities} />
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
         </div>
       ) : null,
     education:
       education.length > 0 ? (
-        <div style={{ display: "grid", rowGap: "18px" }}>
+        <div className="space-y-3.5">
           {education.map((item, index) => (
-            <Template13EducationEntry
+            <Template13BodyStructuredEntry
               key={`${item.school}-${item.degree}-${index}`}
-              degree={item.degree}
-              school={item.school}
-              dates={formatRange(item.startYear, item.endYear)}
-              gpa={item.gpa}
+              title={item.degree}
+              subtitle={item.school}
+              meta={formatRange(item.startYear, item.endYear)}
+              details={
+                hasText(item.gpa) ? (
+                  <p className="resume-body-copy mt-1.5">GPA: {item.gpa}</p>
+                ) : undefined
+              }
             />
           ))}
         </div>
       ) : null,
     projects:
       data.projects.length > 0 ? (
-        <div style={{ display: "grid", rowGap: "18px" }}>
+        <div className="space-y-3.5">
           {data.projects.map((project, index) => (
-            <ResumeStructuredProjectBlock
+            <Template13BodyProjectEntry
               key={`${project.name}-${index}`}
               title={project.name}
               description={project.description}
               technologies={project.technologies}
-              meta={hasText(project.link) ? project.link : undefined}
             />
           ))}
         </div>
       ) : null,
     certifications:
       certifications.length > 0 ? (
-        <Template13CompactStack
-          items={certifications.map((item) => ({
-            primary: item.name,
-            secondary: [item.issuer, formatMonthYear(item.year)].filter(hasText).join(" | "),
-          }))}
-          emphasizeFirst
-        />
+        <div className="space-y-3">
+          {certifications.map((item, index) => (
+            <Template13BodyBulletLine
+              key={`${item.name}-${item.issuer}-${index}`}
+              text={[item.name, item.issuer, formatMonthYear(item.year)].filter(hasText).join(", ")}
+            />
+          ))}
+        </div>
       ) : null,
     achievements:
       (data.achievements || []).length > 0 ? <ResumeBulletList items={data.achievements || []} /> : null,
     languages:
       data.languages.length > 0 ? (
-        <p className="resume-body-copy resume-skills">
-          {data.languages
-            .map((item) => (hasText(item.level) ? `${item.language} (${item.level})` : item.language))
-            .join(", ")}
-        </p>
+        <Template13BodyBulletList
+          items={data.languages.map((item) =>
+            hasText(item.level) ? `${item.language} (${item.level})` : item.language
+          )}
+        />
       ) : null,
-    strengths: (data.strengths || []).length > 0 ? <ResumeTagList items={data.strengths || []} /> : null,
-    hobbies: (data.hobbies || []).length > 0 ? <ResumeTagList items={data.hobbies || []} /> : null,
+    strengths:
+      (data.strengths || []).length > 0 ? (
+        <Template13BodyTagList items={data.strengths || []} />
+      ) : null,
+    hobbies:
+      (data.hobbies || []).length > 0 ? (
+        <Template13BodyTagList items={data.hobbies || []} />
+      ) : null,
     references:
       (data.references || []).length > 0 ? <ResumeBulletList items={data.references || []} /> : null,
     custom:
       (data.customSections || []).length > 0 ? (
-        <div style={{ display: "grid", rowGap: "18px" }}>
+        <div className="space-y-3.5">
           {data.customSections.map((section, index) => {
             const hasItems = (section.items || []).length > 0;
             const hasDescription = hasText(section.description);
@@ -369,6 +545,83 @@ const buildSectionMap = (data: ResumeData) => {
 
   return { sections, summaryTitle };
 };
+
+const Template13BodySection = ({
+  title,
+  summaryTitle,
+  theme,
+  children,
+  avoidBreakInside = true,
+  marginTop = 0,
+}: {
+  title: string;
+  summaryTitle: string;
+  theme: ResumeTemplateTheme;
+  children: ReactNode;
+  avoidBreakInside?: boolean;
+  marginTop?: number;
+}) => (
+  <section
+    className={`resume-section${avoidBreakInside ? " break-inside-avoid" : ""}`}
+    style={{
+      color: theme.palette.text,
+      marginTop: `${marginTop}px`,
+    }}
+  >
+    <h2
+      className="resume-section-title"
+      style={{
+        margin: "12px 0 8px",
+        padding: "3px 10px",
+        background: theme.palette.accent,
+        color: theme.palette.headingText || theme.palette.accentText,
+        fontSize: "var(--resume-heading-size)",
+        fontWeight: 700,
+        textTransform: "uppercase",
+        letterSpacing: "0.75pt",
+        lineHeight: 1.25,
+      }}
+    >
+      {title}
+    </h2>
+    <div
+      className={`resume-section-content ${
+        title === summaryTitle ? "resume-section-summary-plain" : ""
+      }`.trim()}
+      style={{ paddingLeft: "var(--resume-section-content-indent, 16px)" }}
+    >
+      {children}
+    </div>
+  </section>
+);
+
+const renderBodySections = ({
+  keys,
+  sections,
+  summaryTitle,
+  theme,
+  sectionGap = 0,
+}: {
+  keys: SectionKey[];
+  sections: Record<SectionKey, ReactNode>;
+  summaryTitle: string;
+  theme: ResumeTemplateTheme;
+  sectionGap?: number;
+}) =>
+  keys
+    .filter((key) => Boolean(sections[key]))
+    .map((key, index) => (
+      <Template13BodySection
+        key={`body-${key}`}
+        title={getSectionLabel(key, summaryTitle)}
+        summaryTitle={summaryTitle}
+        theme={theme}
+        avoidBreakInside={key !== "languages"}
+        marginTop={index === 0 ? 0 : sectionGap}
+      >
+        {sections[key]}
+      </Template13BodySection>
+    ));
 
 const ResumePage = ({
   children,
@@ -943,38 +1196,8 @@ const Template13CompactStack = ({
   </div>
 );
 
-const renderSections = ({
-  keys,
-  sections,
-  summaryTitle,
-  theme,
-  sidebar = false,
-}: {
-  keys: SectionKey[];
-  sections: Record<SectionKey, ReactNode>;
-  summaryTitle: string;
-  theme: ResumeTemplateTheme;
-  sidebar?: boolean;
-}) =>
-  keys.map((key) => {
-    const content = sections[key];
-    if (!content) return null;
-
-    return (
-      <Template13Section
-        key={`${sidebar ? "sidebar" : "main"}-${key}`}
-        title={getSectionLabel(key, summaryTitle)}
-        theme={theme}
-        sidebar={sidebar}
-        summaryTitle={summaryTitle}
-      >
-        {content}
-      </Template13Section>
-    );
-  });
-
 const template13Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
-  const { sections, summaryTitle } = buildSectionMap(data);
+  const { sections, summaryTitle } = buildBodySectionMap(data);
   const fresherResume = isFresherResume(data);
   const compactMode = getCompactMode(data);
   const densityMode = getDensityMode(data);
@@ -1031,15 +1254,9 @@ const template13Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
     "custom" as SectionKey,
   ].filter((key, index, items) => items.indexOf(key) === index && hasSectionData(key as ResumeSectionKey, data));
 
-  const fresherSidebarKeys = (theme.sidebarSections || DEFAULT_FRESHER_SIDEBAR).filter((key: SectionKey) =>
-    fresherSectionKeys.includes(key)
-  );
-  const fresherMainKeys = (theme.fresherMainSections || DEFAULT_FRESHER_MAIN).filter((key) =>
-    hasSectionData(key, data)
-  );
-
-  const experiencedSidebarKeys = theme.sidebarSections || DEFAULT_EXPERIENCED_SIDEBAR;
-  const experiencedMainKeys = theme.mainSections || DEFAULT_EXPERIENCED_MAIN;
+  const fresherMainKeys = DEFAULT_SINGLE_ORDER.filter((key) => hasSectionData(key, data));
+  const experiencedMainKeys = DEFAULT_SINGLE_ORDER.filter((key) => hasSectionData(key, data));
+  const bodyKeys = fresherResume ? fresherMainKeys : experiencedMainKeys;
 
   return (
     <ResumePage
@@ -1079,11 +1296,12 @@ const template13Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
         <div className="flex h-full flex-col" style={{ gap: `${sectionGap}px` }}>
           <ResumeHeader data={data} theme={theme} compactMode={compactMode} />
           <div className="flex flex-col" style={{ gap: `${sectionGap}px` }}>
-            {renderSections({
-              keys: fresherResume ? fresherSectionKeys : theme.mainSections || DEFAULT_SINGLE_ORDER,
+            {renderBodySections({
+              keys: bodyKeys,
               sections,
               summaryTitle,
               theme,
+              sectionGap,
             })}
           </div>
         </div>
@@ -1097,17 +1315,10 @@ const template13Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
           <div
             className="resume-two-column-layout"
             style={{
-              display: "grid",
-              gridTemplateColumns: `minmax(0, ${TEMPLATE13_SIDEBAR_WIDTH}) minmax(0, 1fr)`,
-              columnGap: TEMPLATE13_COLUMN_GAP,
-              alignItems: "stretch",
               minHeight: "100%",
             }}
           >
-            <main
-              className="resume-main"
-              style={{ minWidth: 0, gridColumn: "1 / -1" }}
-            >
+            <main className="resume-main" style={{ minWidth: 0 }}>
               {theme.summaryInHeader ? null : (
                 <ResumeHeader
                   data={data}
@@ -1116,39 +1327,14 @@ const template13Render = (data: ResumeData, theme: ResumeTemplateTheme) => {
                   densityMode={densityMode}
                 />
               )}
-            </main>
-
-            <div className="resume-sidebar">
-              <ResumeSidebar
-                theme={{
-                  ...theme,
-                  sidebarPadding: theme.sidebarPadding || "30px 24px 28px 24px",
-                }}
-                compactMode={compactMode}
-              >
+              <div style={{ ...mainStyle, marginTop: `${sectionGap}px` }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: `${sectionGap}px` }}>
-                  {theme.sidebarMode === "contact-only" ? (
-                    <ResumeSidebarContactCard data={data} theme={theme} compactMode={compactMode} />
-                  ) : (
-                    renderSections({
-                      keys: fresherResume ? fresherSidebarKeys : experiencedSidebarKeys,
-                      sections,
-                      summaryTitle,
-                      theme,
-                      sidebar: true,
-                    })
-                  )}
-                </div>
-              </ResumeSidebar>
-            </div>
-            <main className="resume-main" style={{ minWidth: 0 }}>
-              <div style={mainStyle}>
-                <div style={{ display: "flex", flexDirection: "column", gap: `${sectionGap}px` }}>
-                  {renderSections({
-                    keys: fresherResume ? fresherMainKeys : experiencedMainKeys,
+                  {renderBodySections({
+                    keys: bodyKeys,
                     sections,
                     summaryTitle,
                     theme,
+                    sectionGap,
                   })}
                 </div>
               </div>

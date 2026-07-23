@@ -2,17 +2,7 @@ import type { ResumeData } from "./types";
 import type { ResumeTemplateTheme } from "./templateThemeTypes";
 import { templateThemes } from "./templateThemes";
 
-export type TemplateColorKey =
-  | "headingBar"
-  | "headingText"
-  | "nameText"
-  | "titleText"
-  | "bodyText"
-  | "accent"
-  | "sidebarBackground"
-  | "sidebarText"
-  | "accentBorder"
-  | "dividerColor";
+export type TemplateColorKey = "headingBar" | "headingText" | "sidebarBackground";
 
 export interface EditableColorField {
   key: TemplateColorKey;
@@ -37,174 +27,95 @@ export const PROFESSIONAL_COLOR_PRESETS = [
   { label: "Purple", value: "#6D28D9" },
 ] as const;
 
-const createSingleBarConfig = (templateId: number, accentOverride?: string): TemplateThemeConfig => ({
-  templateId,
-  defaultColors: {
-    headingBar: accentOverride || templateThemes[templateId].palette.accent,
-    headingText: templateThemes[templateId].palette.accentText,
-    nameText: templateThemes[templateId].palette.text,
-    bodyText: templateThemes[templateId].palette.text,
-    accent: accentOverride || templateThemes[templateId].palette.accent,
-  },
-  editableColors: [
-    { key: "headingBar", label: "Heading Background Color" },
-    { key: "headingText", label: "Heading Text Color" },
-    { key: "nameText", label: "Name Color" },
-    { key: "bodyText", label: "Body Text Color" },
-    { key: "accent", label: "Accent Color" },
-  ],
-});
+const HEADING_COLOR_FIELDS: EditableColorField[] = [
+  { key: "headingBar", label: "Heading Background Color" },
+  { key: "headingText", label: "Heading Text Color" },
+];
 
-const createSidebarConfig = (templateId: number): TemplateThemeConfig => ({
-  templateId,
-  defaultColors: {
-    sidebarBackground: templateThemes[templateId].palette.sidebarBg,
-    sidebarText: templateThemes[templateId].palette.sidebarText,
-    headingBar: templateThemes[templateId].palette.accent,
-    headingText: templateThemes[templateId].palette.accentText,
-    nameText: templateThemes[templateId].palette.nameText || templateThemes[templateId].palette.text,
-    titleText: templateThemes[templateId].palette.titleText || templateThemes[templateId].palette.mutedText,
-  },
-  editableColors: [
-    { key: "sidebarBackground", label: "Sidebar Background" },
-    { key: "sidebarText", label: "Sidebar Text Color" },
-    { key: "headingBar", label: "Heading Background Color" },
-    { key: "headingText", label: "Heading Text Color" },
-    { key: "nameText", label: "Name Color" },
-    { key: "titleText", label: "Role / Title Color" },
-  ],
-});
+const SIDEBAR_COLOR_FIELD: EditableColorField = {
+  key: "sidebarBackground",
+  label: "Sidebar Color",
+};
 
-const createMinimalConfig = (templateId: number): TemplateThemeConfig => ({
+const createHeadingOnlyConfig = (
+  templateId: number,
+  headingBar?: string,
+  headingText?: string
+): TemplateThemeConfig => ({
   templateId,
   defaultColors: {
     headingBar:
+      headingBar ||
       templateThemes[templateId].palette.accentBorder ||
       templateThemes[templateId].palette.accent,
-    headingText: templateThemes[templateId].palette.text,
-    accentBorder: templateThemes[templateId].palette.accent,
-    nameText: templateThemes[templateId].palette.text,
-    bodyText: templateThemes[templateId].palette.text,
+    headingText:
+      headingText ||
+      templateThemes[templateId].palette.headingText ||
+      templateThemes[templateId].palette.accentText ||
+      templateThemes[templateId].palette.text,
   },
-  editableColors: [
-    { key: "headingBar", label: "Heading Background Color" },
-    { key: "headingText", label: "Heading Text Color" },
-    { key: "accentBorder", label: "Accent Border Color" },
-    { key: "nameText", label: "Name Color" },
-    { key: "bodyText", label: "Body Text Color" },
-  ],
+  editableColors: HEADING_COLOR_FIELDS,
+});
+
+const createSidebarConfig = (
+  templateId: number,
+  headingBar?: string,
+  headingText?: string,
+  sidebarBackground?: string
+): TemplateThemeConfig => ({
+  templateId,
+  defaultColors: {
+    headingBar:
+      headingBar ||
+      templateThemes[templateId].palette.accentBorder ||
+      templateThemes[templateId].palette.accent,
+    headingText:
+      headingText ||
+      templateThemes[templateId].palette.headingText ||
+      templateThemes[templateId].palette.accentText ||
+      templateThemes[templateId].palette.text,
+    sidebarBackground:
+      sidebarBackground ||
+      templateThemes[templateId].palette.sidebarBg ||
+      templateThemes[templateId].palette.accentSoft ||
+      templateThemes[templateId].palette.accent,
+  },
+  editableColors: [...HEADING_COLOR_FIELDS, SIDEBAR_COLOR_FIELD],
 });
 
 export const templateThemeConfigs: Record<number, TemplateThemeConfig> = {
-  1: {
-    templateId: 1,
-    defaultColors: {
-      headingBar: templateThemes[1].palette.accent,
-      headingText:
-        templateThemes[1].palette.headingText ||
-        templateThemes[1].palette.accentText ||
-        templateThemes[1].palette.text,
-      accentBorder: templateThemes[1].palette.accent,
-      nameText:
-        templateThemes[1].palette.nameText || templateThemes[1].palette.text,
-      titleText:
-        templateThemes[1].palette.titleText || templateThemes[1].palette.mutedText,
-      bodyText: templateThemes[1].palette.text,
-      dividerColor: templateThemes[1].palette.border,
-    },
-    editableColors: [
-      { key: "headingBar", label: "Heading Background Color" },
-      { key: "headingText", label: "Heading Text Color" },
-      { key: "accentBorder", label: "Accent Border Color" },
-      { key: "nameText", label: "Name Color" },
-      { key: "bodyText", label: "Body Text Color" },
-    ],
-  },
-  2: createMinimalConfig(2),
-  3: {
-    templateId: 3,
-    defaultColors: {
-      headingBar: templateThemes[3].palette.accent,
-      headingText:
-        templateThemes[3].palette.headingText ||
-        templateThemes[3].palette.text,
-      nameText:
-        templateThemes[3].palette.nameText || templateThemes[3].palette.text,
-      titleText:
-        templateThemes[3].palette.titleText || templateThemes[3].palette.mutedText,
-      bodyText: templateThemes[3].palette.text,
-      accent: templateThemes[3].palette.accent,
-      accentBorder:
-        templateThemes[3].palette.accentBorder || templateThemes[3].palette.accent,
-      dividerColor: templateThemes[3].palette.border,
-    },
-    editableColors: [
-      { key: "headingBar", label: "Heading Background Color" },
-      { key: "headingText", label: "Heading Text Color" },
-      { key: "nameText", label: "Name Color" },
-      { key: "bodyText", label: "Body Text Color" },
-      { key: "accent", label: "Accent Color" },
-    ],
-  },
-  4: createMinimalConfig(4),
-  5: {
-    templateId: 5,
-    defaultColors: {
-      sidebarBackground: "#F5F5F5",
-      sidebarText: "#1F2937",
-      headingBar: "#1E293B",
-      headingText: "#0F172A",
-      nameText:
-        templateThemes[5].palette.nameText || templateThemes[5].palette.text,
-      titleText:
-        templateThemes[5].palette.titleText || templateThemes[5].palette.mutedText,
-    },
-    editableColors: [
-      { key: "sidebarBackground", label: "Sidebar Background" },
-      { key: "sidebarText", label: "Sidebar Text Color" },
-      { key: "headingBar", label: "Heading Background Color" },
-      { key: "headingText", label: "Heading Text Color" },
-      { key: "nameText", label: "Name Color" },
-      { key: "titleText", label: "Role / Title Color" },
-    ],
-  },
-  6: {
-    templateId: 6,
-    defaultColors: {
-      sidebarBackground: templateThemes[6].palette.sidebarBg,
-      sidebarText: templateThemes[6].palette.sidebarText,
-      headingBar:
-        templateThemes[6].palette.accentBorder ||
-        templateThemes[6].palette.accent,
-      headingText:
-        templateThemes[6].palette.headingText ||
-        templateThemes[6].palette.accentText ||
-        templateThemes[6].palette.text,
-      nameText: templateThemes[6].palette.nameText || templateThemes[6].palette.text,
-      titleText: templateThemes[6].palette.titleText || templateThemes[6].palette.mutedText,
-      bodyText: templateThemes[6].palette.text,
-      dividerColor: templateThemes[6].palette.divider,
-    },
-    editableColors: [
-      { key: "sidebarBackground", label: "Sidebar Background" },
-      { key: "sidebarText", label: "Sidebar Text" },
-      { key: "headingBar", label: "Heading Background Color" },
-      { key: "headingText", label: "Heading Text Color" },
-      { key: "nameText", label: "Name Color" },
-      { key: "titleText", label: "Role / Title Color" },
-      { key: "bodyText", label: "Body Text Color" },
-      { key: "dividerColor", label: "Divider Color" },
-    ],
-  },
-  7: createSingleBarConfig(7),
-  8: createMinimalConfig(8),
-  9: createSidebarConfig(9),
-  10: createSingleBarConfig(10),
-  11: createSidebarConfig(11),
-  12: createSingleBarConfig(12),
-  13: createSidebarConfig(13),
-  14: createMinimalConfig(14),
-  15: createSidebarConfig(15),
+  1: createHeadingOnlyConfig(
+    1,
+    templateThemes[1].palette.accent,
+    templateThemes[1].palette.headingText ||
+      templateThemes[1].palette.accentText ||
+      templateThemes[1].palette.text
+  ),
+  2: createHeadingOnlyConfig(2),
+  3: createSidebarConfig(
+    3,
+    templateThemes[3].palette.accent,
+    templateThemes[3].palette.headingText || templateThemes[3].palette.text,
+    templateThemes[3].palette.accent
+  ),
+  4: createHeadingOnlyConfig(4),
+  5: createSidebarConfig(5, "#1E293B", "#0F172A"),
+  6: createSidebarConfig(
+    6,
+    templateThemes[6].palette.accentBorder || templateThemes[6].palette.accent,
+    templateThemes[6].palette.headingText ||
+      templateThemes[6].palette.accentText ||
+      templateThemes[6].palette.text
+  ),
+  7: createHeadingOnlyConfig(7, templateThemes[7].palette.accent, templateThemes[7].palette.accentText),
+  8: createHeadingOnlyConfig(8),
+  9: createSidebarConfig(9, templateThemes[9].palette.accent, templateThemes[9].palette.accentText),
+  10: createSidebarConfig(10, templateThemes[10].palette.accent, templateThemes[10].palette.accentText),
+  11: createSidebarConfig(11, templateThemes[11].palette.accent, templateThemes[11].palette.accentText),
+  12: createHeadingOnlyConfig(12, templateThemes[12].palette.accent, templateThemes[12].palette.accentText),
+  13: createSidebarConfig(13, templateThemes[13].palette.accent, templateThemes[13].palette.accentText),
+  14: createHeadingOnlyConfig(14, templateThemes[14].palette.accent, "#111827"),
+  15: createSidebarConfig(15, templateThemes[15].palette.accent, "#111827"),
 };
 
 export const getTemplateThemeConfig = (templateId: number) =>
@@ -265,32 +176,36 @@ export const resolveTemplateTheme = (
     ...baseTheme,
     palette: {
       ...baseTheme.palette,
-      accent: mergedColors.accent || mergedColors.headingBar || mergedColors.accentBorder || baseTheme.palette.accent,
-      accentText: mergedColors.headingText || baseTheme.palette.accentText,
-      text: mergedColors.bodyText || baseTheme.palette.text,
+      accent: mergedColors.headingBar || baseTheme.palette.accent,
+      accentText: baseTheme.palette.accentText,
+      text: baseTheme.palette.text,
       mutedText: baseTheme.palette.mutedText,
       sidebarBg: mergedColors.sidebarBackground || baseTheme.palette.sidebarBg,
-      sidebarText: mergedColors.sidebarText || baseTheme.palette.sidebarText,
-      sidebarMutedText: mergedColors.sidebarText || baseTheme.palette.sidebarMutedText,
-      sidebarAccentSoft: mergedColors.accent || mergedColors.headingBar || baseTheme.palette.sidebarAccentSoft,
-      nameText: mergedColors.nameText || baseTheme.palette.nameText || baseTheme.palette.text,
-      titleText: mergedColors.titleText || baseTheme.palette.titleText || baseTheme.palette.mutedText,
-      divider: mergedColors.dividerColor || baseTheme.palette.divider,
+      sidebarText: baseTheme.palette.sidebarText,
+      sidebarMutedText: baseTheme.palette.sidebarMutedText,
+      sidebarAccentSoft: baseTheme.palette.sidebarAccentSoft,
+      nameText: baseTheme.palette.nameText || baseTheme.palette.text,
+      titleText: baseTheme.palette.titleText || baseTheme.palette.mutedText,
+      divider: baseTheme.palette.divider,
       headingText:
         mergedColors.headingText ||
-        mergedColors.bodyText ||
         baseTheme.palette.headingText ||
+        baseTheme.palette.accentText ||
         baseTheme.palette.text,
-      accentBorder: mergedColors.accentBorder || baseTheme.palette.accentBorder || baseTheme.palette.accent,
+      accentBorder: mergedColors.headingBar || baseTheme.palette.accentBorder || baseTheme.palette.accent,
     },
   };
 };
 
 const hexToRgb = (value: string) => {
   const normalized = value.replace("#", "");
-  const safe = normalized.length === 3
-    ? normalized.split("").map((char) => `${char}${char}`).join("")
-    : normalized;
+  const safe =
+    normalized.length === 3
+      ? normalized
+          .split("")
+          .map((char) => `${char}${char}`)
+          .join("")
+      : normalized;
 
   const numericValue = Number.parseInt(safe, 16);
   return {
@@ -325,18 +240,10 @@ export const hasThemeContrastWarning = (
   colors?: Record<string, string>
 ) => {
   const merged = mergeThemeColors(templateId, colors);
-  const checks = [
-    [merged.bodyText || "#1F2937", "#FFFFFF"],
-    [merged.nameText || merged.bodyText || "#1F2937", "#FFFFFF"],
-  ];
 
   if (merged.headingBar && merged.headingText) {
-    checks.push([merged.headingText, merged.headingBar]);
+    return getContrastRatio(merged.headingText, merged.headingBar) < 4.2;
   }
 
-  if (merged.sidebarBackground && merged.sidebarText) {
-    checks.push([merged.sidebarText, merged.sidebarBackground]);
-  }
-
-  return checks.some(([foreground, background]) => getContrastRatio(foreground, background) < 4.2);
+  return false;
 };

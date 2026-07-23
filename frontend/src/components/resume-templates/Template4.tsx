@@ -290,7 +290,7 @@ const ResumePageStyles = () => (
       font-weight: 700;
       letter-spacing: 0;
       color: var(--resume-page-text);
-      border-bottom: 1px solid var(--resume-border);
+      border-bottom: 1px solid var(--resume-border-strong);
     }
 
     .resume-section-content {
@@ -351,22 +351,8 @@ const ResumePageStyles = () => (
       min-width: 0;
     }
 
-    .template4-bullet-heading {
-      display: grid;
-      grid-template-columns: 16px minmax(0, 1fr);
-      align-items: start;
-      column-gap: 8px;
-    }
-
-    .template4-bullet-marker {
-      font-size: 14px;
-      line-height: ${ResumeTypography.lineHeight};
-      color: var(--resume-page-text);
-      text-align: center;
-      padding-top: 1px;
-    }
-
-    .template4-bullet-title {
+    .template4-bullet-title,
+    .template4-list-heading-title {
       margin: 0;
       font-size: var(--resume-item-title-size);
       line-height: ${ResumeTypography.lineHeight};
@@ -374,10 +360,43 @@ const ResumePageStyles = () => (
       color: var(--resume-page-text);
     }
 
+    .template4-bullet-list {
+      margin-top: 6px;
+      margin-bottom: 0;
+      padding-left: 18px;
+      list-style-type: disc;
+    }
+
+    .template4-bullet-list > li + li {
+      margin-top: 5px;
+    }
+
+    .template4-bullet-list-item,
+    .template4-list-heading-item {
+      min-width: 0;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .template4-bullet-list-item::marker,
+    .template4-list-heading-item::marker {
+      color: var(--resume-page-text);
+    }
+
+    .template4-list-heading {
+      margin: 0;
+      padding-left: 18px;
+      list-style-type: disc;
+    }
+
+    .template4-list-heading > li + li {
+      margin-top: 14px;
+    }
+
     .template4-detail-lines {
       display: grid;
       row-gap: 5px;
-      padding-left: 24px;
+      padding-left: 0;
       margin-top: 2px;
     }
 
@@ -445,18 +464,34 @@ const Template4Section = ({
   );
 };
 
-const Template4BulletHeading = ({
+const Template4ListHeading = ({
   title,
 }: {
   title: string;
 }) => (
-  <div className="template4-bullet-heading">
-    <span aria-hidden="true" className="template4-bullet-marker">
-      •
-    </span>
-    <p className="template4-bullet-title">{title}</p>
-  </div>
+  <p className="template4-list-heading-title">{title}</p>
 );
+
+const Template4BulletList = ({
+  items,
+  textClassName = "resume-body-copy",
+}: {
+  items: string[];
+  textClassName?: string;
+}) => {
+  const filteredItems = items.filter(Boolean);
+  if (filteredItems.length === 0) return null;
+
+  return (
+    <ul className="template4-bullet-list">
+      {filteredItems.map((item, index) => (
+        <li key={`${item}-${index}`} className="template4-bullet-list-item">
+          <p className={textClassName}>{item}</p>
+        </li>
+      ))}
+    </ul>
+  );
+};
 
 const ResumeBulletList = ({
   items,
@@ -529,30 +564,25 @@ const buildSectionMap = (data: ResumeData) => {
           {experience.map((item, index) => (
             <article key={`${item.company}-${item.role}-${index}`} className="template4-entry">
               <p className="template4-bullet-title">
-                {[item.role, item.company].filter(hasText).join(" at ") || "Experience"}
+                {joinNonEmpty(
+                  [
+                    [item.role, item.company].filter(hasText).join(" at "),
+                    formatRange(item.startDate, item.endDate),
+                  ],
+                  " at "
+                ) || "Experience"}
               </p>
-              {hasText(formatRange(item.startDate, item.endDate)) ? (
-                <p className="resume-item-meta">{formatRange(item.startDate, item.endDate)}</p>
-              ) : null}
-              {toBulletItems(item.description).length > 0 ? (
-                <ul className="resume-bullet-list" style={{ margin: "6px 0 0", paddingLeft: "18px" }}>
-                  {toBulletItems(item.description).map((detail, detailIndex) => (
-                    <li key={`${detail}-${detailIndex}`} className="resume-body-copy">
-                      {detail}
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
+              <Template4BulletList items={toBulletItems(item.description)} />
             </article>
           ))}
         </div>
       ) : null,
     education:
       education.length > 0 ? (
-        <div className="template4-entry-list">
+        <ul className="template4-list-heading">
           {education.map((item, index) => (
-            <article key={`${item.school}-${item.degree}-${index}`} className="template4-entry">
-              <Template4BulletHeading title={item.degree || item.school || "Education"} />
+            <li key={`${item.school}-${item.degree}-${index}`} className="template4-list-heading-item">
+              <Template4ListHeading title={item.degree || item.school || "Education"} />
               <div className="template4-detail-lines">
                 {hasText(item.school) ? <p className="resume-item-subtitle">{item.school}</p> : null}
                 {hasText(formatRange(item.startYear, item.endYear)) ? (
@@ -560,9 +590,9 @@ const buildSectionMap = (data: ResumeData) => {
                 ) : null}
                 {hasText(item.gpa) ? <p className="resume-body-copy">{`GPA: ${item.gpa}`}</p> : null}
               </div>
-            </article>
+            </li>
           ))}
-        </div>
+        </ul>
       ) : null,
     projects:
       data.projects.length > 0 ? (
@@ -570,12 +600,16 @@ const buildSectionMap = (data: ResumeData) => {
           {data.projects.map((project, index) => (
             <article key={`${project.name}-${index}`} className="template4-entry">
               <p className="template4-bullet-title">{project.name}</p>
-              <ul className="resume-bullet-list" style={{ margin: "6px 0 0", paddingLeft: "18px" }}>
-                {hasText(project.description) ? (
-                  <li className="resume-body-copy">{project.description}</li>
-                ) : null}
+              <ul className="template4-bullet-list">
+                {toBulletItems(project.description).map((detail, detailIndex) => (
+                  <li key={`${project.name}-${detail}-${detailIndex}`} className="template4-bullet-list-item">
+                    <p className="resume-body-copy">{detail}</p>
+                  </li>
+                ))}
                 {project.technologies.length > 0 ? (
-                  <li className="resume-body-copy">{`Technologies: ${uniqueItems(project.technologies).join(", ")}`}</li>
+                  <li className="template4-bullet-list-item">
+                    <p className="resume-body-copy">{`Technologies: ${uniqueItems(project.technologies).join(", ")}`}</p>
+                  </li>
                 ) : null}
               </ul>
               {hasText(project.link) ? <p className="resume-item-meta template4-long-text">{project.link}</p> : null}
@@ -585,18 +619,15 @@ const buildSectionMap = (data: ResumeData) => {
       ) : null,
     certifications:
       certifications.length > 0 ? (
-        <div className="template4-entry-list">
+        <ul className="template4-list-heading">
           {certifications.map((item, index) => (
-            <div key={`${item.name}-${item.issuer}-${index}`} className="template4-bullet-heading">
-              <span aria-hidden="true" className="template4-bullet-marker">
-                •
-              </span>
+            <li key={`${item.name}-${item.issuer}-${index}`} className="template4-list-heading-item">
               <p className="resume-body-copy template4-certification-line">
                 {joinNonEmpty([item.name, item.issuer, formatMonthYear(item.year)], ", ")}
               </p>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       ) : null,
     achievements:
       (data.achievements || []).length > 0 ? <ResumeBulletList items={data.achievements || []} /> : null,
@@ -625,7 +656,7 @@ const buildSectionMap = (data: ResumeData) => {
 
             return (
               <article key={`${section.title}-${index}`} className="template4-entry">
-                <Template4BulletHeading
+                <Template4ListHeading
                   title={joinNonEmpty([section.title, section.date], " - ") || section.title}
                 />
                 <div className="template4-detail-lines">

@@ -16,10 +16,6 @@ import {
   getStandardResumeTypographyVars,
 } from "@/constants/resumeDesignSystem";
 import { resolveTemplateTheme } from "./themeConfig";
-import {
-  ResumeStructuredExperienceBlock,
-  ResumeStructuredProjectBlock,
-} from "./templatePrimitives";
 
 type HeadingStyle = "bar" | "underline" | "accent";
 type HeaderLayout = "stacked" | "split";
@@ -134,6 +130,7 @@ const DEFAULT_FRESHER_MAIN: SectionKey[] = [
 ];
 
 const hasText = (value?: string | null) => Boolean(value && value.trim());
+const stripLeadingBulletText = (value?: string | null) => (value || "").replace(/^[^A-Za-z0-9]+/, "").trim();
 
 const buildCertificationBullets = ({
   issuer,
@@ -280,14 +277,15 @@ const ResumeSidebarContactCard = ({
       className="break-inside-avoid"
       style={{
         marginTop: "0",
-        textAlign: "center",
+        width: "100%",
+        textAlign: "left",
       }}
     >
       <h2
         className="resume-heading"
         style={{
           color: theme.palette.sidebarText || theme.palette.text,
-          marginBottom: "8px",
+          marginBottom: "4px",
           fontSize: `var(--resume-heading-size)`,
           letterSpacing: "0.14em",
         }}
@@ -299,14 +297,15 @@ const ResumeSidebarContactCard = ({
           width: "100%",
           height: "1px",
           background: theme.palette.divider || theme.palette.sidebarBorder || "rgba(255,255,255,0.28)",
-          marginBottom: "8px",
+          marginBottom: "10px",
         }}
       />
       <div
         className="space-y-3"
         style={{
           display: "grid",
-          justifyItems: "center",
+          rowGap: "14px",
+          justifyItems: "stretch",
         }}
       >
         {items.map((item, index) => (
@@ -314,23 +313,26 @@ const ResumeSidebarContactCard = ({
             key={`${item.label}-${item.value}-${index}`}
             style={{
               width: "100%",
-              textAlign: "center",
+              textAlign: "left",
             }}
           >
             <div
               className="space-y-0"
               style={{
                 display: "grid",
-                justifyItems: "center",
+                rowGap: "5px",
+                justifyItems: "stretch",
               }}
             >
               <p
                 style={{
                   fontSize: "var(--resume-contact-size)",
-                  lineHeight: "var(--resume-line-height)",
-                  letterSpacing: "0.08em",
+                  lineHeight: "1.4",
+                  letterSpacing: "1.5px",
                   textTransform: "uppercase",
                   color: theme.palette.sidebarMutedText || theme.palette.sidebarText || theme.palette.mutedText,
+                  fontWeight: 700,
+                  margin: 0,
                 }}
               >
                 {item.label}
@@ -338,10 +340,14 @@ const ResumeSidebarContactCard = ({
               <p
                 style={{
                   fontSize: "var(--resume-contact-size)",
-                  lineHeight: "1.45",
+                  lineHeight: "1.5",
                   color: theme.palette.sidebarText || theme.palette.text,
-                  wordBreak: "break-word",
-                  textAlign: "center",
+                  fontWeight: 400,
+                  overflowWrap: "break-word",
+                  wordBreak: "normal",
+                  hyphens: "auto",
+                  textAlign: "left",
+                  margin: 0,
                 }}
               >
                 {item.value}
@@ -373,62 +379,70 @@ const buildSectionMap = (data: ResumeData) => {
       experience.length > 0 ? (
         <div className="space-y-3.5">
           {experience.map((item, index) => (
-            <ResumeStructuredExperienceBlock
+            <ResumeMetaBlock
               key={`${item.company}-${item.role}-${index}`}
               title={[item.role, item.company].filter(Boolean).join(" at ")}
               meta={formatRange(item.startDate, item.endDate)}
-              description={item.description}
-            />
+            >
+              <ResumeBulletList items={normalizeListEntries(item.description)} />
+            </ResumeMetaBlock>
           ))}
         </div>
       ) : null,
     education:
       education.length > 0 ? (
-        <div className="space-y-2.5">
+        <ul className="template6-structured-list">
           {education.map((item, index) => (
-            <ResumeEducationBlock
-              key={`${item.school}-${item.degree}-${index}`}
-              title={`• ${item.degree}`}
-              school={item.school}
-              date={formatRange(item.startYear, item.endYear)}
-              gpa={item.gpa}
-            />
+            <li key={`${item.school}-${item.degree}-${index}`} className="template6-structured-list-item">
+              <ResumeEducationBlock
+                title={item.degree}
+                school={item.school}
+                date={formatRange(item.startYear, item.endYear)}
+                gpa={item.gpa}
+              />
+            </li>
           ))}
-        </div>
+        </ul>
       ) : null,
     projects:
       data.projects.length > 0 ? (
         <div className="space-y-3.5">
           {data.projects.map((project, index) => (
-            <ResumeStructuredProjectBlock
+            <ResumeMetaBlock
               key={`${project.name}-${index}`}
               title={project.name}
               meta={hasText(project.link) ? project.link : undefined}
-              description={project.description}
-              technologies={project.technologies}
-            />
+            >
+              <ResumeBulletList
+                items={[
+                  ...normalizeListEntries(project.description),
+                  ...(project.technologies.length > 0
+                    ? [`Technologies: ${uniqueItems(project.technologies).join(", ")}`]
+                    : []),
+                ]}
+              />
+            </ResumeMetaBlock>
           ))}
         </div>
       ) : null,
     certifications:
       certifications.length > 0 ? (
-        <div className="space-y-3">
+        <ul className="template6-structured-list">
           {certifications.map((item, index) => (
-            <ResumeMetaBlock
-              key={`${item.name}-${item.issuer}-${index}`}
-              title={`• ${item.name}`}
-            >
-              <ResumePlainTextList
-                items={buildCertificationBullets({
-                  issuer: item.issuer,
-                  year: item.year,
-                  credentialId: item.credentialId,
-                })}
-                textClassName="resume-item-meta"
-              />
-            </ResumeMetaBlock>
+            <li key={`${item.name}-${item.issuer}-${index}`} className="template6-structured-list-item">
+              <ResumeMetaBlock title={item.name}>
+                <ResumePlainTextList
+                  items={buildCertificationBullets({
+                    issuer: item.issuer,
+                    year: item.year,
+                    credentialId: item.credentialId,
+                  })}
+                  textClassName="resume-item-meta"
+                />
+              </ResumeMetaBlock>
+            </li>
           ))}
-        </div>
+        </ul>
       ) : null,
     achievements:
       (data.achievements || []).length > 0 ? <ResumeBulletList items={data.achievements || []} /> : null,
@@ -595,56 +609,90 @@ const ResumePageStyles = () => (
       font-weight: 700;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      margin: 0 0 0.5em;
+      margin: 0 0 7px;
     }
 
     .resume-bullet-list {
       margin: 4px 0 0;
-      padding-left: 0;
+      padding-left: 20px;
       font-size: var(--resume-list-size);
       line-height: var(--resume-line-height);
-      list-style: none;
+      list-style-type: disc;
+      list-style-position: outside;
       overflow: visible;
     }
 
     .resume-bullet-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: 6px;
-      margin-bottom: 3px;
+      display: list-item;
+      padding-left: 0;
       overflow: visible;
-    }
-
-    .resume-bullet-list li::before {
-      content: "•";
-      position: absolute;
-      left: 0;
-      top: 0;
-      color: currentColor;
-      font-size: 1em;
-      line-height: var(--resume-line-height);
     }
 
     .resume-bullet-list li + li {
       margin-top: 4px;
     }
 
-    .resume-bullet-list li::before {
-      content: none;
+    .template6-structured-list {
+      margin: 0;
+      padding-left: 20px;
+      list-style-type: disc;
+      list-style-position: outside;
+    }
+
+    .template6-structured-list > li + li {
+      margin-top: 12px;
+    }
+
+    .template6-structured-list-item {
+      min-width: 0;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .template6-structured-list-item::marker {
+      font-size: var(--resume-list-size);
+      line-height: var(--resume-line-height);
     }
 
     .resume-bullet-glyph {
       color: currentColor;
       font-size: 1em;
-      line-height: var(--resume-line-height);
-      flex: 0 0 8px;
+      line-height: 1.35;
+      width: 8px;
       display: inline-block;
       text-align: left;
     }
 
     .resume-bullet-text {
-      flex: 1;
-      min-width: 0;
+      display: inline;
+    }
+
+    .template6-bullet-title-row {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .template6-detail-stack {
+      display: grid;
+      row-gap: 2px;
+      padding-left: 14px;
+      margin-top: 2px;
+    }
+
+    .template6-bullet-title-row {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .template6-detail-stack {
+      display: grid;
+      row-gap: 2px;
+      padding-left: 14px;
+      margin-top: 2px;
     }
 
     .resume-summary-box {
@@ -714,6 +762,10 @@ const ResumePageStyles = () => (
     .resume-section {
       display: grid;
       row-gap: var(--resume-section-vertical-gap, 8px);
+    }
+
+    .resume-section > :not([hidden]) ~ :not([hidden]) {
+      margin-top: 0 !important;
     }
 
     .resume-section-content {
@@ -914,12 +966,7 @@ const ResumeBulletList = ({
   return (
     <ul className={`resume-bullet-list ${className}`.trim()}>
       {resolvedItems.map((item, index) => (
-        <li key={`${item}-${index}`}>
-          <span className="resume-bullet-glyph" aria-hidden="true">
-            {"\u2022"}
-          </span>
-          <span className="resume-bullet-text">{item}</span>
-        </li>
+        <li key={`${item}-${index}`}>{item}</li>
       ))}
     </ul>
   );
@@ -981,14 +1028,28 @@ const ResumeMetaBlock = ({
   subtitle?: string;
   meta?: string;
   children?: ReactNode;
-}) => (
-  <div className="resume-meta-block break-inside-avoid">
-    <h3 className="resume-item-title">{title}</h3>
-    {hasText(subtitle) ? <p className="resume-item-subtitle mt-1">{subtitle}</p> : null}
-    {hasText(meta) ? <p className="resume-item-meta mt-1.5">{meta}</p> : null}
-    {children ? <div className="mt-2.5">{children}</div> : null}
-  </div>
-);
+}) => {
+  const normalizedTitle = stripLeadingBulletText(title);
+  const hasLeadingBullet = normalizedTitle !== (title || "").trim();
+
+  return (
+    <div className="resume-meta-block break-inside-avoid">
+      {hasLeadingBullet ? (
+        <div className="template6-bullet-title-row">
+          <span className="resume-bullet-glyph" aria-hidden="true">
+            {"\u2022"}
+          </span>
+          <h3 className="resume-item-title">{normalizedTitle}</h3>
+        </div>
+      ) : (
+        <h3 className="resume-item-title">{title}</h3>
+      )}
+      {hasText(subtitle) ? <p className="resume-item-subtitle mt-1">{subtitle}</p> : null}
+      {hasText(meta) ? <p className="resume-item-meta mt-1.5">{meta}</p> : null}
+      {children ? <div className="mt-2.5">{children}</div> : null}
+    </div>
+  );
+};
 
 const ResumeEducationBlock = ({
   title,
@@ -1000,38 +1061,46 @@ const ResumeEducationBlock = ({
   school?: string;
   date?: string;
   gpa?: string;
-}) => (
-  <div
-    className="resume-meta-block break-inside-avoid"
-    style={{
-      rowGap: "2px",
-    }}
-  >
-    <h3 className="resume-item-title">{title}</h3>
-    {hasText(school) || hasText(date) ? (
-      <p
-        style={{
-          margin: 0,
-          lineHeight: "var(--resume-line-height)",
-        }}
-      >
-        {hasText(school) ? <span className="resume-item-subtitle">{school}</span> : null}
-        {hasText(school) && hasText(date) ? <span className="resume-item-meta"> | </span> : null}
-        {hasText(date) ? <span className="resume-item-meta">{date}</span> : null}
-      </p>
-    ) : null}
-    {hasText(gpa) ? (
-      <p
-        className="resume-body-copy"
-        style={{
-          margin: "2px 0 0",
-        }}
-      >
-        GPA: {gpa}
-      </p>
-    ) : null}
-  </div>
-);
+}) => {
+  const normalizedTitle = stripLeadingBulletText(title);
+
+  return (
+    <div
+      className="resume-meta-block break-inside-avoid"
+      style={{
+        rowGap: "2px",
+      }}
+    >
+      <h3 className="resume-item-title">{normalizedTitle}</h3>
+      {(hasText(school) || hasText(date) || hasText(gpa)) ? (
+        <div className="template6-detail-stack">
+          {hasText(school) || hasText(date) ? (
+            <p
+              style={{
+                margin: 0,
+                lineHeight: "var(--resume-line-height)",
+              }}
+            >
+              {hasText(school) ? <span className="resume-item-subtitle">{school}</span> : null}
+              {hasText(school) && hasText(date) ? <span className="resume-item-meta"> | </span> : null}
+              {hasText(date) ? <span className="resume-item-meta">{date}</span> : null}
+            </p>
+          ) : null}
+          {hasText(gpa) ? (
+            <p
+              className="resume-body-copy"
+              style={{
+                margin: 0,
+              }}
+            >
+              GPA: {gpa}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+};
 
 const ResumeTwoColumnLayout = ({
   sidebar,

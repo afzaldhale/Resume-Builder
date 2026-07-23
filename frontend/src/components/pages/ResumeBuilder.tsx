@@ -483,8 +483,8 @@ const ResumeBuilder = () => {
   };
 
   const formPanel = (
-    <div className="space-y-6">
-      <Card className="border-slate-200 p-5 shadow-sm">
+    <div className="flex h-full min-h-0 flex-col gap-6">
+      <Card className="shrink-0 border-slate-200 p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold text-slate-900">Resume Form</h2>
@@ -504,19 +504,21 @@ const ResumeBuilder = () => {
         </div>
       </Card>
 
-      <Card className="border-slate-200 p-5 shadow-sm">
-        <div className="space-y-4">
-          <h3 className="text-base font-semibold text-slate-900">Personal Information</h3>
+      <div className="min-h-0 flex-1 overflow-y-auto pr-2">
+        <div className="flex flex-col gap-6">
+          <Card className="border-slate-200 p-5 shadow-sm">
+            <div className="space-y-4">
+              <h3 className="text-base font-semibold text-slate-900">Personal Information</h3>
 
-          <div className="space-y-2">
-            <Label htmlFor="fullName">Full Name *</Label>
-            <Input
-              id="fullName"
-              value={formData.fullName}
-              onChange={(event) => handleInputChange("fullName", event.target.value)}
-              placeholder="John Doe"
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name *</Label>
+                <Input
+                  id="fullName"
+                  value={formData.fullName}
+                  onChange={(event) => handleInputChange("fullName", event.target.value)}
+                  placeholder="John Doe"
+                />
+              </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
@@ -835,109 +837,110 @@ const ResumeBuilder = () => {
               ))}
             </div>
           </div>
-        </div>
-      </Card>
-
-      <Card className="border-slate-200 p-5 shadow-sm">
-        <div className="space-y-4">
-          <button
-            type="button"
-            className="flex w-full items-center justify-between text-left"
-            onClick={() => setIsThemePanelOpen((prev) => !prev)}
-          >
-            <div>
-              <h3 className="text-base font-semibold text-slate-900">Customize Colors</h3>
-              <p className="text-sm text-slate-500">
-                Adjust only the colors that apply to {selectedTemplateMeta.name}.
-              </p>
             </div>
-            <ChevronDown
-              className={`h-4 w-4 text-slate-500 transition-transform ${
-                isThemePanelOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
+          </Card>
 
-          {isThemePanelOpen ? (
-            <div className="space-y-5">
-              {themeConfig.editableColors.map((field) => (
-                <div key={field.key} className="space-y-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <Label htmlFor={`theme-${field.key}`}>{field.label}</Label>
-                    <span className="font-mono text-xs text-slate-500">
-                      {themeColors[field.key] || mergedThemeColors[field.key] || "#000000"}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <Input
-                      id={`theme-${field.key}`}
-                      type="color"
-                      value={mergedThemeColors[field.key] || "#000000"}
-                      onChange={(event) => handleThemeColorChange(field.key, event.target.value)}
-                      className="h-11 w-16 cursor-pointer p-1"
-                    />
-                    <Input
-                      value={themeColors[field.key] || mergedThemeColors[field.key] || "#000000"}
-                      onChange={(event) => handleThemeColorChange(field.key, event.target.value)}
-                      placeholder="#2563EB"
-                      className="font-mono"
-                    />
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {PROFESSIONAL_COLOR_PRESETS.map((preset) => (
-                      <button
-                        key={`${field.key}-${preset.value}`}
-                        type="button"
-                        className="h-8 w-8 rounded-full border border-slate-200 shadow-sm"
-                        style={{ backgroundColor: preset.value }}
-                        title={preset.label}
-                        onClick={() => handleThemeColorChange(field.key, preset.value)}
-                      />
-                    ))}
-                  </div>
+          <Card className="border-slate-200 p-5 shadow-sm">
+            <div className="space-y-4">
+              <button
+                type="button"
+                className="flex w-full items-center justify-between text-left"
+                onClick={() => setIsThemePanelOpen((prev) => !prev)}
+              >
+                <div>
+                  <h3 className="text-base font-semibold text-slate-900">Customize Colors</h3>
+                  <p className="text-sm text-slate-500">
+                    Adjust only the colors that apply to {selectedTemplateMeta.name}.
+                  </p>
                 </div>
-              ))}
+                <ChevronDown
+                  className={`h-4 w-4 text-slate-500 transition-transform ${
+                    isThemePanelOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
 
-              {showThemeWarning ? (
-                <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-                  This color may reduce resume readability.
-                </p>
+              {isThemePanelOpen ? (
+                <div className="space-y-5">
+                  {themeConfig.editableColors.map((field) => (
+                    <div key={field.key} className="space-y-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <Label htmlFor={`theme-${field.key}`}>{field.label}</Label>
+                        <span className="font-mono text-xs text-slate-500">
+                          {themeColors[field.key] || mergedThemeColors[field.key] || "#000000"}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <Input
+                          id={`theme-${field.key}`}
+                          type="color"
+                          value={mergedThemeColors[field.key] || "#000000"}
+                          onChange={(event) => handleThemeColorChange(field.key, event.target.value)}
+                          className="h-11 w-16 cursor-pointer p-1"
+                        />
+                        <Input
+                          value={themeColors[field.key] || mergedThemeColors[field.key] || "#000000"}
+                          onChange={(event) => handleThemeColorChange(field.key, event.target.value)}
+                          placeholder="#2563EB"
+                          className="font-mono"
+                        />
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        {PROFESSIONAL_COLOR_PRESETS.map((preset) => (
+                          <button
+                            key={`${field.key}-${preset.value}`}
+                            type="button"
+                            className="h-8 w-8 rounded-full border border-slate-200 shadow-sm"
+                            style={{ backgroundColor: preset.value }}
+                            title={preset.label}
+                            onClick={() => handleThemeColorChange(field.key, preset.value)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+
+                  {showThemeWarning ? (
+                    <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                      This color may reduce resume readability.
+                    </p>
+                  ) : null}
+
+                  <Button type="button" variant="outline" size="sm" onClick={handleResetThemeColors}>
+                    Reset to Default
+                  </Button>
+                </div>
               ) : null}
+            </div>
+          </Card>
 
-              <Button type="button" variant="outline" size="sm" onClick={handleResetThemeColors}>
-                Reset to Default
+          <Card className="border-blue-200 bg-blue-50/80 p-5 shadow-sm">
+            <div className="space-y-4">
+              <div>
+                <h3 className="flex items-center gap-2 text-base font-semibold text-blue-900">
+                  <Send className="h-4 w-4" />
+                  Submit for Approval
+                </h3>
+                <p className="mt-1 text-sm text-blue-800">
+                  Your resume will be saved and sent to the team for final PDF review.
+                </p>
+              </div>
+
+              <Button
+                type="button"
+                className="h-11 w-full"
+                onClick={handleRequestDownload}
+                disabled={isSubmitting || !formData.fullName || !formData.email}
+              >
+                <Send className="mr-2 h-4 w-4" />
+                {isSubmitting ? "Submitting Request..." : "Submit for Admin Approval"}
               </Button>
             </div>
-          ) : null}
+          </Card>
         </div>
-      </Card>
-
-      <Card className="border-blue-200 bg-blue-50/80 p-5 shadow-sm">
-        <div className="space-y-4">
-          <div>
-            <h3 className="flex items-center gap-2 text-base font-semibold text-blue-900">
-              <Send className="h-4 w-4" />
-              Submit for Approval
-            </h3>
-            <p className="mt-1 text-sm text-blue-800">
-              Your resume will be saved and sent to the team for final PDF review.
-            </p>
-          </div>
-
-          <Button
-            type="button"
-            className="h-11 w-full"
-            onClick={handleRequestDownload}
-            disabled={isSubmitting || !formData.fullName || !formData.email}
-          >
-            <Send className="mr-2 h-4 w-4" />
-            {isSubmitting ? "Submitting Request..." : "Submit for Admin Approval"}
-          </Button>
-        </div>
-      </Card>
-
+      </div>
     </div>
   );
 
@@ -953,7 +956,7 @@ const ResumeBuilder = () => {
         </div>
 
         <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700">
-          {selectedTemplateMeta.category}
+          {selectedTemplateMeta.subtitle}
         </span>
       </div>
 
@@ -999,8 +1002,8 @@ const ResumeBuilder = () => {
       <div className="flex min-h-screen bg-slate-50">
         <UserSidebar />
 
-        <main className="flex-1 px-4 pb-10 pt-20 md:px-8 md:pt-8">
-          <div className="mx-auto max-w-[1600px] space-y-6">
+        <main className="flex min-h-screen flex-1 flex-col px-4 pb-10 pt-20 md:px-8 md:pt-8">
+          <div className="mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 flex-col gap-6">
             <Card className="border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div className="space-y-3">
@@ -1070,8 +1073,8 @@ const ResumeBuilder = () => {
               </Tabs>
             </div>
 
-            <div className="hidden gap-6 lg:grid lg:grid-cols-2">
-              <div className="max-h-[calc(100vh-10rem)] overflow-y-auto pr-2">{formPanel}</div>
+            <div className="hidden min-h-0 flex-1 gap-6 lg:grid lg:grid-cols-2">
+              <div className="min-h-0">{formPanel}</div>
               <div className="sticky top-8 self-start">{previewPanel}</div>
             </div>
           </div>

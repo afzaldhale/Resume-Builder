@@ -2,6 +2,11 @@ import { memo } from "react";
 import { Card } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  TEMPLATE_METADATA,
+  getTemplateMetadataById,
+  type TemplateDisplayVariant,
+} from "@/components/resume-shared/TemplateMetadata";
 
 interface TemplateSelectorProps {
   selectedTemplate: number;
@@ -11,28 +16,12 @@ interface TemplateSelectorProps {
   compact?: boolean;
 }
 
-export const templates = [
-  { id: 1, name: "Clean Single Column", category: "Single Column", color: "bg-blue-700", preview: "single" },
-  { id: 2, name: "Corporate Sidebar Blue", category: "Sidebar", color: "bg-blue-700", preview: "sidebar-dark" },
-  { id: 3, name: "Colored Heading Corporate", category: "Corporate", color: "bg-blue-500", preview: "bar-top" },
-  { id: 4, name: "Left Accent Teal", category: "Accent", color: "bg-teal-700", preview: "left-accent" },
-  { id: 5, name: "Premium Gray Sidebar", category: "Sidebar", color: "bg-slate-500", preview: "sidebar-light" },
-  { id: 6, name: "Professional Sidebar Teal", category: "Sidebar", color: "bg-teal-700", preview: "sidebar-dark" },
-  { id: 7, name: "Muted Coral Corporate", category: "Corporate", color: "bg-rose-500", preview: "bar-top" },
-  { id: 8, name: "Compact ATS Single", category: "ATS", color: "bg-slate-700", preview: "single-compact" },
-  { id: 9, name: "Premium Charcoal Sidebar", category: "Premium", color: "bg-slate-700", preview: "sidebar-dark" },
-  { id: 10, name: "Blue Heading Corporate", category: "Corporate", color: "bg-blue-700", preview: "bar-top" },
-  { id: 11, name: "Classic Two Column", category: "Classic", color: "bg-stone-600", preview: "sidebar-light" },
-  { id: 12, name: "Soft Green Corporate", category: "Corporate", color: "bg-emerald-700", preview: "single" },
-  { id: 13, name: "Rose Sidebar Corporate", category: "Sidebar", color: "bg-rose-500", preview: "sidebar-light" },
-  { id: 14, name: "Minimal Left Accent", category: "Minimal", color: "bg-amber-600", preview: "left-accent" },
-  { id: 15, name: "Corporate Clean", category: "Clean", color: "bg-slate-700", preview: "sidebar-light" },
-] as const;
+export const templates = TEMPLATE_METADATA;
 
 export const getTemplateById = (templateId: number) =>
-  templates.find((template) => template.id === templateId) ?? templates[0];
+  getTemplateMetadataById(templateId);
 
-const MiniPreview = ({ preview, color }: { preview: string; color: string }) => {
+const MiniPreview = ({ preview, color }: { preview: TemplateDisplayVariant; color: string }) => {
   if (preview === "sidebar-dark") {
     return (
       <div className="flex w-full h-full bg-white">
@@ -151,9 +140,7 @@ export const TemplateSelector = memo(({
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-2">
                   <p className="text-base font-semibold text-foreground">{template.name}</p>
-                  <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700">
-                    {template.category}
-                  </span>
+                  <p className="text-sm text-slate-500">{template.subtitle}</p>
                 </div>
 
                 {isSelected ? (

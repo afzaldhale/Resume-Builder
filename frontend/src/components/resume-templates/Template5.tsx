@@ -253,7 +253,7 @@ const Template5Styles = ({
       font-size: ${ResumeTypography.title}px;
       line-height: ${ResumeTypography.lineHeight};
       font-weight: 700;
-      color: ${theme.palette.headingText || theme.palette.text};
+      color: ${theme.palette.text};
     }
 
     .template5-item-sub {

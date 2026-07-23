@@ -8,6 +8,7 @@ import { resumeService } from "@/services/resumeService";
 import UserSidebar from "@/components/UserSidebar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { getTemplateById } from "@/components/resume-templates/TemplateSelector";
 
 interface ResumeItem {
   id: string;
@@ -109,7 +110,10 @@ const MyResumes = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {resumes.map((resume) => (
+                {resumes.map((resume) => {
+                  const templateMeta = getTemplateById(resume.templateId);
+
+                  return (
                   <div
                     key={resume.id}
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
@@ -121,7 +125,7 @@ const MyResumes = () => {
                       <div>
                         <h3 className="font-semibold">{resume.title}</h3>
                         <p className="text-sm text-muted-foreground">
-                          Template {resume.templateId} • Created {formatDate(resume.createdAt)}
+                          {templateMeta.name} • {templateMeta.subtitle} • Created {formatDate(resume.createdAt)}
                           {resume.isPublished && (
                             <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
                               Published
@@ -157,7 +161,8 @@ const MyResumes = () => {
                       </Button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </Card>

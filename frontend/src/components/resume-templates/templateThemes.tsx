@@ -354,6 +354,7 @@ export const templateThemes: Record<number, ResumeTemplateTheme> = {
       accent: "#2D3748",
       accentSoft: "#F9FAFB",
       accentText: "#FFFFFF",
+      headingText: "#111827",
       border: "#E5E7EB",
       headerBg: "#FFFFFF",
     },
