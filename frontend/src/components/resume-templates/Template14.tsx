@@ -125,12 +125,6 @@ const DEFAULT_FRESHER_MAIN: SectionKey[] = ["summary", "skills", "experience", "
 
 const hasText = (value?: string | null) => Boolean(value && value.trim());
 
-const toBulletItems = (value?: string | null) =>
-  (value || "")
-    .split("\n")
-    .map((item) => item.trim())
-    .filter(Boolean);
-
 const uniqueItems = (items: string[]) => [...new Set(items.filter(Boolean))];
 
 const scalePxString = (value: string, factor: number) =>
@@ -297,18 +291,19 @@ const buildSectionMap = (data: ResumeData) => {
       ) : null,
     education:
       education.length > 0 ? (
-        <div className="space-y-3.5">
+        <ul className="template14-structured-list">
           {education.map((item, index) => (
-            <ResumeMetaBlock
-              key={`${item.school}-${item.degree}-${index}`}
-              title={item.degree}
-              subtitle={item.school}
-              meta={formatRange(item.startYear, item.endYear)}
-            >
-              {hasText(item.gpa) ? <p className="resume-item-meta">GPA: {item.gpa}</p> : null}
-            </ResumeMetaBlock>
+            <li key={`${item.school}-${item.degree}-${index}`} className="template14-structured-list-item">
+              <ResumeMetaBlock
+                title={item.degree}
+                subtitle={item.school}
+                meta={formatRange(item.startYear, item.endYear)}
+              >
+                {hasText(item.gpa) ? <p className="resume-item-meta">GPA: {item.gpa}</p> : null}
+              </ResumeMetaBlock>
+            </li>
           ))}
-        </div>
+        </ul>
       ) : null,
     projects:
       data.projects.length > 0 ? (
@@ -326,16 +321,17 @@ const buildSectionMap = (data: ResumeData) => {
       ) : null,
     certifications:
       certifications.length > 0 ? (
-        <div className="space-y-3">
+        <ul className="template14-structured-list">
           {certifications.map((item, index) => (
-            <ResumeMetaBlock
-              key={`${item.name}-${item.issuer}-${index}`}
-              title={item.name}
-              subtitle={item.issuer}
-              meta={formatMonthYear(item.year)}
-            />
+            <li key={`${item.name}-${item.issuer}-${index}`} className="template14-structured-list-item">
+              <ResumeMetaBlock
+                title={item.name}
+                subtitle={item.issuer}
+                meta={formatMonthYear(item.year)}
+              />
+            </li>
           ))}
-        </div>
+        </ul>
       ) : null,
     achievements:
       (data.achievements || []).length > 0 ? <ResumeBulletList items={data.achievements || []} /> : null,
@@ -494,25 +490,42 @@ const ResumePageStyles = () => (
 
     .resume-bullet-list {
       margin: 0;
-      padding-left: var(--resume-list-indent, 18px);
+      padding-left: 20px;
       font-size: var(--resume-list-size);
       line-height: var(--resume-line-height);
+      list-style: disc;
+      list-style-position: outside;
     }
 
-    .resume-bullet-list li + li {
-      margin-top: 2px;
+    .resume-bullet-list li {
+      margin: 4px 0;
+      padding: 0;
     }
 
     .resume-summary-box {
-      border-left: 4px solid var(--resume-accent);
-      background: var(--resume-accent-soft);
-      padding: var(--resume-summary-box-padding, 10px 12px);
+      border-left: none;
+      background: transparent;
+      padding: 0;
     }
 
     .resume-section-summary-plain .resume-summary-box {
       border-left: none;
       background: transparent;
       padding: 0;
+    }
+
+    .template14-structured-list {
+      margin: 0;
+      padding-left: 20px;
+      list-style: disc;
+      list-style-position: outside;
+    }
+
+    .template14-structured-list-item {
+      margin: 4px 0;
+      padding: 0;
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
 
     .resume-contact-item {
@@ -602,6 +615,7 @@ const ResumeContactRow = ({
             color,
             fontSize: "var(--resume-item-meta-size)",
             lineHeight: "var(--resume-line-height)",
+            fontFamily: "Inter, 'Source Sans 3', 'Open Sans', Roboto, Arial, sans-serif",
           }}
         >
           {item.value}
