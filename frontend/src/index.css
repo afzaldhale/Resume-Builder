@@ -246,8 +246,10 @@ All colors MUST be HSL.
 
 .resume-preview-container {
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  height: min(760px, calc(100vh - 180px));
+  min-height: 320px;
+  overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -257,32 +259,59 @@ All colors MUST be HSL.
 
 .resume-preview-outer {
   width: calc(var(--resume-page-width) * var(--preview-scale, 0.55));
-  height: calc(var(--resume-page-height) * var(--preview-scale, 0.55));
+  height: auto;
   flex-shrink: 0;
   position: relative;
 }
 
 .resume-preview-inner {
   width: var(--resume-page-width);
-  height: var(--resume-page-height);
+  height: auto;
   transform: scale(var(--preview-scale, 0.55));
   transform-origin: top left;
 }
 
 .resume-preview-container-template2 {
-  overflow: auto;
   align-items: flex-start;
 }
 
 .resume-preview-outer-template2 {
-  width: var(--resume-page-width);
+  width: calc(var(--resume-page-width) * var(--preview-scale, 0.55));
   height: auto;
 }
 
 .resume-preview-inner-template2 {
   width: var(--resume-page-width);
   height: auto;
-  transform: none;
+  transform: scale(var(--preview-scale, 0.55));
+  transform-origin: top left;
+}
+
+.template-thumbnail-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #e2e8f0;
+}
+
+.template-thumbnail-canvas {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  min-height: calc(1123px * var(--thumbnail-scale));
+  transform: translateX(-50%);
+  transform-origin: top center;
+}
+
+.template-thumbnail-document {
+  width: 794px;
+  transform: scale(var(--thumbnail-scale));
+  transform-origin: top left;
+}
+
+.template-thumbnail-viewport-compact .template-thumbnail-canvas {
+  top: -8px;
 }
 
 .resume-page {

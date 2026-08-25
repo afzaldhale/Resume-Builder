@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -169,6 +169,26 @@ const ResumeBuilder = () => {
     platform: "LinkedIn",
     url: "",
   });
+  const previewContainerRef = useRef<HTMLDivElement>(null);
+  const [previewScale, setPreviewScale] = useState(PREVIEW_SCALE);
+
+  useEffect(() => {
+    const previewContainer = previewContainerRef.current;
+    if (!previewContainer) return;
+
+    const updatePreviewScale = () => {
+      const availableWidth = previewContainer.clientWidth - 32;
+      const nextScale = Math.min(PREVIEW_SCALE, Math.max(0.1, availableWidth / 794));
+      setPreviewScale((currentScale) =>
+        Math.abs(currentScale - nextScale) < 0.001 ? currentScale : nextScale
+      );
+    };
+
+    updatePreviewScale();
+    const resizeObserver = new ResizeObserver(updatePreviewScale);
+    resizeObserver.observe(previewContainer);
+    return () => resizeObserver.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!editingResumeId && !requestedTemplateParam) {
@@ -961,7 +981,8 @@ const ResumeBuilder = () => {
       </div>
 
       <div
-        className={`resume-preview-container min-h-[760px] rounded-2xl border ${
+        ref={previewContainerRef}
+        className={`resume-preview-container rounded-2xl border ${
           deferredSelectedTemplate === 2 ? "resume-preview-container-template2" : ""
         }`.trim()}
       >
@@ -971,11 +992,9 @@ const ResumeBuilder = () => {
               deferredSelectedTemplate === 2 ? "resume-preview-outer-template2" : ""
             }`.trim()}
             style={
-              deferredSelectedTemplate === 2
-                ? undefined
-                : {
-                    ["--preview-scale" as string]: PREVIEW_SCALE,
-                  }
+              {
+                ["--preview-scale" as string]: previewScale,
+              }
             }
           >
             <div
